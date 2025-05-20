@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "tabla_simbolos.h"
+#include "AST_latino.h"
 
 extern int yylex();
 extern int num_linea;
@@ -22,6 +23,7 @@ void yyerror(const char* s) {
     struct {
         char* tipo;
         char* valor;
+        struct ast *n;
     } simbolo;
 }
 
