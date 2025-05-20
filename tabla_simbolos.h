@@ -14,6 +14,7 @@ typedef struct {
     char* nombre;           // identificador
     char* tipo;             // "int", "string", "bool"
     int registro;           // posición en la tabla
+    char* valor;             // valor de la variable
 } tSimbolos;
 
 /* Tabla global */
@@ -21,7 +22,7 @@ extern tSimbolos tabla[MAX_SIMBOLOS]; // Con su tamaño máximo
 extern int indice; // Posición de cada símbolo
 
 /* Prototipos */
-void guardar_simbolo(const char* nombre, const char* tipo);
+void guardar_simbolo(const char* nombre, const char* tipo, const char* valor);
 const char* obtener_tipo(const char* nombre);
 void mostrar_tabla(void);
 int buscarTabla(const char* nombre);

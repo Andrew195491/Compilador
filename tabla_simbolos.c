@@ -25,12 +25,15 @@ int buscarTabla(const char* nombre) {
 }
 
 /* Inserta un símbolo si no existe; si existe, actualiza su tipo */
-void guardar_simbolo(const char* nombre, const char* tipo) {
+void guardar_simbolo(const char* nombre, const char* tipo, const char* valor) {
     int pos = buscarTabla(nombre); // Primero mira si el simbolo ya estaba en la tabla
     if (pos >= 0) { // Si existe, limpia su tipo y lo modifica con el nuevo
         /* Actualizar tipo si necesario */
         free(tabla[pos].tipo);
+        free(tabla[pos].valor);
+
         tabla[pos].tipo = strdup(tipo);
+        tabla[pos].valor = strdup(valor);
     } else {
         if (indice >= MAX_SIMBOLOS) { // Si no existe, comprueba que haya espacio en la tabla
             fprintf(stderr, "[ERROR] Tabla de simbolos llena.\n"); // Si no hay espacio, salta error
@@ -39,6 +42,7 @@ void guardar_simbolo(const char* nombre, const char* tipo) {
         /* Si hay espacio */
         tabla[indice].nombre = strdup(nombre); // En la posición del índice, columna del nombre, pone el nombre
         tabla[indice].tipo = strdup(tipo);
+        tabla[indice].valor = strdup(valor);
         tabla[indice].registro = indice; // Guarda la posición en la que ha quedado en la tabla
         indice++;
     }
@@ -56,15 +60,16 @@ const char* obtener_tipo(const char* nombre) {
 /* Muestra la tabla de símbolos por consola */
 void mostrar_tabla(void) {
     printf("\n[Tabla de simbolos]\n");
-    printf("%-5s | %-15s | %-7s\n", "Reg", "Nombre", "Tipo");
+    printf("%-5s | %-15s | %-7s | %-10s\n", "Reg", "Nombre", "Tipo", "Valor");
     // %-5s -> Imprime una cadena (s) en un campo de anchura máxima de 5 alineado a la izquierda (-)
-    // Reg   | Nombre          | Tipo
-    printf("--------------------------------\n");
+    // Reg   | Nombre          | Tipo         | Valor
+    printf("--------------------------------------------------------------------------------\n");
     for (int i = 0; i < indice; ++i) {
-        printf("%-5d | %-15s | %-7s\n",
+        printf("%-5d | %-15s | %-7s | %-10s\n",
                tabla[i].registro, // Saca la posición de cada variable
                tabla[i].nombre, // Su nombre
-               tabla[i].tipo); // El tipo de dato
+               tabla[i].tipo, // El tipo de dato
+               tabla[i].valor); // El tipo de dato
     }
-    printf("--------------------------------\n\n");
+    printf("--------------------------------------------------------------------------------\n\n");
 }

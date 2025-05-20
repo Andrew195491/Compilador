@@ -1384,7 +1384,7 @@ yyreduce:
     {
         int pos = buscarTabla((yyvsp[(1) - (3)].stringVal));
         if (pos == -1) {
-            guardar_simbolo((yyvsp[(1) - (3)].stringVal), (yyvsp[(3) - (3)].simbolo).tipo);
+            guardar_simbolo((yyvsp[(1) - (3)].stringVal), (yyvsp[(3) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).valor);
             pos = buscarTabla((yyvsp[(1) - (3)].stringVal));
         }
         

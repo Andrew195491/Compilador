@@ -52,7 +52,7 @@ asignacion:
     IDENTIFICADOR IGUAL expresion {
         int pos = buscarTabla($1);
         if (pos == -1) {
-            guardar_simbolo($1, $3.tipo);
+            guardar_simbolo($1, $3.tipo, $3.valor);
             pos = buscarTabla($1);
         }
         
