@@ -8,12 +8,13 @@
 extern int yylex();
 extern int num_linea;
 extern FILE* yyin;
+extern FILE* yyout; 
+
 
 void yyerror(const char* s) {
     fprintf(stderr, "[ERROR] Sintaxis invalida en linea %d: %s\n", num_linea, s);
     exit(1);
 }
-
 %}
 
 %union {
@@ -27,38 +28,61 @@ void yyerror(const char* s) {
     } simbolo;
 }
 
-%token <stringVal> CADENA BOOL IDENTIFICADOR
+%token <enteroVal> NUMERICO
+%token <realVal> NUMERICODECIMAL
+%token <stringVal> IDENTIFICADOR CADENA BOOL 
 %token SUMA RESTA MULTI DIVISION CORCHETEABIERTO CORCHETECERRADO SEPARADOR IGUAL
-%token <simbolo> NUMERICO NUMERICODECIMAL 
 
-
-
+%type <simbolo> programa lista_sentencias sentencia asignacion expresion valor
 %type <stringVal> operador array array2
-%type <simbolo> expresion valor asignacion
 
-%start axioma
+%start programa
 
 %%
 
-//S -> lambda | S A Sa
-axioma:
-    /* vacio */
-  | axioma asignacion salto
-  ;
+programa
+    : lista_sentencias {
+        // Al final, genera el código MIPS para el AST global
+        printf("Llamando a comprobarAST\n");
+        comprobarAST($1.n);
 
-salto:
-    '\n' 
-  | /* vacio */
-  ;
+        // Limpieza opcional de memoria
 
-asignacion:
-    IDENTIFICADOR IGUAL expresion {
+    }
+    ;
+
+
+lista_sentencias
+    : sentencia  {
+        $$.tipo = strdup($1.tipo);
+        $$.valor = strdup($1.valor);
+        $$.n = $1.n;
+        free($1.tipo); free($1.valor);
+    }
+    | lista_sentencias sentencia {
+        $$.tipo = strdup("lista");
+        $$.valor = NULL;
+        $$.n = crearNodoNoTerminal($1.n, $2.n, NODO_LISTA);
+        free($1.tipo); free($1.valor); free($2.tipo); free($2.valor);
+    }
+    ;
+
+sentencia
+    : asignacion {
+        $$.tipo = strdup($1.tipo);
+        $$.valor = strdup($1.valor);
+        $$.n = $1.n;
+        free($1.tipo); free($1.valor);
+    }
+    ;
+
+asignacion
+    : IDENTIFICADOR IGUAL expresion {
         int pos = buscarTabla($1);
         if (pos == -1) {
             guardar_simbolo($1, $3.tipo, $3.valor);
             pos = buscarTabla($1);
         }
-        
         if (strcmp($3.tipo, "int") == 0) {
             tabla[pos].numerico = atoi($3.valor);
         } else if (strcmp($3.tipo, "float") == 0) {
@@ -66,126 +90,115 @@ asignacion:
         } else {
             tabla[pos].texto = strdup($3.valor);
         }
-        
-        printf("[OK] Asignacion valida -> %s = %s (tipo: %s)\n", $1, $3.valor, $3.tipo);
-        mostrar_tabla();
+        $$.tipo = strdup("asignacion");
+        $$.valor = NULL;
+        $$.n = crearNodoAsignacion(tabla[pos].registro, $3.n);
         free($1);
-        free($3.tipo);
-        free($3.valor);
-
-        $$.n = crearNodoAsignacion(pos, $3.n);
-        comprobarValorNodo($$.n ,7);
-        free($$.tipo);
-        free($$.valor);
-        free($$.n);
+        free($3.tipo); free($3.valor);
     }
-  ;
+    ;
 
-array:
-    CORCHETEABIERTO array2 CORCHETECERRADO {
-        $$ = strdup("array");  
+array
+    : CORCHETEABIERTO array2 CORCHETECERRADO {
+        $$ = strdup("array");
         free($2);
     }
-  | CORCHETEABIERTO CORCHETECERRADO {
+    | CORCHETEABIERTO CORCHETECERRADO {
         $$ = strdup("array");
     }
-  ;
+    ;
 
-array2:
-    expresion SEPARADOR array2 {
+array2
+    : expresion SEPARADOR array2 {
         char* temp = malloc(strlen($1.valor) + strlen($3) + 2);
         sprintf(temp, "%s,%s", $1.valor, $3);
         $$ = temp;
-        free($1.tipo);
-        free($1.valor);
-        free($3);
+        free($1.tipo); free($1.valor); free($3);
     }
-  | expresion {
+    | expresion {
         $$ = strdup($1.valor);
-        free($1.tipo);
-        free($1.valor);
+        free($1.tipo); free($1.valor);
     }
-  ;
+    ;
 
-expresion:
-    valor {
+expresion
+    : valor {
         $$.tipo = strdup($1.tipo);
         $$.valor = strdup($1.valor);
+        $$.n = $1.n;
+        free($1.tipo); free($1.valor);
     }
-  | array {
+    | array {
         $$.tipo = strdup("array");
         $$.valor = strdup($1);
+        $$.n = NULL;
         free($1);
     }
-  | expresion operador valor {
+    | expresion operador valor {
         if (strcmp($1.tipo, $3.tipo) != 0) {
-            fprintf(stderr,
-                    "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n",
-                    $1.tipo, $3.tipo, num_linea);
+            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
             exit(1);
         }
-        
-        if (strcmp($2, "/") == 0) {
-            if (strcmp($3.valor, "0") == 0 || strcmp($3.valor, "0.0") == 0) {
-                fprintf(stderr, "[ERROR] Division por cero (linea %d)\n", num_linea);
-                exit(1);
-            }
+        if (strcmp($2, "/") == 0 && (strcmp($3.valor, "0") == 0 || strcmp($3.valor, "0.0") == 0)) {
+            fprintf(stderr, "[ERROR] Division por cero (linea %d)\n", num_linea);
+            exit(1);
         }
-        
         char* new_val = malloc(strlen($1.valor) + strlen($3.valor) + strlen($2) + 2);
-       
         sprintf(new_val, "(%s%s%s)", $1.valor, $2, $3.valor);
-        
+
         $$.tipo = strdup($1.tipo);
         $$.valor = new_val;
-        
-        free($1.tipo);
-        free($1.valor);
-        free($2);
-        free($3.tipo);
-        free($3.valor);
+
+        int tipoNodo;
+        if (strcmp($2, "+") == 0) tipoNodo = NODO_SUMA;
+        else if (strcmp($2, "-") == 0) tipoNodo = NODO_RESTA;
+        else if (strcmp($2, "*") == 0) tipoNodo = NODO_MULT;
+        else if (strcmp($2, "/") == 0) tipoNodo = NODO_DIV;
+        else tipoNodo = 0;
+
+        $$.n = crearNodoNoTerminal($1.n, $3.n, tipoNodo);
+
+        free($1.tipo); free($1.valor); free($2); free($3.tipo); free($3.valor);
     }
-  ;
+    ;
 
-operador:
-    SUMA     { $$ = strdup("+"); }
-  | RESTA    { $$ = strdup("-"); }
-  | MULTI    { $$ = strdup("*"); }
-  | DIVISION { $$ = strdup("/"); }
-  ;
+operador
+    : SUMA     { $$ = strdup("+"); }
+    | RESTA    { $$ = strdup("-"); }
+    | MULTI    { $$ = strdup("*"); }
+    | DIVISION { $$ = strdup("/"); }
+    ;
 
-valor:
-    NUMERICO {
+valor
+    : NUMERICO {
         $$.tipo = strdup("int");
         $$.valor = malloc(12);
+        $$.n = crearNodoTerminal($1);
         sprintf($$.valor, "%d", $1);
-        $$.n = $1;
     }
-  | NUMERICODECIMAL {
+    | NUMERICODECIMAL {
         $$.tipo = strdup("float");
         $$.valor = malloc(32);
-        sprintf($$.valor, "%d", (int)$1->valor);
-        $$.n = $1;
+        $$.n = crearNodoTerminal($1);
+        sprintf($$.valor, "%.2f", $1);
     }
-  | CADENA {
+    | CADENA {
         $$.tipo = strdup("string");
         $$.valor = strdup($1);
+        $$.n = NULL;
     }
-  | BOOL {
+    | BOOL {
         $$.tipo = strdup("bool");
         $$.valor = strdup($1);
+        $$.n = NULL;
     }
-  | IDENTIFICADOR {
+    | IDENTIFICADOR {
         int pos = buscarTabla($1);
         if (pos == -1) {
-            fprintf(stderr,
-                    "[ERROR] Variable '%s' no declarada (linea %d)\n",
-                    $1, num_linea);
+            fprintf(stderr, "[ERROR] Variable '%s' no declarada (linea %d)\n", $1, num_linea);
             exit(1);
         }
-        
         $$.tipo = strdup(tabla[pos].tipo);
-        
         if (strcmp(tabla[pos].tipo, "int") == 0) {
             $$.valor = malloc(12);
             sprintf($$.valor, "%d", tabla[pos].numerico);
@@ -195,10 +208,10 @@ valor:
         } else {
             $$.valor = strdup(tabla[pos].texto);
         }
-        
+        $$.n = NULL; // Si tienes nodos para variables, cámbialo por el nodo correspondiente
         free($1);
     }
-  ;
+    ;
 
 %%
 
@@ -210,7 +223,13 @@ int main(int argc, char** argv) {
             return 1;
         }
     }
+    yyout = fopen("output.asm", "w");
+    if (!yyout) {
+        perror("output.asm");
+        return 1;
+    }
     printf("Analizando...\n");
     yyparse();
+    fclose(yyout);
     return 0;
 }

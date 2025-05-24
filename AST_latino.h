@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h> 
+#include <stdio.h>
 
 // ----------------------------- GLOSARIO DE PRIORIDADES -------------------------------------------
 #define NODO_NUMERO 1
@@ -85,12 +86,12 @@ void saltoLinea(void){
 
 
 // METODO "imprimir", imprime el codigo .asm que hace referencia a la funcion imprimir de latino
-void funcionImprimir()
+void funcionImprimir(struct ast *n)
 {
-  //fprintf(yyout, "li $v0, 2\n"); //entero
-  //fprintf(yyout, "add.s $f12, $f31, $f%d\n", n->resultado); // Mover del registro n al registro 30 (es el que empleamos para imprimir)
-  //fprintf(yyout, "mov.s $f30, $f12  #Movemos el registro 12 al 30 iniciado a false\n");
-  //fprintf(yyout, "syscall #Llamada al sistema\n");
+  fprintf(yyout, "li $v0, 2\n"); //entero
+  fprintf(yyout, "add.s $f12, $f31, $f%d\n", n->resultado); // Mover del registro n al registro 30 (es el que empleamos para imprimir)
+  fprintf(yyout, "mov.s $f30, $f12  #Movemos el registro 12 al 30 iniciado a false\n");
+  fprintf(yyout, "syscall #Llamada al sistema\n");
   saltoLinea(); //Introducimos un salto de linea
 }
 
@@ -103,10 +104,12 @@ int comprobarValorNodo(struct ast *n, int contadorEtiquetaLocal)
   if (n->tipoNodo == NODO_NUMERO) {
     dato = n->valor;
     fprintf(yyout, "lwc1 $f%d, var_%d\n", n->resultado, n->nombreVar);
+    fprintf(yyout, "LLAMADA\n");
 
   //TIPO NODO 3 - Nueva suma
   }  else if (n->tipoNodo == NODO_SUMA) {
     dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal) + comprobarValorNodo(n->dcha, contadorEtiquetaLocal);
+    fprintf(yyout, "LLAMADA\n");
     fprintf(yyout, "add.s $f%d, $f%d, $f%d\n", n->resultado, n->izq->resultado, n->dcha->resultado); //se utiliza add.s para + en ASM
     borrarReg(n->izq, n->dcha); //borrado de registros (se ponen a true)
 
@@ -152,9 +155,11 @@ int comprobarValorNodo(struct ast *n, int contadorEtiquetaLocal)
 }
 
 
+
 // METODO "comprobarAST", imprime el codigo .asm y generas sus respectivos pasos
 void comprobarAST(struct ast *n)
 {
+  printf("hola");
   imprimirVariables(); //Metodo que realiza la impresion de la parte de variables para Mips
   fprintf(yyout, "\n#--------------------- Ejecuciones ---------------------");
   fprintf(yyout, "\n.text\n");
