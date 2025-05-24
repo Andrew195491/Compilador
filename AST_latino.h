@@ -4,6 +4,17 @@
 #include <string.h>
 #include <stdbool.h> 
 
+// ----------------------------- GLOSARIO DE PRIORIDADES -------------------------------------------
+#define NODO_NUMERO 1
+#define NODO_SUMA 2
+#define NODO_RESTA 3
+#define NODO_MULT 4
+#define NODO_DIV 5
+#define NODO_IMPRIMIR 6
+#define NODO_ASIGNACION 7
+#define NODO_VARIABLE 8
+#define NODO_LISTA 9
+
 // ----------------------------- DECLARACION DE VARIABLES Y ESTRUCTURAS --------------------------------------------
 extern FILE *yyout;
 int contadorEtiqueta = 0;         // Variable para el control de las etiquetas 
@@ -37,77 +48,21 @@ struct ast
 
 //-----------------------------------------------  METODOS -------------------------------------------------------
 
+
 // METODO "crearNombreVariable", incremente el valor de la variable "nombreVariable"
 int crearNombreVariable(){
   return nombreVariable++; //retorna la variable y luego la incrementa
 }
 
-// METODO "comprobarValorNodo", se escribe el lenguaje máquina (por tipo de nodo) desde árbol completo generado al nivel del axioma de la gramática
-double comprobarValorNodo(struct ast *n, int contadorEtiquetaLocal)
-{
-  double dato;
-
-  //TIPO NODO 1 - Nueva hoja en el arbol
-  if (n->tipoNodo == 1) {
-    dato = n->valor;
-    fprintf(yyout, "lwc1 $f%d, var_%d\n", n->resultado, n->nombreVar);
-
-  //TIPO NODO 3 - Nueva suma
-  }  else if (n->tipoNodo == 2) {
-    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal) + comprobarValorNodo(n->dcha, contadorEtiquetaLocal);
-    fprintf(yyout, "add.s $f%d, $f%d, $f%d\n", n->resultado, n->izq->resultado, n->dcha->resultado); //se utiliza add.s para + en ASM
-    borrarReg(n->izq, n->dcha); //borrado de registros (se ponen a true)
-
-  //TIPO NODO 4 - Nueva resta
-  } else if (n->tipoNodo == 3) {
-    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal) - comprobarValorNodo(n->dcha, contadorEtiquetaLocal);
-    fprintf(yyout, "sub.s $f%d, $f%d, $f%d\n", n->resultado, n->izq->resultado, n->dcha->resultado); //se utiliza sub.s para - en ASM
-    borrarReg(n->izq, n->dcha); //borrado de registros (se ponen a true)
-  
-  //TIPO NODO 18 - Nuevo imprimir
-  } else if (n->tipoNodo == 4) {
-    comprobarValorNodo(n->izq, contadorEtiquetaLocal);
-    funcionImprimir(n->izq);
-
-  //TIPO NODO 19 - Nueva asignación 
-  }else if (n->tipoNodo == 5) {
-    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal);
-
-  //TIPO NODO 20 - Nueva variable
-  } else if (n->tipoNodo == 6) {
-    dato = n->valor;
-    
-  //TIPO NODO 22 - Lista de sentencias
-  } else if (n->tipoNodo == 7) {
-    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal); 
-    comprobarValorNodo(n->dcha, contadorEtiquetaLocal);   
-  }
-  return dato; //Devolvemos el valor
+// METODO "borrarReg", pone a true de nuevo el registro para que pueda volver a usarse
+void borrarReg(struct ast *izq, struct ast *dcha) { 
+  registros[izq->resultado] = true; registros[dcha->resultado] = true; 
 }
 
-// METODO "comprobarAST", imprime el codigo .asm y generas sus respectivos pasos
-comprobarAST(struct ast *n)
-{
-  imprimirVariables(); //Metodo que realiza la impresion de la parte de variables para Mips
-  fprintf(yyout, "\n#--------------------- Ejecuciones ---------------------");
-  fprintf(yyout, "\n.text\n");
-  fprintf(yyout, "lwc1 $f31, zero\n");
-  comprobarValorNodo(n, contadorEtiqueta); //Comprueba el valor del nodo
-}
-
-// METODO "imprimir", imprime el codigo .asm que hace referencia a la funcion imprimir de latino
-funcionImprimir(struct ast *n)
-{
-  fprintf(yyout, "li $v0, 2\n"); //entero
-  fprintf(yyout, "add.s $f12, $f31, $f%d\n", n->resultado); // Mover del registro n al registro 30 (es el que empleamos para imprimir)
-  fprintf(yyout, "mov.s $f30, $f12  #Movemos el registro 12 al 30 iniciado a false\n");
-  fprintf(yyout, "syscall #Llamada al sistema\n");
-  saltoLinea(); //Introducimos un salto de linea
-}
 
 // METODO "imprimirVariables", imprime el archivo .asm la estructura del .data
 // Recorrer los registros y devolver la posicion del primero que esté libre
-imprimirVariables(){
+void imprimirVariables(void){
   fprintf(yyout, "\n#-------------- Declaracion de variables --------------"); 
   fprintf(yyout, "\n.data \n");
   fprintf(yyout, "saltoLinea: .asciiz \"\\n\"\n"); //Variable salto de linea
@@ -120,35 +75,118 @@ imprimirVariables(){
   }
 }
 
+
 // METODO "saltoLinea", incorpora un salto de linea en la salida de nuestro codigo
-saltoLinea(){
+void saltoLinea(void){
 	fprintf(yyout, "li $v0, 4\n");                      //especifica al registro $v0 que va a imprimir una cadena de caracteres
 	fprintf(yyout, "la $a0, saltoLinea\n");             //carga en $a0 el valor del salto de linea
 	fprintf(yyout, "syscall #Llamada al sistema\n");
 }
 
+
+// METODO "imprimir", imprime el codigo .asm que hace referencia a la funcion imprimir de latino
+void funcionImprimir()
+{
+  //fprintf(yyout, "li $v0, 2\n"); //entero
+  //fprintf(yyout, "add.s $f12, $f31, $f%d\n", n->resultado); // Mover del registro n al registro 30 (es el que empleamos para imprimir)
+  //fprintf(yyout, "mov.s $f30, $f12  #Movemos el registro 12 al 30 iniciado a false\n");
+  //fprintf(yyout, "syscall #Llamada al sistema\n");
+  saltoLinea(); //Introducimos un salto de linea
+}
+
+// METODO "comprobarValorNodo", se escribe el lenguaje máquina (por tipo de nodo) desde árbol completo generado al nivel del axioma de la gramática
+int comprobarValorNodo(struct ast *n, int contadorEtiquetaLocal)
+{
+  int dato;
+
+  //TIPO NODO 1 - Nueva hoja en el arbol
+  if (n->tipoNodo == NODO_NUMERO) {
+    dato = n->valor;
+    fprintf(yyout, "lwc1 $f%d, var_%d\n", n->resultado, n->nombreVar);
+
+  //TIPO NODO 3 - Nueva suma
+  }  else if (n->tipoNodo == NODO_SUMA) {
+    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal) + comprobarValorNodo(n->dcha, contadorEtiquetaLocal);
+    fprintf(yyout, "add.s $f%d, $f%d, $f%d\n", n->resultado, n->izq->resultado, n->dcha->resultado); //se utiliza add.s para + en ASM
+    borrarReg(n->izq, n->dcha); //borrado de registros (se ponen a true)
+
+  //TIPO NODO 4 - Nueva resta
+  } else if (n->tipoNodo == NODO_RESTA) {
+    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal) - comprobarValorNodo(n->dcha, contadorEtiquetaLocal);
+    fprintf(yyout, "sub.s $f%d, $f%d, $f%d\n", n->resultado, n->izq->resultado, n->dcha->resultado); //se utiliza sub.s para - en ASM
+    borrarReg(n->izq, n->dcha); //borrado de registros (se ponen a true)
+  
+  //TIPO NODO 4 - Nueva multiplicacion
+  } else if (n->tipoNodo == NODO_MULT) {
+    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal) * comprobarValorNodo(n->dcha, contadorEtiquetaLocal);
+    fprintf(yyout, "mul.s $f%d, $f%d, $f%d\n", n->resultado, n->izq->resultado, n->dcha->resultado); //se utiliza mul.s para - en ASM
+    borrarReg(n->izq, n->dcha); //borrado de registros (se ponen a true)
+  
+  //TIPO NODO 4 - Nueva division
+  } else if (n->tipoNodo == NODO_DIV) {
+    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal) / comprobarValorNodo(n->dcha, contadorEtiquetaLocal);
+    fprintf(yyout, "div.s $f%d, $f%d, $f%d\n", n->resultado, n->izq->resultado, n->dcha->resultado); //se utiliza div.s para - en ASM
+    borrarReg(n->izq, n->dcha); //borrado de registros (se ponen a true)
+  
+
+  //TIPO NODO 18 - Nuevo imprimir
+  } else if (n->tipoNodo == NODO_IMPRIMIR) {
+    comprobarValorNodo(n->izq, contadorEtiquetaLocal);
+    funcionImprimir(n->izq);
+
+  //TIPO NODO 19 - Nueva asignación 
+  }else if (n->tipoNodo == NODO_ASIGNACION) {
+    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal);
+
+  //TIPO NODO 20 - Nueva variable
+  } else if (n->tipoNodo == NODO_VARIABLE) {
+    dato = n->valor;
+    
+  //TIPO NODO 22 - Lista de sentencias
+  } else if (n->tipoNodo == NODO_LISTA) {
+    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal); 
+    comprobarValorNodo(n->dcha, contadorEtiquetaLocal);   
+  }
+
+  return dato; //Devolvemos el valor
+}
+
+
+// METODO "comprobarAST", imprime el codigo .asm y generas sus respectivos pasos
+void comprobarAST(struct ast *n)
+{
+  imprimirVariables(); //Metodo que realiza la impresion de la parte de variables para Mips
+  fprintf(yyout, "\n#--------------------- Ejecuciones ---------------------");
+  fprintf(yyout, "\n.text\n");
+  fprintf(yyout, "lwc1 $f31, zero\n");
+  comprobarValorNodo(n, contadorEtiqueta); //Comprueba el valor del nodo
+}
+
+
 // METODO "encontrarReg", comprueba si el registro está libre y devuelve su posicion
 // Recorrer los registros y devolver la posicion del primero que esté libre
-encontrarReg()
+int encontrarReg()
 {
   int posicion = 0;
   while (posicion <= (numMaxRegistros - 1) && registros[posicion] == 0) {  // registros[posicion] == 0, evita recorrer todo el array
     posicion++;
   }
   registros[posicion] = 0;
+  if (posicion >= numMaxRegistros) {
+    fprintf(stderr, "Error: No hay registros disponibles\n");
+    exit(1);
+  }
   return posicion; //retorna la posicion donde se encuentra el registro libre
 }
 
-// METODO "borrarReg", pone a true de nuevo el registro para que pueda volver a usarse
-borrarReg(struct ast *izq, struct ast *dcha) { 
-  registros[izq->resultado] = true; registros[dcha->resultado] = true; 
-}
 
 //METODO "crearNodoVacio", crea un nuevo nodo sin contenido
 struct ast *crearNodoVacio()
 {
   struct ast *n = malloc(sizeof(struct ast)); // Asigna memoria dinamicamente para el nuevo nodo
-  n->izq = NULL; n->dcha = NULL; n->tipoNodo = NULL; 
+  n->izq = NULL; 
+  n->dcha = NULL;
+  n->tipoNodo = 0; 
   return n;
 }
 
@@ -160,7 +198,9 @@ struct ast *crearNodoTerminal(double valor)
   n->resultado = encontrarReg(); //Hacemos llamada al metodo para buscar un nuevo registro
   n->nombreVar = crearNombreVariable();
   printf("# [AST] - Registro $f%d ocupado para var_%d = %.3f\n", n->resultado, n->nombreVar, n->valor);
-  variables[n->resultado].dato = n->valor; variables[n->resultado].nombre = n->nombreVar; variables[n->resultado].disponible = true;
+  variables[n->resultado].dato = n->valor; 
+  variables[n->resultado].nombre = n->nombreVar; 
+  variables[n->resultado].disponible = true;
   return n;
 }
 
@@ -168,7 +208,9 @@ struct ast *crearNodoTerminal(double valor)
 struct ast *crearNodoNoTerminal(struct ast *izq, struct ast *dcha, int tipoNodo)
 {     
   struct ast *n = malloc(sizeof(struct ast)); // Crea un nuevo nodo
-  n->izq = izq; n->dcha = dcha; n->tipoNodo = tipoNodo; // Asignamos al nodo genérico sus hijos y tipo
+  n->izq = izq; 
+  n->dcha = dcha; 
+  n->tipoNodo = tipoNodo; // Asignamos al nodo genérico sus hijos y tipo
   n->resultado = encontrarReg(); //Hacemos llamada al metodo para buscar un nuevo registro
   return n;
 }
@@ -177,7 +219,51 @@ struct ast *crearNodoNoTerminal(struct ast *izq, struct ast *dcha, int tipoNodo)
 struct ast *crearVariableTerminal(double valor, int registro)
 {                                               
   struct ast *n = malloc(sizeof(struct ast)); // Asigna memoria dinamicamente para el nuevo nodo
-  n->izq = NULL; n->dcha = NULL; n->tipoNodo = 6; n->valor = valor;
+  n->izq = NULL; 
+  n->dcha = NULL; 
+  n->tipoNodo = 6; 
+  n->valor = valor;
   n->resultado = registro;
   return n;
+}
+
+struct ast *crearNodoAsignacion(int identificador, struct ast* expresion) {
+  struct ast* nodo = malloc(sizeof(struct ast));
+  nodo ->tipoNodo = NODO_ASIGNACION;
+  nodo ->nombreVar = identificador;
+  nodo->izq = expresion;
+  nodo->dcha = NULL;
+
+  if(expresion != NULL){
+    nodo->tipo = strdup(expresion->tipo);
+  }else{
+    nodo->tipo = strdup("desconocido");
+  }
+
+  return nodo;
+}
+
+
+void pruebaOperaciones() {
+  // Construye el AST para: (5.0 * 3.0) + (6.0 / 2.0)
+  
+  // Números
+  struct ast *num5 = crearNodoTerminal(5.0);
+  struct ast *num3 = crearNodoTerminal(3.0);
+  struct ast *num6 = crearNodoTerminal(6.0);
+  struct ast *num2 = crearNodoTerminal(2.0);
+  
+  // Multiplicación (5 * 3)
+  struct ast *mult = crearNodoNoTerminal(num5, num3, NODO_MULT);
+  
+  // División (6 / 2)
+  struct ast *div = crearNodoNoTerminal(num6, num2, NODO_DIV);
+  
+  // Suma final ( (5*3) + (6/2) )
+  struct ast *suma = crearNodoNoTerminal(mult, div, NODO_SUMA);
+  
+  // Generar código
+  yyout = fopen("prueba.asm", "w");
+  comprobarAST(suma);
+  fclose(yyout);
 }

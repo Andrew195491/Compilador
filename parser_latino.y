@@ -27,13 +27,14 @@ void yyerror(const char* s) {
     } simbolo;
 }
 
-%token <enteroVal> NUMERICO
-%token <realVal> NUMERICODECIMAL
-%token <stringVal> IDENTIFICADOR CADENA BOOL 
+%token <stringVal> CADENA BOOL IDENTIFICADOR
 %token SUMA RESTA MULTI DIVISION CORCHETEABIERTO CORCHETECERRADO SEPARADOR IGUAL
+%token <simbolo> NUMERICO NUMERICODECIMAL 
 
-%type <simbolo> valor expresion
+
+
 %type <stringVal> operador array array2
+%type <simbolo> expresion valor asignacion
 
 %start axioma
 
@@ -71,6 +72,12 @@ asignacion:
         free($1);
         free($3.tipo);
         free($3.valor);
+
+        $$.n = crearNodoAsignacion(pos, $3.n);
+        comprobarValorNodo($$.n ,7);
+        free($$.tipo);
+        free($$.valor);
+        free($$.n);
     }
   ;
 
@@ -126,6 +133,7 @@ expresion:
         }
         
         char* new_val = malloc(strlen($1.valor) + strlen($3.valor) + strlen($2) + 2);
+       
         sprintf(new_val, "(%s%s%s)", $1.valor, $2, $3.valor);
         
         $$.tipo = strdup($1.tipo);
@@ -151,11 +159,13 @@ valor:
         $$.tipo = strdup("int");
         $$.valor = malloc(12);
         sprintf($$.valor, "%d", $1);
+        $$.n = $1;
     }
   | NUMERICODECIMAL {
         $$.tipo = strdup("float");
         $$.valor = malloc(32);
-        sprintf($$.valor, "%.2f", $1);
+        sprintf($$.valor, "%d", (int)$1->valor);
+        $$.n = $1;
     }
   | CADENA {
         $$.tipo = strdup("string");
