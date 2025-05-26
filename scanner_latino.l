@@ -24,7 +24,9 @@ int num_linea = 1;
 "/"                     { yylval.stringVal = strdup("/"); return DIVISION; }
 "true"                  { yylval.stringVal = strdup("true"); return BOOL; }
 "false"                 { yylval.stringVal = strdup("false"); return BOOL; }
-
+"if"                    { return IF; }
+"else"                  { return ELSE; }
+"for"                   { return FOR; }
 
 [0-9]+                  { yylval.enteroVal = atoi(yytext); return NUMERICO; }
 [0-9]+\.[0-9]+          { yylval.realVal = atof(yytext); return NUMERICODECIMAL; }
