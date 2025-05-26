@@ -8,6 +8,8 @@
 int num_linea = 1;
 %}
 
+%x COMMENT
+
 %%
 
 [ \t]+                  ; // ignorar espacios
@@ -27,6 +29,11 @@ int num_linea = 1;
 "if"                    { return IF; }
 "else"                  { return ELSE; }
 "for"                   { return FOR; }
+"#".*                   ;
+"=begin"                BEGIN(COMMENT);
+<COMMENT>[^=]*[\r\n]+   ;
+<COMMENT>"=end"         BEGIN(INITIAL);
+
 
 [0-9]+                  { yylval.enteroVal = atoi(yytext); return NUMERICO; }
 [0-9]+\.[0-9]+          { yylval.realVal = atof(yytext); return NUMERICODECIMAL; }
