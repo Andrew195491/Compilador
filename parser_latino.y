@@ -33,20 +33,8 @@ void yyerror(const char* s) {
 
 %token <enteroVal> NUMERICO
 %token <realVal> NUMERICODECIMAL
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-%token <stringVal> IDENTIFICADOR CADENA BOOL 
-%token SUMA RESTA MULTI DIVISION CORCHETEABIERTO CORCHETECERRADO SEPARADOR IGUAL
-%token IF ELSE
-%token FOR
-=======
 %token <stringVal> IDENTIFICADOR CADENA BOOL
 %token SUMA RESTA MULTI DIVISION CORCHETEABIERTO CORCHETECERRADO SEPARADOR IGUAL SALTO PARENIZQ PARENDER IF ELSE FOR
->>>>>>> Stashed changes
-=======
-%token <stringVal> IDENTIFICADOR CADENA BOOL
-%token SUMA RESTA MULTI DIVISION CORCHETEABIERTO CORCHETECERRADO SEPARADOR IGUAL SALTO PARENIZQ PARENDER IF ELSE FOR
->>>>>>> Stashed changes
 
 %type <simbolo> programa lista_sentencias sentencia asignacion expresion valor
 %type <simbolo> array array2 acceso_array indices_array
@@ -97,26 +85,6 @@ sentencia
         }
         $$.n = $1.n;
         free($1.tipo); free($1.valor);
-    }
-    | IF expresion sentencia {
-        $$.tipo = strdup("if");
-        $$.valor = NULL;
-        $$.n = crearNodoIf($2.n, $3.n); // Asumiendo que tienes una función para esto
-        free($2.tipo); free($2.valor); free($3.tipo); free($3.valor);
-    }
-    | IF expresion sentencia ELSE sentencia {
-        $$.tipo = strdup("if_else");
-        $$.valor = NULL;
-        $$.n = crearNodoIf($2.n, $3.n, $5.n);
-        free($2.tipo); free($2.valor); free($3.tipo); free($3.valor);
-        free($5.tipo); free($5.valor);
-    }
-    | FOR IDENTIFICADOR IGUAL expresion expresion sentencia {
-        int pos = buscarTabla($2);
-        if (pos == -1) {
-            guardar_simbolo($2, "int", $4.valor);
-            pos = buscarTabla($2);
-        }
     }
     ;
 
