@@ -8,8 +8,11 @@
 int num_linea = 1;
 %}
 %x COMMENT
+<<<<<<< Updated upstream
 
 %x COMMENT
+=======
+>>>>>>> Stashed changes
 
 %%
 
@@ -34,14 +37,20 @@ int num_linea = 1;
 "for"                   { return FOR; }
 "#".*                   ;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 "=begin"                BEGIN(COMMENT);
 <COMMENT>[^=]*[\r\n]+   ;
 <COMMENT>"=end"         BEGIN(INITIAL);
 =======
+=======
+>>>>>>> Stashed changes
 "=begin"                {BEGIN(COMMENT);}
 <COMMENT>[^=]*[\r\n]+   ;
 <COMMENT>"=end"         {BEGIN(INITIAL);}
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 
