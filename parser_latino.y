@@ -8,8 +8,7 @@
 extern int yylex();
 extern int num_linea;
 extern FILE* yyin;
-extern FILE* yyout; 
-
+extern FILE* yyout;
 
 void yyerror(const char* s) {
     fprintf(stderr, "[ERROR] Sintaxis invalida en linea %d: %s\n", num_linea, s);
@@ -28,15 +27,24 @@ void yyerror(const char* s) {
     } simbolo;
 }
 
+%left SUMA RESTA
+%left MULTI DIVISION
+%left PARENIZQ PARENDER
+
 %token <enteroVal> NUMERICO
 %token <realVal> NUMERICODECIMAL
+<<<<<<< Updated upstream
 %token <stringVal> IDENTIFICADOR CADENA BOOL 
 %token SUMA RESTA MULTI DIVISION CORCHETEABIERTO CORCHETECERRADO SEPARADOR IGUAL
 %token IF ELSE
 %token FOR
+=======
+%token <stringVal> IDENTIFICADOR CADENA BOOL
+%token SUMA RESTA MULTI DIVISION CORCHETEABIERTO CORCHETECERRADO SEPARADOR IGUAL SALTO PARENIZQ PARENDER IF ELSE FOR
+>>>>>>> Stashed changes
 
 %type <simbolo> programa lista_sentencias sentencia asignacion expresion valor
-%type <stringVal> operador array array2
+%type <simbolo> array array2 acceso_array indices_array
 
 %start programa
 
@@ -44,27 +52,32 @@ void yyerror(const char* s) {
 
 programa
     : lista_sentencias {
-        // Al final, genera el código MIPS para el AST global
-        printf("Llamando a comprobarAST\n");
-        comprobarAST($1.n);
-
-        // Limpieza opcional de memoria
-
+        printf("Llamando a recorrerAST\n");
+        generarASM($1.n);
+        liberarAST($1.n);
     }
     ;
 
+salto:
+    |
+    SALTO
+    ;
 
 lista_sentencias
-    : sentencia  {
+    : sentencia salto {
         $$.tipo = strdup($1.tipo);
-        $$.valor = strdup($1.valor);
+        if ($1.valor != NULL) {
+            $$.valor = strdup($1.valor);
+        } else {
+            $$.valor = NULL;
+        }
         $$.n = $1.n;
         free($1.tipo); free($1.valor);
     }
-    | lista_sentencias sentencia {
+    | lista_sentencias sentencia SALTO {
         $$.tipo = strdup("lista");
         $$.valor = NULL;
-        $$.n = crearNodoNoTerminal($1.n, $2.n, NODO_LISTA);
+        $$.n = crearNodoLista($1.n, $2.n);
         free($1.tipo); free($1.valor); free($2.tipo); free($2.valor);
     }
     ;
@@ -72,7 +85,11 @@ lista_sentencias
 sentencia
     : asignacion {
         $$.tipo = strdup($1.tipo);
-        $$.valor = strdup($1.valor);
+        if ($1.valor != NULL) {
+            $$.valor = strdup($1.valor);
+        } else {
+            $$.valor = NULL;
+        }
         $$.n = $1.n;
         free($1.tipo); free($1.valor);
     }
@@ -114,7 +131,7 @@ asignacion
         }
         $$.tipo = strdup("asignacion");
         $$.valor = NULL;
-        $$.n = crearNodoAsignacion(tabla[pos].registro, $3.n);
+        $$.n = crearNodoAsignacion($1, $3.n);
         free($1);
         free($3.tipo); free($3.valor);
     }
@@ -122,24 +139,54 @@ asignacion
 
 array
     : CORCHETEABIERTO array2 CORCHETECERRADO {
-        $$ = strdup("array");
-        free($2);
+        $$.tipo = strdup("array");
+        $$.valor = NULL;
+        $$.n = $2.n;
+        free($2.tipo); free($2.valor);
     }
     | CORCHETEABIERTO CORCHETECERRADO {
-        $$ = strdup("array");
+        $$.tipo = strdup("array");
+        $$.valor = NULL;
+        $$.n = NULL;
     }
     ;
 
 array2
     : expresion SEPARADOR array2 {
-        char* temp = malloc(strlen($1.valor) + strlen($3) + 2);
-        sprintf(temp, "%s,%s", $1.valor, $3);
-        $$ = temp;
-        free($1.tipo); free($1.valor); free($3);
+        $$.tipo = strdup("array");
+        $$.valor = NULL;
+        $$.n = crearNodoArray($1.n, $3.n);
+        free($1.tipo); free($1.valor); free($3.tipo); free($3.valor);
     }
     | expresion {
-        $$ = strdup($1.valor);
+        $$.tipo = strdup("array");
+        $$.valor = NULL;
+        $$.n = crearNodoArray($1.n, NULL);
         free($1.tipo); free($1.valor);
+    }
+    ;
+
+acceso_array
+    : IDENTIFICADOR indices_array {
+        $$.tipo = strdup("acceso_array");
+        $$.valor = NULL;
+        $$.n = crearNodoAccesoArray($1, $2.n);
+        free($1); free($2.tipo); free($2.valor);
+    }
+    ;
+
+indices_array
+    : CORCHETEABIERTO expresion CORCHETECERRADO {
+        $$.tipo = strdup("lista");
+        $$.valor = NULL;
+        $$.n = crearNodoLista($2.n, NULL);
+        free($2.tipo); free($2.valor);
+    }
+    | indices_array CORCHETEABIERTO expresion CORCHETECERRADO {
+        $$.tipo = strdup("lista");
+        $$.valor = NULL;
+        $$.n = crearNodoLista($1.n, $3.n);
+        free($1.tipo); free($1.valor); free($3.tipo); free($3.valor);
     }
     ;
 
@@ -152,67 +199,97 @@ expresion
     }
     | array {
         $$.tipo = strdup("array");
-        $$.valor = strdup($1);
-        $$.n = NULL;
-        free($1);
+        $$.valor = NULL;
+        $$.n = $1.n;
+        free($1.tipo); free($1.valor);
     }
-    | expresion operador valor {
+    | acceso_array {
+        $$.tipo = strdup("acceso_array");
+        $$.valor = NULL;
+        $$.n = $1.n;
+        free($1.tipo); free($1.valor);
+    }
+    | expresion SUMA expresion {
         if (strcmp($1.tipo, $3.tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
             exit(1);
         }
-        if (strcmp($2, "/") == 0 && (strcmp($3.valor, "0") == 0 || strcmp($3.valor, "0.0") == 0)) {
+        $$.tipo = strdup($1.tipo);
+        $$.valor = NULL;
+        $$.n = crearNodoOperacion(NODO_SUMA, $1.n, $3.n);
+        free($1.tipo); free($3.tipo);
+    }
+    | expresion RESTA expresion {
+        if (strcmp($1.tipo, $3.tipo) != 0) {
+            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
+            exit(1);
+        }
+        $$.tipo = strdup($1.tipo);
+        $$.valor = NULL;
+        $$.n = crearNodoOperacion(NODO_RESTA, $1.n, $3.n);
+        free($1.tipo); free($3.tipo);
+    }
+    | expresion MULTI expresion {
+        if (strcmp($1.tipo, $3.tipo) != 0) {
+            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
+            exit(1);
+        }
+        $$.tipo = strdup($1.tipo);
+        $$.valor = NULL;
+        $$.n = crearNodoOperacion(NODO_MULT, $1.n, $3.n);
+        free($1.tipo); free($3.tipo);
+    }
+    | expresion DIVISION expresion {
+        if (strcmp($1.tipo, $3.tipo) != 0) {
+            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
+            exit(1);
+        }
+        if ((strcmp($3.tipo, "int") == 0 && $3.n && $3.n->valor_int == 0) ||
+            (strcmp($3.tipo, "float") == 0 && $3.n && $3.n->valor_float == 0.0)) {
             fprintf(stderr, "[ERROR] Division por cero (linea %d)\n", num_linea);
             exit(1);
         }
-        char* new_val = malloc(strlen($1.valor) + strlen($3.valor) + strlen($2) + 2);
-        sprintf(new_val, "(%s%s%s)", $1.valor, $2, $3.valor);
-
         $$.tipo = strdup($1.tipo);
-        $$.valor = new_val;
-
-        int tipoNodo;
-        if (strcmp($2, "+") == 0) tipoNodo = NODO_SUMA;
-        else if (strcmp($2, "-") == 0) tipoNodo = NODO_RESTA;
-        else if (strcmp($2, "*") == 0) tipoNodo = NODO_MULT;
-        else if (strcmp($2, "/") == 0) tipoNodo = NODO_DIV;
-        else tipoNodo = 0;
-
-        $$.n = crearNodoNoTerminal($1.n, $3.n, tipoNodo);
-
-        free($1.tipo); free($1.valor); free($2); free($3.tipo); free($3.valor);
+        $$.valor = NULL;
+        $$.n = crearNodoOperacion(NODO_DIV, $1.n, $3.n);
+        free($1.tipo); free($3.tipo);
     }
-    ;
-
-operador
-    : SUMA     { $$ = strdup("+"); }
-    | RESTA    { $$ = strdup("-"); }
-    | MULTI    { $$ = strdup("*"); }
-    | DIVISION { $$ = strdup("/"); }
+    | PARENIZQ expresion PARENDER {
+        $$.tipo = strdup($2.tipo);
+        if ($2.valor != NULL) {
+            $$.valor = strdup($2.valor);
+        } else {
+            $$.valor = NULL;
+        }
+        $$.n = $2.n;
+        free($2.tipo); free($2.valor);
+    }
     ;
 
 valor
     : NUMERICO {
         $$.tipo = strdup("int");
         $$.valor = malloc(12);
-        $$.n = crearNodoTerminal($1);
         sprintf($$.valor, "%d", $1);
+        $$.n = crearNodoNumero($1);
     }
     | NUMERICODECIMAL {
         $$.tipo = strdup("float");
         $$.valor = malloc(32);
-        $$.n = crearNodoTerminal($1);
         sprintf($$.valor, "%.2f", $1);
+        $$.n = crearNodoFloat($1);
     }
     | CADENA {
         $$.tipo = strdup("string");
         $$.valor = strdup($1);
-        $$.n = NULL;
+        $$.n = crearNodoString($1);
+        free($1);
     }
     | BOOL {
         $$.tipo = strdup("bool");
         $$.valor = strdup($1);
-        $$.n = NULL;
+        $$.n = crearNodoBool($1);
+        free($1);
     }
     | IDENTIFICADOR {
         int pos = buscarTabla($1);
@@ -230,7 +307,7 @@ valor
         } else {
             $$.valor = strdup(tabla[pos].texto);
         }
-        $$.n = NULL; // Si tienes nodos para variables, cámbialo por el nodo correspondiente
+        $$.n = crearNodoVariable($1);
         free($1);
     }
     ;

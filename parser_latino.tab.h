@@ -38,19 +38,25 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     NUMERICO = 258,
-     NUMERICODECIMAL = 259,
-     IDENTIFICADOR = 260,
-     CADENA = 261,
-     BOOL = 262,
-     SUMA = 263,
-     RESTA = 264,
-     MULTI = 265,
-     DIVISION = 266,
-     CORCHETEABIERTO = 267,
-     CORCHETECERRADO = 268,
-     SEPARADOR = 269,
-     IGUAL = 270
+     RESTA = 258,
+     SUMA = 259,
+     DIVISION = 260,
+     MULTI = 261,
+     PARENDER = 262,
+     PARENIZQ = 263,
+     NUMERICO = 264,
+     NUMERICODECIMAL = 265,
+     IDENTIFICADOR = 266,
+     CADENA = 267,
+     BOOL = 268,
+     CORCHETEABIERTO = 269,
+     CORCHETECERRADO = 270,
+     SEPARADOR = 271,
+     IGUAL = 272,
+     SALTO = 273,
+     IF = 274,
+     ELSE = 275,
+     FOR = 276
    };
 #endif
 
@@ -61,7 +67,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1685 of yacc.c  */
-#line 20 "parser_latino.y"
+#line 19 "parser_latino.y"
 
     int enteroVal;
     float realVal;
@@ -75,7 +81,7 @@ typedef union YYSTYPE
 
 
 /* Line 1685 of yacc.c  */
-#line 79 "parser_latino.tab.h"
+#line 85 "parser_latino.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

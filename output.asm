@@ -1,12 +1,18 @@
+.data
+g: .word 0:100
+h: .word 0:100
 
-#-------------- Declaracion de variables --------------
-.data 
-saltoLinea: .asciiz "\n"
-zero: .float 0.0
-var_0: .float 5.000
-
-#--------------------- Ejecuciones ---------------------
 .text
-lwc1 $f31, zero
-lwc1 $f0, var_0
-LLAMADA
+.globl main
+main:
+    li $t0, 1
+    li $t1, 2
+    li $t2, 3
+    sw (null), g
+    li $t3, 1
+    li $t4, 2
+    li $t5, 2
+    li $t6, 1
+    sw (null), h
+    li $v0, 10
+    syscall

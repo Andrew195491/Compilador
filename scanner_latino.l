@@ -7,18 +7,21 @@
 
 int num_linea = 1;
 %}
+%x COMMENT
 
 %x COMMENT
 
 %%
 
 [ \t]+                  ; // ignorar espacios
-\n                      { num_linea++; return '\n'; }
+\n                      { num_linea++; return SALTO; }
 
 "="                     { return IGUAL; }
 "["                     { return CORCHETEABIERTO; }
 "]"                     { return CORCHETECERRADO; }
 ","                     { return SEPARADOR; }
+"("                     { return PARENIZQ; }
+")"                     { return PARENDER; }
 
 "+"                     { yylval.stringVal = strdup("+"); return SUMA; }
 "-"                     { yylval.stringVal = strdup("-"); return RESTA; }
@@ -30,9 +33,16 @@ int num_linea = 1;
 "else"                  { return ELSE; }
 "for"                   { return FOR; }
 "#".*                   ;
+<<<<<<< Updated upstream
 "=begin"                BEGIN(COMMENT);
 <COMMENT>[^=]*[\r\n]+   ;
 <COMMENT>"=end"         BEGIN(INITIAL);
+=======
+"=begin"                {BEGIN(COMMENT);}
+<COMMENT>[^=]*[\r\n]+   ;
+<COMMENT>"=end"         {BEGIN(INITIAL);}
+
+>>>>>>> Stashed changes
 
 
 [0-9]+                  { yylval.enteroVal = atoi(yytext); return NUMERICO; }
