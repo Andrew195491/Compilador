@@ -1,18 +1,15 @@
 .data
 g: .word 0:100
-h: .word 0:100
 
 .text
 .globl main
 main:
+    la $a0, g
     li $t0, 1
-    li $t1, 2
-    li $t2, 3
-    sw (null), g
-    li $t3, 1
-    li $t4, 2
-    li $t5, 2
-    li $t6, 1
-    sw (null), h
+    sw $t0, 0($a0)
+    li $t1, 0
+    sw $t1, 4($a0)
+    li $t2, 1
+    sw $t2, 8($a0)
     li $v0, 10
     syscall

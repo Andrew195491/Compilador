@@ -35,7 +35,7 @@ struct ast *crearNodoString(const char* valor);
 struct ast *crearNodoBool(const char* valor);
 struct ast *crearNodoVariable(const char* nombre);
 struct ast *crearNodoArray(struct ast *elemento, struct ast *siguiente);
-struct ast *crearNodoAccesoArray(const char *nombre, struct ast *indice);
+struct ast *crearNodoAccesoArray(const char *nombre, struct ast *indices);
 
 
 void recorrerAST(struct ast *n);

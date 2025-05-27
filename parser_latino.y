@@ -78,11 +78,7 @@ lista_sentencias
 sentencia
     : asignacion {
         $$.tipo = strdup($1.tipo);
-        if ($1.valor != NULL) {
-            $$.valor = strdup($1.valor);
-        } else {
-            $$.valor = NULL;
-        }
+        $$.valor = NULL;
         $$.n = $1.n;
         free($1.tipo); free($1.valor);
     }
@@ -90,23 +86,11 @@ sentencia
 
 asignacion
     : IDENTIFICADOR IGUAL expresion {
-        int pos = buscarTabla($1);
-        if (pos == -1) {
-            guardar_simbolo($1, $3.tipo, $3.valor);
-            pos = buscarTabla($1);
-        }
-        if (strcmp($3.tipo, "int") == 0) {
-            tabla[pos].numerico = atoi($3.valor);
-        } else if (strcmp($3.tipo, "float") == 0) {
-            tabla[pos].numericoDecimal = atof($3.valor);
-        } else {
-            tabla[pos].texto = strdup($3.valor);
-        }
+        // La tabla de símbolos solo sirve para ejecución/interprete, no para el AST ni para arrays heterogéneos
         $$.tipo = strdup("asignacion");
         $$.valor = NULL;
         $$.n = crearNodoAsignacion($1, $3.n);
-        free($1);
-        free($3.tipo); free($3.valor);
+        free($1); free($3.tipo); free($3.valor);
     }
     ;
 
@@ -265,21 +249,9 @@ valor
         free($1);
     }
     | IDENTIFICADOR {
-        int pos = buscarTabla($1);
-        if (pos == -1) {
-            fprintf(stderr, "[ERROR] Variable '%s' no declarada (linea %d)\n", $1, num_linea);
-            exit(1);
-        }
-        $$.tipo = strdup(tabla[pos].tipo);
-        if (strcmp(tabla[pos].tipo, "int") == 0) {
-            $$.valor = malloc(12);
-            sprintf($$.valor, "%d", tabla[pos].numerico);
-        } else if (strcmp(tabla[pos].tipo, "float") == 0) {
-            $$.valor = malloc(32);
-            sprintf($$.valor, "%.2f", tabla[pos].numericoDecimal);
-        } else {
-            $$.valor = strdup(tabla[pos].texto);
-        }
+        // Solo para ejecución/interprete, no para el AST puro
+        $$.tipo = strdup("var");
+        $$.valor = strdup($1);
         $$.n = crearNodoVariable($1);
         free($1);
     }
