@@ -257,6 +257,44 @@
         return buffer[idx];
     }
 
+// Prototipo necesario para evitar error:
+const char* generarASM_rec(struct ast *n);
+
+void generar_puts(struct ast *expresion) {
+    if (!expresion) return;
+
+    const char* reg = generarASM_rec(expresion);
+
+    switch (expresion->tipoNodo) {
+        case NODO_STRING:
+            fprintf(yyout, "    li $v0, 4\n");
+            fprintf(yyout, "    move $a0, %s\n", reg);
+            break;
+        case NODO_FLOAT:
+            fprintf(yyout, "    mov.s $f12, %s\n", reg);
+            fprintf(yyout, "    li $v0, 2\n");
+            break;
+        case NODO_NUMERO:
+        case NODO_BOOL:
+        case NODO_VARIABLE:
+            fprintf(yyout, "    li $v0, 1\n");
+            fprintf(yyout, "    move $a0, %s\n", reg);
+            break;
+        default:
+            fprintf(yyout, "    # tipo no soportado en puts\n");
+            return;
+    }
+
+    fprintf(yyout, "    syscall\n");
+
+    // salto de línea
+    fprintf(yyout, "    li $a0, 10\n");
+    fprintf(yyout, "    li $v0, 11\n");
+    fprintf(yyout, "    syscall\n");
+}
+
+
+
     // Inicializa un array multidimensional de enteros, floats o strings en memoria (aplanado)
     void generar_inicializacion_array(const char* base_reg, struct ast* array, int* offset, int modo) {
         struct ast* elem = array;
@@ -438,7 +476,7 @@
                 return NULL;
             }
             case NODO_PUTS: {
-                generarASM_rec(n->izq);
+                generar_puts(n->izq);
                 return NULL;
             }
             default:
@@ -505,7 +543,7 @@
 
         // 2. Sección .data 
         fprintf(yyout, ".data\n");
-        declarar_arrays_data();
+        //declarar_arrays_data();
         //declarar_bool();
         //declarar_integer();
         //declarar_float();  
@@ -514,6 +552,7 @@
 
         // 3. Sección .text y main
         fprintf(yyout, ".text\n.globl main\nmain:\n");
+       // generar_puts(n);
 
         // 4. Código de instrucciones
         generarASM_rec(n);

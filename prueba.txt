@@ -1,1 +1,1 @@
-g = "Hola"
+puts 6

@@ -1,10 +1,14 @@
 .data
-g: .word 0:100
 
 .text
 .globl main
 main:
-    la $t0, str_0
-    sw $t0, g
+    li $t0, 6
+    li $v0, 1
+    move $a0, $t0
+    syscall
+    li $a0, 10
+    li $v0, 11
+    syscall
     li $v0, 10
     syscall
