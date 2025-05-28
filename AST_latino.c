@@ -127,6 +127,16 @@
         return n;
     }
 
+    struct ast *crearNodoPuts(struct ast *expresion) {
+        struct ast *n = malloc(sizeof(struct ast));
+        n->tipoNodo = NODO_PUTS; // Usamos NODO_PUTS para simplificar
+        n->izq = expresion;
+        n->nombre = NULL;;
+        n->dcha = NULL;
+        n->valor_str = NULL;
+        return n;
+    }
+
     // ======== Liberación del AST ========
 
     void liberarAST(struct ast *n) {
@@ -200,6 +210,12 @@
                     idx = idx->dcha;
                 }
                 printf("]");
+                break;
+            }
+            case NODO_PUTS: {
+                printf("puts(%s, ", n->nombre);
+                recorrerAST(n->izq);
+                printf(");\n");
                 break;
             }
         }
@@ -322,10 +338,21 @@
                 fprintf(yyout, "    li %s, %d\n", reg, val);
                 return reg;
             }
+            case NODO_STRING: {
+                const char* reg = nuevo_temp();
+                fprintf(yyout, "    la %s, str_%d\n", reg, string_label_counter);
+                string_label_counter++;
+                return reg;
+            }
             case NODO_VARIABLE: {
                 const char* reg = nuevo_temp();
                 registrar_variable(n->nombre);
                 fprintf(yyout, "    lw %s, %s\n", reg, n->nombre);
+                return reg;
+            }
+            case NODO_FLOAT: {
+                const char* reg = nuevo_temp();
+                fprintf(yyout, "    li.s %s, %d\n", reg, n->valor_int);
                 return reg;
             }
             case NODO_SUMA: {
@@ -358,16 +385,46 @@
             }
             case NODO_ASIGNACION: {
                 if (n->izq && n->izq->tipoNodo == NODO_ARRAY) {
+                    // Detecta tipo del array: 0=int/bool, 1=float, 2=string
+                    int tipo = detectar_tipo_array(n->izq);
                     registrar_variable(n->nombre);
                     fprintf(yyout, "    la $a0, %s\n", n->nombre);
                     int offset = 0;
-                    int tipo = detectar_tipo_array(n->izq); // 0=int/bool, 1=float, 2=string
                     generar_inicializacion_array("$a0", n->izq, &offset, tipo);
                     return "$a0";
                 } else {
+                    // Asignación simple: detecta tipo y usa la instrucción adecuada
                     const char* reg = generarASM_rec(n->izq);
+
+                    // Detecta el tipo de la expresión derecha
+                    int tipo = -1;
+                    switch (n->izq->tipoNodo) {
+                        case NODO_NUMERO:
+                        case NODO_BOOL:
+                            tipo = 0; // int/bool
+                            break;
+                        case NODO_FLOAT:
+                            tipo = 1; // float
+                            break;
+                        case NODO_STRING:
+                            tipo = 2; // string
+                            break;
+                        default:
+                            tipo = 0;
+                    }
+
                     registrar_variable(n->nombre);
-                    fprintf(yyout, "    sw %s, %s\n", reg, n->nombre);
+
+                    if (tipo == 1) {
+                        // float
+                        fprintf(yyout, "    s.s %s, %s\n", reg, n->nombre);
+                    } else if (tipo == 2) {
+                        // string: reg debe ser la dirección del string
+                        fprintf(yyout, "    sw %s, %s\n", reg, n->nombre);
+                    } else {
+                        // int/bool
+                        fprintf(yyout, "    sw %s, %s\n", reg, n->nombre);
+                    }
                     return reg;
                 }
             }
@@ -378,6 +435,10 @@
             case NODO_LISTA: {
                 generarASM_rec(n->izq);
                 generarASM_rec(n->dcha);
+                return NULL;
+            }
+            case NODO_PUTS: {
+                generarASM_rec(n->izq);
                 return NULL;
             }
             default:
@@ -398,6 +459,20 @@
         }
     }
 
+    void declarar_string(const char *nombre, const char *valor) {
+        fprintf(yyout, "%s: .asciiz \"%s\"\n", nombre, valor);
+    }
+
+    void declarar_integer(const char *nombre, int valor) {
+        fprintf(yyout, "%s: .word %d\n", nombre, valor);
+    }
+    void declarar_float(const char *nombre, float valor) {
+        fprintf(yyout, "%s: .float %f\n", nombre, valor);
+    }
+    void declarar_bool(const char *nombre, const char *valor) {
+        int val = (strcmp(valor, "true") == 0) ? 1 : 0;
+        fprintf(yyout, "%s: .word %d\n", nombre, val);
+    }
     // ======== Recolectar variables y tipos del AST ========
 
     void recolectar_vars_tipos(struct ast *nodo) {
@@ -428,9 +503,13 @@
         // 1. Recolectar variables y tipos del AST
         recolectar_vars_tipos(n);
 
-        // 2. Sección .data
+        // 2. Sección .data 
         fprintf(yyout, ".data\n");
         declarar_arrays_data();
+        //declarar_bool();
+        //declarar_integer();
+        //declarar_float();  
+        //declarar_string();  
         fprintf(yyout, "\n");
 
         // 3. Sección .text y main

@@ -14,7 +14,8 @@ enum tipoNodoAST {
     NODO_BOOL,
     NODO_VARIABLE,
     NODO_ARRAY,
-    NODO_ACCESO_ARRAY
+    NODO_ACCESO_ARRAY,
+    NODO_PUTS
 };
 
 struct ast {
@@ -36,6 +37,7 @@ struct ast *crearNodoBool(const char* valor);
 struct ast *crearNodoVariable(const char* nombre);
 struct ast *crearNodoArray(struct ast *elemento, struct ast *siguiente);
 struct ast *crearNodoAccesoArray(const char *nombre, struct ast *indices);
+struct ast *crearNodoPuts(struct ast *expresion);
 
 
 void recorrerAST(struct ast *n);

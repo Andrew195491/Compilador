@@ -34,7 +34,7 @@ void yyerror(const char* s) {
 %token <enteroVal> NUMERICO
 %token <realVal> NUMERICODECIMAL
 %token <stringVal> IDENTIFICADOR CADENA BOOL
-%token SUMA RESTA MULTI DIVISION CORCHETEABIERTO CORCHETECERRADO SEPARADOR IGUAL SALTO PARENIZQ PARENDER IF ELSE FOR
+%token SUMA RESTA MULTI DIVISION CORCHETEABIERTO CORCHETECERRADO SEPARADOR IGUAL SALTO PARENIZQ PARENDER IF ELSE FOR PUTS
 
 %type <simbolo> programa lista_sentencias sentencia asignacion expresion valor
 %type <simbolo> array array2 acceso_array indices_array
@@ -82,15 +82,23 @@ sentencia
         $$.n = $1.n;
         free($1.tipo); free($1.valor);
     }
+    | PUTS expresion  {
+        $$.tipo = strdup("puts");
+        $$.valor = NULL;
+        $$.n = crearNodoPuts($2.n);
+        free($2.tipo); free($2.valor);
+    }
     ;
 
 asignacion
     : IDENTIFICADOR IGUAL expresion {
-        // La tabla de símbolos solo sirve para ejecución/interprete, no para el AST ni para arrays heterogéneos
+        guardar_simbolo($1,$3.tipo, $3.valor);
         $$.tipo = strdup("asignacion");
         $$.valor = NULL;
         $$.n = crearNodoAsignacion($1, $3.n);
+        mostrar_tabla();
         free($1); free($3.tipo); free($3.valor);
+        
     }
     ;
 
@@ -249,10 +257,24 @@ valor
         free($1);
     }
     | IDENTIFICADOR {
-        // Solo para ejecución/interprete, no para el AST puro
-        $$.tipo = strdup("var");
-        $$.valor = strdup($1);
-        $$.n = crearNodoVariable($1);
+        int pos = buscarTabla($1);
+        if (pos == -1){
+            fprintf(stderr, "ERROR, LA VARIABLE  '%s' NO ESTA DECLARADA EN (linea %d)\n", $1, num_linea);
+            exit(1);
+        }
+        $$.tipo = strdup(tabla[pos].tipo);
+        $$.valor = strdup(tabla[pos].valor);
+        if (strcmp(tabla[pos].tipo, "int") == 0) {
+            $$.n = crearNodoNumero(tabla[pos].numerico);
+        } else if (strcmp(tabla[pos].tipo, "float") == 0) {
+            $$.n = crearNodoFloat(tabla[pos].numericoDecimal);
+        } else if (strcmp(tabla[pos].tipo, "string") == 0) {
+            $$.n = crearNodoString(tabla[pos].texto);
+        } else if (strcmp(tabla[pos].tipo, "bool") == 0) {
+            $$.n = crearNodoBool(tabla[pos].texto);
+        } else {
+            $$.n = crearNodoVariable($1);
+        }
         free($1);
     }
     ;

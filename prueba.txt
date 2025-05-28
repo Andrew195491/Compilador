@@ -1,1 +1,1 @@
-g = [true, false, true]
+g = "Hola"

@@ -34,6 +34,7 @@ int num_linea = 1;
 "=begin"                {BEGIN(COMMENT);}
 <COMMENT>[^=]*[\r\n]+   ;
 <COMMENT>"=end"         {BEGIN(INITIAL);}
+"puts"                  { return PUTS; }       
 
 
 
@@ -42,6 +43,8 @@ int num_linea = 1;
 \"[^\"]*\"              { yylval.stringVal = strdup(yytext); return CADENA; }
 
 [a-zA-Z_][a-zA-Z0-9_]*  { yylval.stringVal = strdup(yytext); return IDENTIFICADOR; }
+
+       
 
 .                       { printf("[LEX] Caracter no reconocido: %s (linea %d)\n", yytext, num_linea); }
 
