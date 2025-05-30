@@ -1,6 +1,8 @@
-a = 7 
-b = 2
-c = a + b
-puts c
-t = 7 + 1
-puts t
+x = 1
+y = 0
+if x == 0
+  puts "positivo"
+  y = x + 1
+else
+  puts "no positivo"
+end

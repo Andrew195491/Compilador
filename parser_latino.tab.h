@@ -38,31 +38,37 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     RESTA = 258,
-     SUMA = 259,
-     DIVISION = 260,
-     MULTI = 261,
-     PARENDER = 262,
-     PARENIZQ = 263,
-     NUMERICO = 264,
-     NUMERICODECIMAL = 265,
-     IDENTIFICADOR = 266,
-     CADENA = 267,
-     BOOL = 268,
-     CORCHETEABIERTO = 269,
-     CORCHETECERRADO = 270,
-     SEPARADOR = 271,
-     IGUAL = 272,
-     SALTO = 273,
-     IF = 274,
-     ELSE = 275,
-     WHILE = 276,
-     FOR = 277,
-     PUTS = 278,
-     END = 279,
-     DEF = 280,
-     INTERP_INI = 281,
-     INTERP_FIN = 282
+     MENOR = 258,
+     MAYOR = 259,
+     MENORIGUAL = 260,
+     MAYORIGUAL = 261,
+     DIFERENTE = 262,
+     IGUALIGUAL = 263,
+     RESTA = 264,
+     SUMA = 265,
+     DIVISION = 266,
+     MULTI = 267,
+     PARENDER = 268,
+     PARENIZQ = 269,
+     NUMERICO = 270,
+     NUMERICODECIMAL = 271,
+     IDENTIFICADOR = 272,
+     CADENA = 273,
+     BOOL = 274,
+     CORCHETEABIERTO = 275,
+     CORCHETECERRADO = 276,
+     SEPARADOR = 277,
+     IGUAL = 278,
+     SALTO = 279,
+     IF = 280,
+     ELSE = 281,
+     WHILE = 282,
+     FOR = 283,
+     PUTS = 284,
+     END = 285,
+     DEF = 286,
+     INTERP_INI = 287,
+     INTERP_FIN = 288
    };
 #endif
 
@@ -87,7 +93,7 @@ typedef union YYSTYPE
 
 
 /* Line 1685 of yacc.c  */
-#line 91 "parser_latino.tab.h"
+#line 97 "parser_latino.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

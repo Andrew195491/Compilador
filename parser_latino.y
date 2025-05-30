@@ -27,6 +27,7 @@ void yyerror(const char* s) {
     } simbolo;
 }
 
+%left IGUALIGUAL DIFERENTE MAYORIGUAL MENORIGUAL MAYOR MENOR
 %left SUMA RESTA
 %left MULTI DIVISION
 %left PARENIZQ PARENDER
@@ -44,6 +45,7 @@ void yyerror(const char* s) {
 %token  PUTS
 %token  END DEF
 %token  INTERP_INI INTERP_FIN
+%token IGUALIGUAL DIFERENTE MAYORIGUAL MENORIGUAL MAYOR MENOR
 
 %type   <simbolo> programa lista_sentencias sentencia asignacion expresion valor
 %type   <simbolo> array array2 acceso_array indices_array
@@ -152,6 +154,7 @@ if_else_end
         free($2.tipo); free($2.valor); free($4.tipo); free($4.valor); free($7.tipo); free($7.valor);
     }
     ;
+
 
 while_end
     : WHILE expresion salto lista_sentencias END {
@@ -358,7 +361,68 @@ expresion
         $$.n = $2.n;
         free($2.tipo); free($2.valor);
     }
+    | expresion IGUALIGUAL expresion {
+        if (strcmp($1.tipo, $3.tipo) != 0) {
+            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
+            exit(1);
+        }
+        $$.tipo = strdup("bool");
+        $$.valor = NULL;
+        $$.n = crearNodoOperacion(NODO_IGUALIGUAL, $1.n, $3.n);
+        free($1.tipo); free($3.tipo);
+    }
+    | expresion DIFERENTE expresion {
+        if (strcmp($1.tipo, $3.tipo) != 0) {
+            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
+            exit(1);
+        }
+        $$.tipo = strdup("bool");
+        $$.valor = NULL;
+        $$.n = crearNodoOperacion(NODO_DIFERENTE, $1.n, $3.n);
+        free($1.tipo); free($3.tipo);
+    }
+    | expresion MENOR expresion {
+        if (strcmp($1.tipo, $3.tipo) != 0) {
+            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
+            exit(1);
+        }
+        $$.tipo = strdup("bool");
+        $$.valor = NULL;
+        $$.n = crearNodoOperacion(NODO_MENOR, $1.n, $3.n);
+        free($1.tipo); free($3.tipo);
+    }
+    | expresion MAYOR expresion {
+        if (strcmp($1.tipo, $3.tipo) != 0) {
+            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
+            exit(1);
+        }
+        $$.tipo = strdup("bool");
+        $$.valor = NULL;
+        $$.n = crearNodoOperacion(NODO_MAYOR, $1.n, $3.n);
+        free($1.tipo); free($3.tipo);
+    }
+    | expresion MENORIGUAL expresion {
+        if (strcmp($1.tipo, $3.tipo) != 0) {
+            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
+            exit(1);
+        }
+        $$.tipo = strdup("bool");
+        $$.valor = NULL;
+        $$.n = crearNodoOperacion(NODO_MENORIGUAL, $1.n, $3.n);
+        free($1.tipo); free($3.tipo);
+    }
+    | expresion MAYORIGUAL expresion {
+        if (strcmp($1.tipo, $3.tipo) != 0) {
+            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
+            exit(1);
+        }
+        $$.tipo = strdup("bool");
+        $$.valor = NULL;
+        $$.n = crearNodoOperacion(NODO_MAYORIGUAL, $1.n, $3.n);
+        free($1.tipo); free($3.tipo);
+    }
     ;
+    
 
 valor
     : NUMERICO {

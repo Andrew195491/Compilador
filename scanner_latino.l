@@ -40,6 +40,12 @@ int num_linea = 1;
 "-"                     { yylval.stringVal = strdup("-"); return RESTA; }
 "*"                     { yylval.stringVal = strdup("*"); return MULTI; }
 "/"                     { yylval.stringVal = strdup("/"); return DIVISION; }
+"=="                    { return IGUALIGUAL; }
+"!="                    { return DIFERENTE; }
+">="                    { return MAYORIGUAL; }
+"<="                    { return MENORIGUAL; }
+">"                     { return MAYOR; }
+"<"                     { return MENOR; }
 
 "#".*                   ; // comentarios de una línea estilo Ruby
 
