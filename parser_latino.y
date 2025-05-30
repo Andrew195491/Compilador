@@ -33,7 +33,7 @@ void yyerror(const char* s) {
 %token <stringVal> IDENTIFICADOR CADENA BOOL 
 %token SUMA RESTA MULTI DIVISION CORCHETEABIERTO CORCHETECERRADO SEPARADOR IGUAL
 %token IF ELSE
-%token FOR
+%token FOR WHILE
 
 %type <simbolo> programa lista_sentencias sentencia asignacion expresion valor
 %type <stringVal> operador array array2

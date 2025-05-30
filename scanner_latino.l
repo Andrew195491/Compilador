@@ -29,6 +29,7 @@ int num_linea = 1;
 "if"                    { return IF; }
 "else"                  { return ELSE; }
 "for"                   { return FOR; }
+"while"                 { return WHILE; }
 "#".*                   ;
 "=begin"                BEGIN(COMMENT);
 <COMMENT>[^=]*[\r\n]+   ;
