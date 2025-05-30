@@ -118,25 +118,25 @@ array
 
 array2
     : expresion SEPARADOR array2 {
-        $$.tipo = strdup("array");
-        $$.valor = NULL;
-        $$.n = crearNodoArray($1.n, $3.n);
-        free($1.tipo); free($1.valor); free($3.tipo); free($3.valor);
+       // $$.tipo = strdup("array");
+        //$$.valor = NULL;
+        //$$.n = crearNodoArray($1.n, $3.n);
+        //free($1.tipo); free($1.valor); free($3.tipo); free($3.valor);
     }
     | expresion {
-        $$.tipo = strdup("array");
-        $$.valor = NULL;
-        $$.n = crearNodoArray($1.n, NULL);
-        free($1.tipo); free($1.valor);
+        //$$.tipo = strdup("array");
+        //$$.valor = NULL;
+        //$$.n = crearNodoArray($1.n, NULL);
+        //free($1.tipo); free($1.valor);
     }
     ;
 
 acceso_array
     : IDENTIFICADOR indices_array {
-        $$.tipo = strdup("acceso_array");
-        $$.valor = NULL;
-        $$.n = crearNodoAccesoArray($1, $2.n);
-        free($1); free($2.tipo); free($2.valor);
+        //$$.tipo = strdup("acceso_array");
+        //$$.valor = NULL;
+        //$$.n = crearNodoAccesoArray($1, $2.n);
+        //free($1); free($2.tipo); free($2.valor);
     }
     ;
 

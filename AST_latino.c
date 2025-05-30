@@ -184,13 +184,50 @@
 
     static int temp_counter = 0;
 
-    const char* nuevo_temp() {
-        static char buffer[10][5];
-        int idx = temp_counter % 10;
-        sprintf(buffer[idx], "$t%d", idx);
-        temp_counter++;
+    
+    const char* nuevo_temp(const char* tipo) {  
+        static char buffer[20][6];
+        static int temp_counter_float = 0; // Contador para temporales de tipo float
+        static int temp_counter_int = 0; // Contador para temporales de tipo int
+        int idx;
+        if (strcmp(tipo, "float") == 0) {
+        idx = temp_counter_float % 10;
+        sprintf(buffer[idx], "$f%d", 12 + idx);  // Float temporals: $f12–$f21
+        temp_counter_float++;
+        } else {
+        idx = temp_counter_int % 10;
+        sprintf(buffer[10 + idx], "$t%d", idx);  // Int temporals: $t0–$t9
+        temp_counter_int++;
+        }
+
+        return (strcmp(tipo, "float") == 0) ? buffer[idx] : buffer[10 + idx];
+
+    }
+
+    // Función para crear un nuevo registro temporal, diferenciando entre enteros y flotantes
+    const char* nuevo_temp1(const char* tipo) {
+    static char buffer[20][6]; // hasta 20 registros, más espacio para "$f10", etc.
+    static int temp_counter_int = 0;
+    static int temp_counter_float = 0;
+
+    int idx;
+
+    if (strcmp(tipo, "int") == 0) {
+        idx = temp_counter_int % 10;
+        sprintf(buffer[idx], "$t%d", idx);  // registros temporales enteros
+        temp_counter_int++;
         return buffer[idx];
     }
+    else if (strcmp(tipo, "float") == 0) {
+        idx = temp_counter_float % 10;
+        sprintf(buffer[10 + idx], "$f%d", idx * 2);  // registros flotantes ($f0, $f2, etc.)
+        temp_counter_float++;
+        return buffer[10 + idx];
+    }
+    else {
+        return "ERROR"; // tipo desconocido
+    }
+}
 
     // Prototipo necesario para evitar error:
     const char* generarASM_rec(struct ast *n);
@@ -233,34 +270,34 @@
         for(int pos = 0; pos < indice; pos++) { // RECORRE LAS POSICIONES DE LA TABLA DE SIMBOLOS
             switch(n->tipoNodo) {
                 case NODO_NUMERO: {
-                    const char* reg = nuevo_temp();
+                    const char* reg = nuevo_temp(tabla[pos].tipo);
                     return reg;
                 }
                 case NODO_BOOL: {
-                    const char* reg = nuevo_temp();
+                    const char* reg = nuevo_temp(tabla[pos].tipo);
                     return reg;
                 }
                 case NODO_STRING: {
-                    const char* reg = nuevo_temp();
+                    const char* reg = nuevo_temp(tabla[pos].tipo);
                     fprintf(yyout, "    la %s, str_%d\n", reg, string_label_counter);
                     string_label_counter++;
                     return reg;
                 }
                 case NODO_VARIABLE: {
-                    const char* reg = nuevo_temp();
+                    const char* reg = nuevo_temp(tabla[pos].tipo);
                     registrar_variable(n->nombre);
                     fprintf(yyout, "    lw %s, %s\n", reg, n->nombre);
                     return reg;
                 }
                 case NODO_FLOAT: {
-                    const char* reg = nuevo_temp();
+                    const char* reg = nuevo_temp(tabla[pos].tipo);
                     fprintf(yyout, "    l.s %s, %f\n", reg, n->valor_float);
                     return reg;
                 }
                 case NODO_SUMA: {
                     const char* reg_izq = generarASM_rec(n->izq);
                     const char* reg_dcha = generarASM_rec(n->dcha);
-                    const char* reg = nuevo_temp();
+                    const char* reg = nuevo_temp(tabla[pos].tipo);
                     if(strcmp(tabla[pos].tipo, "int") == 0) { // SI EL VALOR ES ENTERO, HACE ADD
                         fprintf(yyout, "    add %s, %s, %s\n", reg, reg_izq, reg_dcha);
                     }
@@ -272,21 +309,26 @@
                 case NODO_RESTA: {
                     const char* reg_izq = generarASM_rec(n->izq);
                     const char* reg_dcha = generarASM_rec(n->dcha);
-                    const char* reg = nuevo_temp();
-                    fprintf(yyout, "    sub %s, %s, %s\n", reg, reg_izq, reg_dcha);
+                    const char* reg = nuevo_temp(tabla[pos].tipo);
+                    if(strcmp(tabla[pos].tipo, "int") == 0) { // SI EL VALOR ES ENTERO, HACE SUB
+                        fprintf(yyout, "    sub %s, %s, %s\n", reg, reg_izq, reg_dcha);
+                    }
+                    else if(strcmp(tabla[pos].tipo, "float") == 0) { // SI EL VALOR ES FLOAT, HACE SUB.S
+                        fprintf(yyout, "    sub.s %s, %s, %s\n", reg, reg_izq, reg_dcha);
+                    }
                     return reg;
                 }
                 case NODO_MULT: {
                     const char* reg_izq = generarASM_rec(n->izq);
                     const char* reg_dcha = generarASM_rec(n->dcha);
-                    const char* reg = nuevo_temp();
+                    const char* reg = nuevo_temp(tabla[pos].tipo);
                     fprintf(yyout, "    mul %s, %s, %s\n", reg, reg_izq, reg_dcha);
                     return reg;
                 }
                 case NODO_DIV: {
                     const char* reg_izq = generarASM_rec(n->izq);
                     const char* reg_dcha = generarASM_rec(n->dcha);
-                    const char* reg = nuevo_temp();
+                    const char* reg = nuevo_temp(tabla[pos].tipo);
                     fprintf(yyout, "    div %s, %s, %s\n", reg, reg_izq, reg_dcha);
                     return reg;
                 }

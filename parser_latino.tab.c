@@ -1509,10 +1509,10 @@ yyreduce:
 /* Line 1464 of yacc.c  */
 #line 120 "parser_latino.y"
     {
-        (yyval.simbolo).tipo = strdup("array");
-        (yyval.simbolo).valor = NULL;
-        (yyval.simbolo).n = crearNodoArray((yyvsp[(1) - (3)].simbolo).n, (yyvsp[(3) - (3)].simbolo).n);
-        free((yyvsp[(1) - (3)].simbolo).tipo); free((yyvsp[(1) - (3)].simbolo).valor); free((yyvsp[(3) - (3)].simbolo).tipo); free((yyvsp[(3) - (3)].simbolo).valor);
+       // $$.tipo = strdup("array");
+        //$$.valor = NULL;
+        //$$.n = crearNodoArray($1.n, $3.n);
+        //free($1.tipo); free($1.valor); free($3.tipo); free($3.valor);
     ;}
     break;
 
@@ -1521,10 +1521,10 @@ yyreduce:
 /* Line 1464 of yacc.c  */
 #line 126 "parser_latino.y"
     {
-        (yyval.simbolo).tipo = strdup("array");
-        (yyval.simbolo).valor = NULL;
-        (yyval.simbolo).n = crearNodoArray((yyvsp[(1) - (1)].simbolo).n, NULL);
-        free((yyvsp[(1) - (1)].simbolo).tipo); free((yyvsp[(1) - (1)].simbolo).valor);
+        //$$.tipo = strdup("array");
+        //$$.valor = NULL;
+        //$$.n = crearNodoArray($1.n, NULL);
+        //free($1.tipo); free($1.valor);
     ;}
     break;
 
@@ -1533,10 +1533,10 @@ yyreduce:
 /* Line 1464 of yacc.c  */
 #line 135 "parser_latino.y"
     {
-        (yyval.simbolo).tipo = strdup("acceso_array");
-        (yyval.simbolo).valor = NULL;
-        (yyval.simbolo).n = crearNodoAccesoArray((yyvsp[(1) - (2)].stringVal), (yyvsp[(2) - (2)].simbolo).n);
-        free((yyvsp[(1) - (2)].stringVal)); free((yyvsp[(2) - (2)].simbolo).tipo); free((yyvsp[(2) - (2)].simbolo).valor);
+        //$$.tipo = strdup("acceso_array");
+        //$$.valor = NULL;
+        //$$.n = crearNodoAccesoArray($1, $2.n);
+        //free($1); free($2.tipo); free($2.valor);
     ;}
     break;
 

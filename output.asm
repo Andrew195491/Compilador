@@ -1,14 +1,14 @@
 .data
+a: .word 0
+b: .float 0.000000
 
 .text
 .globl main
 main:
-    li $t0, 6
-    li $v0, 1
-    move $a0, $t0
-    syscall
-    li $a0, 10
-    li $v0, 11
-    syscall
+    add $t2, $t0, $t1
+    sw $t2, a
+    l.s $t3, 7.500000
+    l.s $t4, 6.500000
+    add $t5, $t3, $t4
     li $v0, 10
     syscall
