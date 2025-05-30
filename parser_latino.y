@@ -34,10 +34,21 @@ void yyerror(const char* s) {
 %token <enteroVal> NUMERICO
 %token <realVal> NUMERICODECIMAL
 %token <stringVal> IDENTIFICADOR CADENA BOOL
-%token SUMA RESTA MULTI DIVISION CORCHETEABIERTO CORCHETECERRADO SEPARADOR IGUAL SALTO PARENIZQ PARENDER IF ELSE FOR PUTS
 
-%type <simbolo> programa lista_sentencias sentencia asignacion expresion valor
-%type <simbolo> array array2 acceso_array indices_array
+
+%token  SUMA RESTA MULTI DIVISION
+%token  CORCHETEABIERTO CORCHETECERRADO
+%token  SEPARADOR IGUAL SALTO
+%token  PARENIZQ PARENDER
+%token  IF ELSE WHILE FOR
+%token  PUTS
+%token  END DEF
+%token  INTERP_INI INTERP_FIN
+
+%type   <simbolo> programa lista_sentencias sentencia asignacion expresion valor
+%type   <simbolo> array array2 acceso_array indices_array
+%type   <simbolo> if_else_end while_end funcion_definicion llamada_funcion parametros parametros_opt argumentos argumentos_opt
+
 
 %start programa
 
@@ -52,8 +63,7 @@ programa
     ;
 
 salto:
-    |
-    SALTO
+    | SALTO
     ;
 
 lista_sentencias
@@ -88,6 +98,30 @@ sentencia
         $$.n = crearNodoPuts($2.n);
         free($2.tipo); free($2.valor);
     }
+    | if_else_end {
+        $$.tipo = strdup("if_else");
+        $$.valor = NULL;
+        $$.n = $1.n;
+        free($1.tipo); free($1.valor);
+    }
+    | while_end {
+        $$.tipo = strdup("while");
+        $$.valor = NULL;
+        $$.n = $1.n;
+        free($1.tipo); free($1.valor);
+    }
+    | funcion_definicion {
+        $$.tipo = strdup("funcion_definicion");
+        $$.valor = NULL;
+        $$.n = $1.n;
+        free($1.tipo); free($1.valor);
+    }
+    | llamada_funcion {
+        $$.tipo = strdup("llamada_funcion");
+        $$.valor = NULL;
+        $$.n = $1.n;
+        free($1.tipo); free($1.valor);
+    }
     ;
 
 asignacion
@@ -101,6 +135,101 @@ asignacion
         
     }
     ;
+
+if_else_end
+    : IF expresion salto lista_sentencias END {
+        // if sin else
+        $$.tipo = strdup("if");
+        $$.valor = NULL;
+        $$.n = crearNodoIf($2.n, $4.n, NULL);
+        free($2.tipo); free($2.valor); free($4.tipo); free($4.valor);
+    }
+    | IF expresion salto lista_sentencias ELSE salto lista_sentencias END {
+        // if con else
+        $$.tipo = strdup("if_else");
+        $$.valor = NULL;
+        $$.n = crearNodoIf($2.n, $4.n, $7.n);
+        free($2.tipo); free($2.valor); free($4.tipo); free($4.valor); free($7.tipo); free($7.valor);
+    }
+    ;
+
+while_end
+    : WHILE expresion salto lista_sentencias END {
+        $$.tipo = strdup("while");
+        $$.valor = NULL;
+        $$.n = crearNodoWhile($2.n, $4.n);
+        free($2.tipo); free($2.valor); free($4.tipo); free($4.valor);
+    }
+    ;
+
+funcion_definicion
+    : DEF IDENTIFICADOR PARENIZQ parametros_opt PARENDER salto lista_sentencias END {
+        $$.tipo = strdup("funcion");
+        $$.valor = strdup($2);
+        $$.n = crearNodoFuncion($2, $4.n, $7.n); // nombre, parámetros, cuerpo
+        free($2); free($4.tipo); free($4.valor); free($7.tipo); free($7.valor);
+    }
+    | DEF IDENTIFICADOR salto lista_sentencias END {
+        // Definición sin paréntesis ni parámetros
+        $$.tipo = strdup("funcion");
+        $$.valor = strdup($2);
+        $$.n = crearNodoFuncion($2, NULL, $4.n);
+        free($2); free($4.tipo); free($4.valor);
+    }
+    ;
+
+
+parametros_opt
+    : /* vacío */ { $$.tipo = strdup("parametros"); $$.valor = NULL; $$.n = NULL; }
+    | parametros
+    ;
+
+parametros
+    : IDENTIFICADOR {
+        $$.tipo = strdup("parametros");
+        $$.valor = NULL;
+        $$.n = crearNodoParametro($1, NULL);
+        free($1);
+    }
+    | parametros SEPARADOR IDENTIFICADOR {
+        $$.tipo = strdup("parametros");
+        $$.valor = NULL;
+        $$.n = crearNodoParametro($3, $1.n);
+        free($3);
+    }
+    ;
+
+
+llamada_funcion
+    : IDENTIFICADOR argumentos_opt {
+        $$.tipo = strdup("llamada_funcion");
+        $$.valor = strdup($1);
+        $$.n = crearNodoLlamadaFuncion($1, $2.n);
+        free($1); free($2.tipo); free($2.valor);
+    }
+    ;
+
+argumentos_opt
+    : /* vacío */ { $$.tipo = strdup("argumentos"); $$.valor = NULL; $$.n = NULL; }
+    | PARENIZQ argumentos PARENDER { $$.tipo = strdup("argumentos"); $$.valor = NULL; $$.n = $2.n; free($2.tipo); free($2.valor);}
+    ;
+
+argumentos
+    : expresion {
+        $$.tipo = strdup("argumentos");
+        $$.valor = NULL;
+        $$.n = crearNodoArgumento($1.n, NULL);
+        free($1.tipo); free($1.valor);
+    }
+    | argumentos SEPARADOR expresion {
+        $$.tipo = strdup("argumentos");
+        $$.valor = NULL;
+        $$.n = crearNodoArgumento($3.n, $1.n);
+        free($3.tipo); free($3.valor);
+    }
+    ;
+
+
 
 array
     : CORCHETEABIERTO array2 CORCHETECERRADO {
@@ -264,17 +393,8 @@ valor
         }
         $$.tipo = strdup(tabla[pos].tipo);
         $$.valor = strdup(tabla[pos].valor);
-        if (strcmp(tabla[pos].tipo, "int") == 0) {
-            $$.n = crearNodoNumero(tabla[pos].numerico);
-        } else if (strcmp(tabla[pos].tipo, "float") == 0) {
-            $$.n = crearNodoFloat(tabla[pos].numericoDecimal);
-        } else if (strcmp(tabla[pos].tipo, "string") == 0) {
-            $$.n = crearNodoString(tabla[pos].texto);
-        } else if (strcmp(tabla[pos].tipo, "bool") == 0) {
-            $$.n = crearNodoBool(tabla[pos].texto);
-        } else {
-            $$.n = crearNodoVariable($1);
-        }
+        $$.n = crearNodoVariable($1);
+        
         free($1);
     }
     ;

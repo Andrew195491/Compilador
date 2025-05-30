@@ -56,8 +56,13 @@
      SALTO = 273,
      IF = 274,
      ELSE = 275,
-     FOR = 276,
-     PUTS = 277
+     WHILE = 276,
+     FOR = 277,
+     PUTS = 278,
+     END = 279,
+     DEF = 280,
+     INTERP_INI = 281,
+     INTERP_FIN = 282
    };
 #endif
 
@@ -82,7 +87,7 @@ typedef union YYSTYPE
 
 
 /* Line 1685 of yacc.c  */
-#line 86 "parser_latino.tab.h"
+#line 91 "parser_latino.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
