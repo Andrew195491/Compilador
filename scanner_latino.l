@@ -45,7 +45,7 @@ int num_linea = 1;
 ">="                    { return MAYORIGUAL; }
 "<="                    { return MENORIGUAL; }
 ">"                     { return MAYOR; }
-"<"                     { return MENOR; }
+"<"                         { return MENOR; }
 
 "#".*                   ; // comentarios de una línea estilo Ruby
 

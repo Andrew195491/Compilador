@@ -25,11 +25,19 @@ const char* nombres_nodo[] = {
     "NODO_STRING",
     "NODO_BOOL",
     "NODO_VARIABLE",
-    "NODO_PUTS"
+    "NODO_PUTS",
+    "NODO_WHILE",
+    "NODO_IF",
+    "NODO_ELSE",
+    "NODO_FUNCION",
+    "NODO_LLAMADA_FUNCION",
 };
 
 // Para strings en .data
 int string_label_counter = 0;
+int float_label_counter = 0;
+
+
 
 static char* strdup_safe(const char* s) {
     if (!s) return NULL;
@@ -101,7 +109,9 @@ struct ast *crearNodoFloat(float valor) {
     n->tipoNodo = NODO_FLOAT;
     n->valor_float = valor;
     n->izq = n->dcha = NULL;
-    n->nombre = NULL; n->valor_str = NULL;
+    n->nombre = NULL; 
+    n->valor_str = malloc(32);
+    sprintf(n->valor_str, "float_%d", float_label_counter++);
     return n;
 }
 

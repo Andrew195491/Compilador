@@ -311,6 +311,10 @@ expresion
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
             exit(1);
         }
+        if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0) {
+            fprintf(stderr, "[ERROR] Operación aritmética no permitida con tipo string (línea %d)\n", num_linea);
+            exit(1);
+        }
         $$.tipo = strdup($1.tipo);
         $$.valor = NULL;
         $$.n = crearNodoOperacion(NODO_SUMA, $1.n, $3.n);
@@ -319,6 +323,10 @@ expresion
     | expresion RESTA expresion {
         if (strcmp($1.tipo, $3.tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
+            exit(1);
+        }
+         if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0) {
+            fprintf(stderr, "[ERROR] Operación aritmética no permitida con tipo string (línea %d)\n", num_linea);
             exit(1);
         }
         $$.tipo = strdup($1.tipo);
@@ -331,6 +339,10 @@ expresion
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
             exit(1);
         }
+         if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0) {
+            fprintf(stderr, "[ERROR] Operación aritmética no permitida con tipo string (línea %d)\n", num_linea);
+            exit(1);
+        }
         $$.tipo = strdup($1.tipo);
         $$.valor = NULL;
         $$.n = crearNodoOperacion(NODO_MULT, $1.n, $3.n);
@@ -339,6 +351,10 @@ expresion
     | expresion DIVISION expresion {
         if (strcmp($1.tipo, $3.tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
+            exit(1);
+        }
+         if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0) {
+            fprintf(stderr, "[ERROR] Operación aritmética no permitida con tipo string (línea %d)\n", num_linea);
             exit(1);
         }
         if ((strcmp($3.tipo, "int") == 0 && $3.n && $3.n->valor_int == 0) ||
