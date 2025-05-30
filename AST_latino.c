@@ -31,6 +31,13 @@ const char* nombres_nodo[] = {
 // Para strings en .data
 int string_label_counter = 0;
 
+static char* strdup_safe(const char* s) {
+    if (!s) return NULL;
+    char* copy = malloc(strlen(s) + 1);
+    if (copy) strcpy(copy, s);
+    return copy;
+}
+
 void registrar_variable(const char *nombre) {
     if (!nombre) return;
     for (int i = 0; i < num_vars; i++) {
@@ -133,6 +140,83 @@ struct ast *crearNodoPuts(struct ast *expresion) {
     n->dcha = NULL;
     n->valor_str = NULL;
     return n;
+}
+
+struct ast* crearNodoIf(struct ast* condicion, struct ast* cuerpo, struct ast* else_cuerpo) {
+    struct ast* nodo = malloc(sizeof(struct ast));
+    nodo->tipoNodo = NODO_IF;
+    nodo->izq = condicion;
+    nodo->dcha = cuerpo;
+    nodo->nombre = NULL;
+    nodo->valor_str = NULL;
+    nodo->valor_int = 0;
+    nodo->valor_float = 0.0f;
+    // Puedes usar izq/dcha para if/else, o agregar un campo extra si lo prefieres
+    if (else_cuerpo) {
+        // Si quieres guardar el else como dcha->dcha, por ejemplo:
+        nodo->dcha->dcha = else_cuerpo;
+    }
+    return nodo;
+}
+
+struct ast* crearNodoWhile(struct ast* condicion, struct ast* cuerpo) {
+    struct ast* nodo = malloc(sizeof(struct ast));
+    nodo->tipoNodo = NODO_WHILE;
+    nodo->izq = condicion;
+    nodo->dcha = cuerpo;
+    nodo->nombre = NULL;
+    nodo->valor_str = NULL;
+    nodo->valor_int = 0;
+    nodo->valor_float = 0.0f;
+    return nodo;
+}
+
+struct ast* crearNodoFuncion(const char* nombre, struct ast* parametros, struct ast* cuerpo) {
+    struct ast* nodo = malloc(sizeof(struct ast));
+    nodo->tipoNodo = NODO_FUNCION;
+    nodo->izq = parametros;
+    nodo->dcha = cuerpo;
+    nodo->nombre = strdup_safe(nombre);
+    nodo->valor_str = NULL;
+    nodo->valor_int = 0;
+    nodo->valor_float = 0.0f;
+    return nodo;
+}
+
+struct ast* crearNodoParametro(const char* nombre, struct ast* siguiente) {
+    struct ast* nodo = malloc(sizeof(struct ast));
+    nodo->tipoNodo = NODO_VARIABLE;
+    nodo->izq = siguiente;
+    nodo->dcha = NULL;
+    nodo->nombre = strdup_safe(nombre);
+    nodo->valor_str = NULL;
+    nodo->valor_int = 0;
+    nodo->valor_float = 0.0f;
+    return nodo;
+}
+
+struct ast* crearNodoLlamadaFuncion(const char* nombre, struct ast* argumentos) {
+    struct ast* nodo = malloc(sizeof(struct ast));
+    nodo->tipoNodo = NODO_LLAMADA_FUNCION;
+    nodo->izq = argumentos;
+    nodo->dcha = NULL;
+    nodo->nombre = strdup_safe(nombre);
+    nodo->valor_str = NULL;
+    nodo->valor_int = 0;
+    nodo->valor_float = 0.0f;
+    return nodo;
+}
+
+struct ast* crearNodoArgumento(struct ast* valor, struct ast* siguiente) {
+    struct ast* nodo = malloc(sizeof(struct ast));
+    nodo->tipoNodo = NODO_VARIABLE; // o puedes crear NODO_ARGUMENTO si lo agregas
+    nodo->izq = valor;
+    nodo->dcha = siguiente;
+    nodo->nombre = NULL;
+    nodo->valor_str = NULL;
+    nodo->valor_int = 0;
+    nodo->valor_float = 0.0f;
+    return nodo;
 }
 
 // ======== Liberación del AST ========
