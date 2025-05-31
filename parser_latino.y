@@ -23,6 +23,12 @@ void yyerror(const char* s) {
     struct {
         char* tipo;
         char* valor;
+        char* tipoBase;
+        int tam;
+        int filas; // Para matrices
+        int columnas; // Para matrices
+        char* valores;
+        char* tipoBaseReal;
         struct ast *n;
     } simbolo;
 }
@@ -48,7 +54,7 @@ void yyerror(const char* s) {
 %token IGUALIGUAL DIFERENTE MAYORIGUAL MENORIGUAL MAYOR MENOR
 
 %type   <simbolo> programa lista_sentencias sentencia asignacion expresion valor
-%type   <simbolo> array array2 acceso_array indices_array
+%type   <simbolo> array expresion_array acceso_array indices_array
 %type   <simbolo> if_else_end while_end funcion_definicion llamada_funcion parametros parametros_opt argumentos argumentos_opt
 
 
@@ -128,16 +134,23 @@ sentencia
 
 asignacion
     : IDENTIFICADOR IGUAL expresion {
-        guardar_simbolo($1,$3.tipo, $3.valor);
+        if ($3.tipo && strcmp($3.tipo, "matriz") == 0) {
+            // Si tienes forma de calcular filas/columnas, ponlo aquí. Si no, déjalo en 0.
+            guardar_simbolo_matriz($1, $3.tipo, $3.tipoBase, $3.filas, $3.columnas, $3.valores ? $3.valores : "NULL");
+            free($3.tipoBase); free($3.valores);
+        } else if ($3.tipo && strcmp($3.tipo, "array") == 0) {
+            guardar_simbolo_array($1, $3.tipo, $3.tipoBase, $3.tam, $3.valores ? $3.valores : "NULL");
+            free($3.tipoBase); free($3.valores);
+        } else {
+            guardar_simbolo($1, $3.tipo, $3.valor);
+        }
         $$.tipo = strdup("asignacion");
         $$.valor = NULL;
         $3.n->es_inicializada = 1;
         $$.n = crearNodoAsignacion($1, $3.n);
         mostrar_tabla();
         free($1); free($3.tipo); free($3.valor);
-        
     }
-    ;
 
 if_else_end
     : IF expresion salto lista_sentencias END {
@@ -233,36 +246,83 @@ argumentos
     }
     ;
 
-
-
 array
-    : CORCHETEABIERTO array2 CORCHETECERRADO {
-        $$.tipo = strdup("array");
+    : CORCHETEABIERTO expresion_array CORCHETECERRADO {
+        if ($2.tipoBase && strcmp($2.tipoBase, "array") == 0) {
+            $$.tipo = strdup("matriz");
+            // Tipo base real: el tipo base del primer subarray
+            // Suponemos que $2.valores tiene los valores linealizados y $2.n guarda la estructura
+            // Aquí asumimos que guardaste filas y columnas en $2.filas y $2.columnas
+            $$.tipoBase = $2.tipoBaseReal ? strdup($2.tipoBaseReal) : strdup("int");
+            $$.tam = $2.tam;
+            $$.filas = $2.filas;
+            $$.columnas = $2.columnas;
+        } else {
+            $$.tipo = strdup("array");
+            $$.tipoBase = strdup($2.tipoBase);
+            $$.tam = $2.tam;
+            $$.filas = 0;
+            $$.columnas = 0;
+        }
         $$.valor = NULL;
+        $$.valores = strdup($2.valores);
         $$.n = $2.n;
-        free($2.tipo); free($2.valor);
+        free($2.tipoBase); free($2.valores);
+        if ($2.tipoBaseReal) free($2.tipoBaseReal);
     }
     | CORCHETEABIERTO CORCHETECERRADO {
         $$.tipo = strdup("array");
         $$.valor = NULL;
+        $$.tipoBase = strdup("int");
+        $$.tam = 0;
+        $$.filas = 0;
+        $$.columnas = 0;
+        $$.valores = strdup("");
         $$.n = NULL;
     }
-    ;
+;
 
-array2
-    : expresion SEPARADOR array2 {
-       // $$.tipo = strdup("array");
-        //$$.valor = NULL;
-        //$$.n = crearNodoArray($1.n, $3.n);
-        //free($1.tipo); free($1.valor); free($3.tipo); free($3.valor);
+expresion_array
+    : expresion SEPARADOR expresion_array {
+        if ($1.tipo && strcmp($1.tipo, "array") == 0) {
+            $$.tipoBase = strdup($1.tipo);
+            $$.tam = $3.tam + 1;
+            $$.valores = malloc(strlen($1.valores) + strlen($3.valores) + 2);
+            sprintf($$.valores, "%s %s", $1.valores, $3.valores);
+            // Para matriz: filas = $3.filas + 1, columnas = columnas del primer subarray
+            $$.filas = $3.filas + 1;
+            $$.columnas = $1.tam; // Suponiendo que todos los subarrays tienen el mismo tamaño
+            $$.tipoBaseReal = $1.tipoBase ? strdup($1.tipoBase) : strdup("int");
+        } else {
+            $$.tipoBase = strdup($1.tipo);
+            $$.tam = $3.tam + 1;
+            $$.valores = malloc(strlen($1.valor) + strlen($3.valores) + 2);
+            sprintf($$.valores, "%s %s", $1.valor, $3.valores);
+            $$.filas = 0;
+            $$.columnas = 0;
+            $$.tipoBaseReal = NULL;
+        }
+        $$.n = crearNodoArray($1.n, $3.n);
+        free($1.tipo); free($1.valor); free($1.valores); free($1.tipoBase); free($3.tipoBase); free($3.valores); if ($3.tipoBaseReal) free($3.tipoBaseReal);
     }
     | expresion {
-        //$$.tipo = strdup("array");
-        //$$.valor = NULL;
-        //$$.n = crearNodoArray($1.n, NULL);
-        //free($1.tipo); free($1.valor);
+        $$.tipoBase = strdup($1.tipo);
+        $$.tam = 1;
+        if ($1.tipo && strcmp($1.tipo, "array") == 0) {
+            $$.valores = strdup($1.valores);
+            $$.filas = 1;
+            $$.columnas = $1.tam;
+            $$.tipoBaseReal = $1.tipoBase ? strdup($1.tipoBase) : strdup("int");
+        } else {
+            $$.valores = strdup($1.valor);
+            $$.filas = 0;
+            $$.columnas = 0;
+            $$.tipoBaseReal = NULL;
+        }
+        $$.n = crearNodoArray($1.n, NULL);
+        free($1.tipo); free($1.valor); if ($1.tipoBase) free($1.tipoBase);
     }
-    ;
+;
 
 acceso_array
     : IDENTIFICADOR indices_array {
@@ -296,8 +356,11 @@ expresion
         free($1.tipo); free($1.valor);
     }
     | array {
-        $$.tipo = strdup("array");
+        $$.tipo = strdup($1.tipo); // <-- Propaga "array" o "matriz"
         $$.valor = NULL;
+        $$.tipoBase = $1.tipoBase ? strdup($1.tipoBase) : NULL;
+        $$.tam = $1.tam;
+        $$.valores = $1.valores ? strdup($1.valores) : strdup(""); // <-- Cambia esto
         $$.n = $1.n;
         free($1.tipo); free($1.valor);
     }
@@ -317,9 +380,11 @@ expresion
             exit(1);
         }
         $$.tipo = strdup($1.tipo);
-        $$.valor = NULL;
+        // SIEMPRE guarda la expresión textual, no el resultado
+        $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
+        sprintf($$.valor, "%s+%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
         $$.n = crearNodoOperacion(NODO_SUMA, $1.n, $3.n);
-        free($1.tipo); free($3.tipo);
+        free($1.tipo); free($3.tipo); free($1.valor); free($3.valor);
     }
     | expresion RESTA expresion {
         if (strcmp($1.tipo, $3.tipo) != 0) {
@@ -473,9 +538,13 @@ valor
             exit(1);
         }
         $$.tipo = strdup(tabla[pos].tipo);
-        $$.valor = strdup(tabla[pos].valor);
+        // Si es array o matriz, usa sus valores linealizados
+        if (tabla[pos].tipo && (strcmp(tabla[pos].tipo, "array") == 0 || strcmp(tabla[pos].tipo, "matriz") == 0)) {
+            $$.valor = tabla[pos].Valores ? strdup(tabla[pos].Valores) : strdup("");
+        } else {
+            $$.valor = tabla[pos].valor ? strdup(tabla[pos].valor) : strdup("");
+        }
         $$.n = crearNodoVariable($1);
-        
         free($1);
     }
     ;

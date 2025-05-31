@@ -30,6 +30,7 @@ struct ast *crearNodoFloat(float valor);
 struct ast *crearNodoString(const char* valor);
 struct ast *crearNodoBool(const char* valor);
 struct ast *crearNodoVariable(const char* nombre);
+struct ast* crearNodoArray(struct ast* elemento, struct ast* siguiente);
 
 struct ast *crearNodoPuts(struct ast *expresion);
 

@@ -163,13 +163,19 @@ typedef union YYSTYPE
     struct {
         char* tipo;
         char* valor;
+        char* tipoBase;
+        int tam;
+        int filas; // Para matrices
+        int columnas; // Para matrices
+        char* valores;
+        char* tipoBaseReal;
         struct ast *n;
     } simbolo;
 
 
 
 /* Line 214 of yacc.c  */
-#line 173 "parser_latino.tab.c"
+#line 179 "parser_latino.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -181,7 +187,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 185 "parser_latino.tab.c"
+#line 191 "parser_latino.tab.c"
 
 #ifdef short
 # undef short
@@ -487,12 +493,12 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    60,    60,    67,    68,    72,    82,    91,    97,   103,
-     109,   115,   121,   130,   143,   150,   161,   170,   176,   187,
-     188,   192,   198,   208,   217,   218,   222,   228,   239,   245,
-     253,   259,   268,   277,   283,   292,   298,   304,   310,   324,
-     338,   352,   371,   381,   391,   401,   411,   421,   431,   445,
-     451,   457,   463,   469
+       0,    66,    66,    73,    74,    78,    88,    97,   103,   109,
+     115,   121,   127,   136,   156,   163,   174,   183,   189,   200,
+     201,   205,   211,   221,   230,   231,   235,   241,   250,   273,
+     286,   308,   328,   337,   343,   352,   358,   367,   373,   389,
+     403,   417,   436,   446,   456,   466,   476,   486,   496,   510,
+     516,   522,   528,   534
 };
 #endif
 
@@ -509,8 +515,8 @@ static const char *const yytname[] =
   "END", "DEF", "INTERP_INI", "INTERP_FIN", "$accept", "programa", "salto",
   "lista_sentencias", "sentencia", "asignacion", "if_else_end",
   "while_end", "funcion_definicion", "parametros_opt", "parametros",
-  "llamada_funcion", "argumentos_opt", "argumentos", "array", "array2",
-  "acceso_array", "indices_array", "expresion", "valor", 0
+  "llamada_funcion", "argumentos_opt", "argumentos", "array",
+  "expresion_array", "acceso_array", "indices_array", "expresion", "valor", 0
 };
 #endif
 
@@ -1485,7 +1491,7 @@ yyreduce:
         case 2:
 
 /* Line 1464 of yacc.c  */
-#line 60 "parser_latino.y"
+#line 66 "parser_latino.y"
     {
         printf("Llamando a recorrerAST\n");
         generarASM((yyvsp[(1) - (1)].simbolo).n);
@@ -1496,7 +1502,7 @@ yyreduce:
   case 5:
 
 /* Line 1464 of yacc.c  */
-#line 72 "parser_latino.y"
+#line 78 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup((yyvsp[(1) - (2)].simbolo).tipo);
         if ((yyvsp[(1) - (2)].simbolo).valor != NULL) {
@@ -1512,7 +1518,7 @@ yyreduce:
   case 6:
 
 /* Line 1464 of yacc.c  */
-#line 82 "parser_latino.y"
+#line 88 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("lista");
         (yyval.simbolo).valor = NULL;
@@ -1524,7 +1530,7 @@ yyreduce:
   case 7:
 
 /* Line 1464 of yacc.c  */
-#line 91 "parser_latino.y"
+#line 97 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup((yyvsp[(1) - (1)].simbolo).tipo);
         (yyval.simbolo).valor = NULL;
@@ -1536,7 +1542,7 @@ yyreduce:
   case 8:
 
 /* Line 1464 of yacc.c  */
-#line 97 "parser_latino.y"
+#line 103 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("puts");
         (yyval.simbolo).valor = NULL;
@@ -1548,7 +1554,7 @@ yyreduce:
   case 9:
 
 /* Line 1464 of yacc.c  */
-#line 103 "parser_latino.y"
+#line 109 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("if_else");
         (yyval.simbolo).valor = NULL;
@@ -1560,7 +1566,7 @@ yyreduce:
   case 10:
 
 /* Line 1464 of yacc.c  */
-#line 109 "parser_latino.y"
+#line 115 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("while");
         (yyval.simbolo).valor = NULL;
@@ -1572,7 +1578,7 @@ yyreduce:
   case 11:
 
 /* Line 1464 of yacc.c  */
-#line 115 "parser_latino.y"
+#line 121 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("funcion_definicion");
         (yyval.simbolo).valor = NULL;
@@ -1584,7 +1590,7 @@ yyreduce:
   case 12:
 
 /* Line 1464 of yacc.c  */
-#line 121 "parser_latino.y"
+#line 127 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("llamada_funcion");
         (yyval.simbolo).valor = NULL;
@@ -1596,23 +1602,31 @@ yyreduce:
   case 13:
 
 /* Line 1464 of yacc.c  */
-#line 130 "parser_latino.y"
+#line 136 "parser_latino.y"
     {
-        guardar_simbolo((yyvsp[(1) - (3)].stringVal),(yyvsp[(3) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).valor);
+        if ((yyvsp[(3) - (3)].simbolo).tipo && strcmp((yyvsp[(3) - (3)].simbolo).tipo, "matriz") == 0) {
+            // Si tienes forma de calcular filas/columnas, ponlo aquí. Si no, déjalo en 0.
+            guardar_simbolo_matriz((yyvsp[(1) - (3)].stringVal), (yyvsp[(3) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipoBase, (yyvsp[(3) - (3)].simbolo).filas, (yyvsp[(3) - (3)].simbolo).columnas, (yyvsp[(3) - (3)].simbolo).valores ? (yyvsp[(3) - (3)].simbolo).valores : "NULL");
+            free((yyvsp[(3) - (3)].simbolo).tipoBase); free((yyvsp[(3) - (3)].simbolo).valores);
+        } else if ((yyvsp[(3) - (3)].simbolo).tipo && strcmp((yyvsp[(3) - (3)].simbolo).tipo, "array") == 0) {
+            guardar_simbolo_array((yyvsp[(1) - (3)].stringVal), (yyvsp[(3) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipoBase, (yyvsp[(3) - (3)].simbolo).tam, (yyvsp[(3) - (3)].simbolo).valores ? (yyvsp[(3) - (3)].simbolo).valores : "NULL");
+            free((yyvsp[(3) - (3)].simbolo).tipoBase); free((yyvsp[(3) - (3)].simbolo).valores);
+        } else {
+            guardar_simbolo((yyvsp[(1) - (3)].stringVal), (yyvsp[(3) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).valor);
+        }
         (yyval.simbolo).tipo = strdup("asignacion");
         (yyval.simbolo).valor = NULL;
         (yyvsp[(3) - (3)].simbolo).n->es_inicializada = 1;
         (yyval.simbolo).n = crearNodoAsignacion((yyvsp[(1) - (3)].stringVal), (yyvsp[(3) - (3)].simbolo).n);
         mostrar_tabla();
         free((yyvsp[(1) - (3)].stringVal)); free((yyvsp[(3) - (3)].simbolo).tipo); free((yyvsp[(3) - (3)].simbolo).valor);
-        
     ;}
     break;
 
   case 14:
 
 /* Line 1464 of yacc.c  */
-#line 143 "parser_latino.y"
+#line 156 "parser_latino.y"
     {
         // if sin else
         (yyval.simbolo).tipo = strdup("if");
@@ -1625,7 +1639,7 @@ yyreduce:
   case 15:
 
 /* Line 1464 of yacc.c  */
-#line 150 "parser_latino.y"
+#line 163 "parser_latino.y"
     {
         // if con else
         (yyval.simbolo).tipo = strdup("if_else");
@@ -1638,7 +1652,7 @@ yyreduce:
   case 16:
 
 /* Line 1464 of yacc.c  */
-#line 161 "parser_latino.y"
+#line 174 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("while");
         (yyval.simbolo).valor = NULL;
@@ -1650,7 +1664,7 @@ yyreduce:
   case 17:
 
 /* Line 1464 of yacc.c  */
-#line 170 "parser_latino.y"
+#line 183 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("funcion");
         (yyval.simbolo).valor = strdup((yyvsp[(2) - (8)].stringVal));
@@ -1662,7 +1676,7 @@ yyreduce:
   case 18:
 
 /* Line 1464 of yacc.c  */
-#line 176 "parser_latino.y"
+#line 189 "parser_latino.y"
     {
         // Definición sin paréntesis ni parámetros
         (yyval.simbolo).tipo = strdup("funcion");
@@ -1675,14 +1689,14 @@ yyreduce:
   case 19:
 
 /* Line 1464 of yacc.c  */
-#line 187 "parser_latino.y"
+#line 200 "parser_latino.y"
     { (yyval.simbolo).tipo = strdup("parametros"); (yyval.simbolo).valor = NULL; (yyval.simbolo).n = NULL; ;}
     break;
 
   case 21:
 
 /* Line 1464 of yacc.c  */
-#line 192 "parser_latino.y"
+#line 205 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("parametros");
         (yyval.simbolo).valor = NULL;
@@ -1694,7 +1708,7 @@ yyreduce:
   case 22:
 
 /* Line 1464 of yacc.c  */
-#line 198 "parser_latino.y"
+#line 211 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("parametros");
         (yyval.simbolo).valor = NULL;
@@ -1706,7 +1720,7 @@ yyreduce:
   case 23:
 
 /* Line 1464 of yacc.c  */
-#line 208 "parser_latino.y"
+#line 221 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("llamada_funcion");
         (yyval.simbolo).valor = strdup((yyvsp[(1) - (2)].stringVal));
@@ -1718,21 +1732,21 @@ yyreduce:
   case 24:
 
 /* Line 1464 of yacc.c  */
-#line 217 "parser_latino.y"
+#line 230 "parser_latino.y"
     { (yyval.simbolo).tipo = strdup("argumentos"); (yyval.simbolo).valor = NULL; (yyval.simbolo).n = NULL; ;}
     break;
 
   case 25:
 
 /* Line 1464 of yacc.c  */
-#line 218 "parser_latino.y"
+#line 231 "parser_latino.y"
     { (yyval.simbolo).tipo = strdup("argumentos"); (yyval.simbolo).valor = NULL; (yyval.simbolo).n = (yyvsp[(2) - (3)].simbolo).n; free((yyvsp[(2) - (3)].simbolo).tipo); free((yyvsp[(2) - (3)].simbolo).valor);;}
     break;
 
   case 26:
 
 /* Line 1464 of yacc.c  */
-#line 222 "parser_latino.y"
+#line 235 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("argumentos");
         (yyval.simbolo).valor = NULL;
@@ -1744,7 +1758,7 @@ yyreduce:
   case 27:
 
 /* Line 1464 of yacc.c  */
-#line 228 "parser_latino.y"
+#line 241 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("argumentos");
         (yyval.simbolo).valor = NULL;
@@ -1756,22 +1770,44 @@ yyreduce:
   case 28:
 
 /* Line 1464 of yacc.c  */
-#line 239 "parser_latino.y"
+#line 250 "parser_latino.y"
     {
-        (yyval.simbolo).tipo = strdup("array");
+        if ((yyvsp[(2) - (3)].simbolo).tipoBase && strcmp((yyvsp[(2) - (3)].simbolo).tipoBase, "array") == 0) {
+            (yyval.simbolo).tipo = strdup("matriz");
+            // Tipo base real: el tipo base del primer subarray
+            // Suponemos que $2.valores tiene los valores linealizados y $2.n guarda la estructura
+            // Aquí asumimos que guardaste filas y columnas en $2.filas y $2.columnas
+            (yyval.simbolo).tipoBase = (yyvsp[(2) - (3)].simbolo).tipoBaseReal ? strdup((yyvsp[(2) - (3)].simbolo).tipoBaseReal) : strdup("int");
+            (yyval.simbolo).tam = (yyvsp[(2) - (3)].simbolo).tam;
+            (yyval.simbolo).filas = (yyvsp[(2) - (3)].simbolo).filas;
+            (yyval.simbolo).columnas = (yyvsp[(2) - (3)].simbolo).columnas;
+        } else {
+            (yyval.simbolo).tipo = strdup("array");
+            (yyval.simbolo).tipoBase = strdup((yyvsp[(2) - (3)].simbolo).tipoBase);
+            (yyval.simbolo).tam = (yyvsp[(2) - (3)].simbolo).tam;
+            (yyval.simbolo).filas = 0;
+            (yyval.simbolo).columnas = 0;
+        }
         (yyval.simbolo).valor = NULL;
+        (yyval.simbolo).valores = strdup((yyvsp[(2) - (3)].simbolo).valores);
         (yyval.simbolo).n = (yyvsp[(2) - (3)].simbolo).n;
-        free((yyvsp[(2) - (3)].simbolo).tipo); free((yyvsp[(2) - (3)].simbolo).valor);
+        free((yyvsp[(2) - (3)].simbolo).tipoBase); free((yyvsp[(2) - (3)].simbolo).valores);
+        if ((yyvsp[(2) - (3)].simbolo).tipoBaseReal) free((yyvsp[(2) - (3)].simbolo).tipoBaseReal);
     ;}
     break;
 
   case 29:
 
 /* Line 1464 of yacc.c  */
-#line 245 "parser_latino.y"
+#line 273 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("array");
         (yyval.simbolo).valor = NULL;
+        (yyval.simbolo).tipoBase = strdup("int");
+        (yyval.simbolo).tam = 0;
+        (yyval.simbolo).filas = 0;
+        (yyval.simbolo).columnas = 0;
+        (yyval.simbolo).valores = strdup("");
         (yyval.simbolo).n = NULL;
     ;}
     break;
@@ -1779,31 +1815,58 @@ yyreduce:
   case 30:
 
 /* Line 1464 of yacc.c  */
-#line 253 "parser_latino.y"
+#line 286 "parser_latino.y"
     {
-       // $$.tipo = strdup("array");
-        //$$.valor = NULL;
-        //$$.n = crearNodoArray($1.n, $3.n);
-        //free($1.tipo); free($1.valor); free($3.tipo); free($3.valor);
+        if ((yyvsp[(1) - (3)].simbolo).tipo && strcmp((yyvsp[(1) - (3)].simbolo).tipo, "array") == 0) {
+            (yyval.simbolo).tipoBase = strdup((yyvsp[(1) - (3)].simbolo).tipo);
+            (yyval.simbolo).tam = (yyvsp[(3) - (3)].simbolo).tam + 1;
+            (yyval.simbolo).valores = malloc(strlen((yyvsp[(1) - (3)].simbolo).valores) + strlen((yyvsp[(3) - (3)].simbolo).valores) + 2);
+            sprintf((yyval.simbolo).valores, "%s %s", (yyvsp[(1) - (3)].simbolo).valores, (yyvsp[(3) - (3)].simbolo).valores);
+            // Para matriz: filas = $3.filas + 1, columnas = columnas del primer subarray
+            (yyval.simbolo).filas = (yyvsp[(3) - (3)].simbolo).filas + 1;
+            (yyval.simbolo).columnas = (yyvsp[(1) - (3)].simbolo).tam; // Suponiendo que todos los subarrays tienen el mismo tamaño
+            (yyval.simbolo).tipoBaseReal = (yyvsp[(1) - (3)].simbolo).tipoBase ? strdup((yyvsp[(1) - (3)].simbolo).tipoBase) : strdup("int");
+        } else {
+            (yyval.simbolo).tipoBase = strdup((yyvsp[(1) - (3)].simbolo).tipo);
+            (yyval.simbolo).tam = (yyvsp[(3) - (3)].simbolo).tam + 1;
+            (yyval.simbolo).valores = malloc(strlen((yyvsp[(1) - (3)].simbolo).valor) + strlen((yyvsp[(3) - (3)].simbolo).valores) + 2);
+            sprintf((yyval.simbolo).valores, "%s %s", (yyvsp[(1) - (3)].simbolo).valor, (yyvsp[(3) - (3)].simbolo).valores);
+            (yyval.simbolo).filas = 0;
+            (yyval.simbolo).columnas = 0;
+            (yyval.simbolo).tipoBaseReal = NULL;
+        }
+        (yyval.simbolo).n = crearNodoArray((yyvsp[(1) - (3)].simbolo).n, (yyvsp[(3) - (3)].simbolo).n);
+        free((yyvsp[(1) - (3)].simbolo).tipo); free((yyvsp[(1) - (3)].simbolo).valor); free((yyvsp[(1) - (3)].simbolo).valores); free((yyvsp[(1) - (3)].simbolo).tipoBase); free((yyvsp[(3) - (3)].simbolo).tipoBase); free((yyvsp[(3) - (3)].simbolo).valores); if ((yyvsp[(3) - (3)].simbolo).tipoBaseReal) free((yyvsp[(3) - (3)].simbolo).tipoBaseReal);
     ;}
     break;
 
   case 31:
 
 /* Line 1464 of yacc.c  */
-#line 259 "parser_latino.y"
+#line 308 "parser_latino.y"
     {
-        //$$.tipo = strdup("array");
-        //$$.valor = NULL;
-        //$$.n = crearNodoArray($1.n, NULL);
-        //free($1.tipo); free($1.valor);
+        (yyval.simbolo).tipoBase = strdup((yyvsp[(1) - (1)].simbolo).tipo);
+        (yyval.simbolo).tam = 1;
+        if ((yyvsp[(1) - (1)].simbolo).tipo && strcmp((yyvsp[(1) - (1)].simbolo).tipo, "array") == 0) {
+            (yyval.simbolo).valores = strdup((yyvsp[(1) - (1)].simbolo).valores);
+            (yyval.simbolo).filas = 1;
+            (yyval.simbolo).columnas = (yyvsp[(1) - (1)].simbolo).tam;
+            (yyval.simbolo).tipoBaseReal = (yyvsp[(1) - (1)].simbolo).tipoBase ? strdup((yyvsp[(1) - (1)].simbolo).tipoBase) : strdup("int");
+        } else {
+            (yyval.simbolo).valores = strdup((yyvsp[(1) - (1)].simbolo).valor);
+            (yyval.simbolo).filas = 0;
+            (yyval.simbolo).columnas = 0;
+            (yyval.simbolo).tipoBaseReal = NULL;
+        }
+        (yyval.simbolo).n = crearNodoArray((yyvsp[(1) - (1)].simbolo).n, NULL);
+        free((yyvsp[(1) - (1)].simbolo).tipo); free((yyvsp[(1) - (1)].simbolo).valor); if ((yyvsp[(1) - (1)].simbolo).tipoBase) free((yyvsp[(1) - (1)].simbolo).tipoBase);
     ;}
     break;
 
   case 32:
 
 /* Line 1464 of yacc.c  */
-#line 268 "parser_latino.y"
+#line 328 "parser_latino.y"
     {
         //$$.tipo = strdup("acceso_array");
         //$$.valor = NULL;
@@ -1815,7 +1878,7 @@ yyreduce:
   case 33:
 
 /* Line 1464 of yacc.c  */
-#line 277 "parser_latino.y"
+#line 337 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("lista");
         (yyval.simbolo).valor = NULL;
@@ -1827,7 +1890,7 @@ yyreduce:
   case 34:
 
 /* Line 1464 of yacc.c  */
-#line 283 "parser_latino.y"
+#line 343 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("lista");
         (yyval.simbolo).valor = NULL;
@@ -1839,7 +1902,7 @@ yyreduce:
   case 35:
 
 /* Line 1464 of yacc.c  */
-#line 292 "parser_latino.y"
+#line 352 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup((yyvsp[(1) - (1)].simbolo).tipo);
         (yyval.simbolo).valor = strdup((yyvsp[(1) - (1)].simbolo).valor);
@@ -1851,10 +1914,13 @@ yyreduce:
   case 36:
 
 /* Line 1464 of yacc.c  */
-#line 298 "parser_latino.y"
+#line 358 "parser_latino.y"
     {
-        (yyval.simbolo).tipo = strdup("array");
+        (yyval.simbolo).tipo = strdup((yyvsp[(1) - (1)].simbolo).tipo); // <-- Propaga "array" o "matriz"
         (yyval.simbolo).valor = NULL;
+        (yyval.simbolo).tipoBase = (yyvsp[(1) - (1)].simbolo).tipoBase ? strdup((yyvsp[(1) - (1)].simbolo).tipoBase) : NULL;
+        (yyval.simbolo).tam = (yyvsp[(1) - (1)].simbolo).tam;
+        (yyval.simbolo).valores = (yyvsp[(1) - (1)].simbolo).valores ? strdup((yyvsp[(1) - (1)].simbolo).valores) : strdup(""); // <-- Cambia esto
         (yyval.simbolo).n = (yyvsp[(1) - (1)].simbolo).n;
         free((yyvsp[(1) - (1)].simbolo).tipo); free((yyvsp[(1) - (1)].simbolo).valor);
     ;}
@@ -1863,7 +1929,7 @@ yyreduce:
   case 37:
 
 /* Line 1464 of yacc.c  */
-#line 304 "parser_latino.y"
+#line 367 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("acceso_array");
         (yyval.simbolo).valor = NULL;
@@ -1875,7 +1941,7 @@ yyreduce:
   case 38:
 
 /* Line 1464 of yacc.c  */
-#line 310 "parser_latino.y"
+#line 373 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -1886,16 +1952,18 @@ yyreduce:
             exit(1);
         }
         (yyval.simbolo).tipo = strdup((yyvsp[(1) - (3)].simbolo).tipo);
-        (yyval.simbolo).valor = NULL;
+        // SIEMPRE guarda la expresión textual, no el resultado
+        (yyval.simbolo).valor = malloc(strlen((yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "") + strlen((yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "") + 4);
+        sprintf((yyval.simbolo).valor, "%s+%s", (yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "", (yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "");
         (yyval.simbolo).n = crearNodoOperacion(NODO_SUMA, (yyvsp[(1) - (3)].simbolo).n, (yyvsp[(3) - (3)].simbolo).n);
-        free((yyvsp[(1) - (3)].simbolo).tipo); free((yyvsp[(3) - (3)].simbolo).tipo);
+        free((yyvsp[(1) - (3)].simbolo).tipo); free((yyvsp[(3) - (3)].simbolo).tipo); free((yyvsp[(1) - (3)].simbolo).valor); free((yyvsp[(3) - (3)].simbolo).valor);
     ;}
     break;
 
   case 39:
 
 /* Line 1464 of yacc.c  */
-#line 324 "parser_latino.y"
+#line 389 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -1915,7 +1983,7 @@ yyreduce:
   case 40:
 
 /* Line 1464 of yacc.c  */
-#line 338 "parser_latino.y"
+#line 403 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -1935,7 +2003,7 @@ yyreduce:
   case 41:
 
 /* Line 1464 of yacc.c  */
-#line 352 "parser_latino.y"
+#line 417 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -1960,7 +2028,7 @@ yyreduce:
   case 42:
 
 /* Line 1464 of yacc.c  */
-#line 371 "parser_latino.y"
+#line 436 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup((yyvsp[(2) - (3)].simbolo).tipo);
         if ((yyvsp[(2) - (3)].simbolo).valor != NULL) {
@@ -1976,7 +2044,7 @@ yyreduce:
   case 43:
 
 /* Line 1464 of yacc.c  */
-#line 381 "parser_latino.y"
+#line 446 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -1992,7 +2060,7 @@ yyreduce:
   case 44:
 
 /* Line 1464 of yacc.c  */
-#line 391 "parser_latino.y"
+#line 456 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2008,7 +2076,7 @@ yyreduce:
   case 45:
 
 /* Line 1464 of yacc.c  */
-#line 401 "parser_latino.y"
+#line 466 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2024,7 +2092,7 @@ yyreduce:
   case 46:
 
 /* Line 1464 of yacc.c  */
-#line 411 "parser_latino.y"
+#line 476 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2040,7 +2108,7 @@ yyreduce:
   case 47:
 
 /* Line 1464 of yacc.c  */
-#line 421 "parser_latino.y"
+#line 486 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2056,7 +2124,7 @@ yyreduce:
   case 48:
 
 /* Line 1464 of yacc.c  */
-#line 431 "parser_latino.y"
+#line 496 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2072,7 +2140,7 @@ yyreduce:
   case 49:
 
 /* Line 1464 of yacc.c  */
-#line 445 "parser_latino.y"
+#line 510 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("int");
         (yyval.simbolo).valor = malloc(12);
@@ -2084,7 +2152,7 @@ yyreduce:
   case 50:
 
 /* Line 1464 of yacc.c  */
-#line 451 "parser_latino.y"
+#line 516 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("float");
         (yyval.simbolo).valor = malloc(32);
@@ -2096,7 +2164,7 @@ yyreduce:
   case 51:
 
 /* Line 1464 of yacc.c  */
-#line 457 "parser_latino.y"
+#line 522 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("string");
         (yyval.simbolo).valor = strdup((yyvsp[(1) - (1)].stringVal));
@@ -2108,7 +2176,7 @@ yyreduce:
   case 52:
 
 /* Line 1464 of yacc.c  */
-#line 463 "parser_latino.y"
+#line 528 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("bool");
         (yyval.simbolo).valor = strdup((yyvsp[(1) - (1)].stringVal));
@@ -2120,7 +2188,7 @@ yyreduce:
   case 53:
 
 /* Line 1464 of yacc.c  */
-#line 469 "parser_latino.y"
+#line 534 "parser_latino.y"
     {
         int pos = buscarTabla((yyvsp[(1) - (1)].stringVal));
         if (pos == -1){
@@ -2128,9 +2196,13 @@ yyreduce:
             exit(1);
         }
         (yyval.simbolo).tipo = strdup(tabla[pos].tipo);
-        (yyval.simbolo).valor = strdup(tabla[pos].valor);
+        // Si es array o matriz, usa sus valores linealizados
+        if (tabla[pos].tipo && (strcmp(tabla[pos].tipo, "array") == 0 || strcmp(tabla[pos].tipo, "matriz") == 0)) {
+            (yyval.simbolo).valor = tabla[pos].Valores ? strdup(tabla[pos].Valores) : strdup("");
+        } else {
+            (yyval.simbolo).valor = tabla[pos].valor ? strdup(tabla[pos].valor) : strdup("");
+        }
         (yyval.simbolo).n = crearNodoVariable((yyvsp[(1) - (1)].stringVal));
-        
         free((yyvsp[(1) - (1)].stringVal));
     ;}
     break;
@@ -2138,7 +2210,7 @@ yyreduce:
 
 
 /* Line 1464 of yacc.c  */
-#line 2142 "parser_latino.tab.c"
+#line 2214 "parser_latino.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2350,7 +2422,7 @@ yyreturn:
 
 
 /* Line 1684 of yacc.c  */
-#line 483 "parser_latino.y"
+#line 552 "parser_latino.y"
 
 
 int main(int argc, char** argv) {

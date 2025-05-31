@@ -222,6 +222,19 @@ struct ast* crearNodoLlamadaFuncion(const char* nombre, struct ast* argumentos) 
     return nodo;
 }
 
+struct ast* crearNodoArray(struct ast* elemento, struct ast* siguiente) {
+    struct ast* nodo = malloc(sizeof(struct ast));
+    nodo->tipoNodo = NODO_ARRAY;
+    nodo->izq = elemento;
+    nodo->dcha = siguiente;
+    nodo->nombre = NULL;
+    nodo->valor_str = NULL;
+    nodo->valor_int = 0;
+    nodo->valor_float = 0.0f;
+    nodo->es_inicializada = 0;
+    return nodo;
+}
+
 struct ast* crearNodoArgumento(struct ast* valor, struct ast* siguiente) {
     struct ast* nodo = malloc(sizeof(struct ast));
     nodo->tipoNodo = NODO_VARIABLE; // o puedes crear NODO_ARGUMENTO si lo agregas

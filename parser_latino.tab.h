@@ -87,13 +87,19 @@ typedef union YYSTYPE
     struct {
         char* tipo;
         char* valor;
+        char* tipoBase;
+        int tam;
+        int filas; // Para matrices
+        int columnas; // Para matrices
+        char* valores;
+        char* tipoBaseReal;
         struct ast *n;
     } simbolo;
 
 
 
 /* Line 1685 of yacc.c  */
-#line 97 "parser_latino.tab.h"
+#line 103 "parser_latino.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
