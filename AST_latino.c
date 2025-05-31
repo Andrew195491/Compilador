@@ -460,6 +460,11 @@ const char* generarASM_rec(struct ast *n) {
                 }
                 return reg;
             }
+            case NODO_ARRAY: {
+                // Los arrays/matrices ya están declarados e inicializados en .data
+                // No se genera código en .text para ellos
+                return NULL;
+            }
             case NODO_SUMA: {
                 // Detecta si alguno de los operandos es float
                 const char* tipo_izq = NULL;
@@ -512,41 +517,43 @@ const char* generarASM_rec(struct ast *n) {
                 fprintf(yyout, "    div %s, %s, %s\n", reg, reg_izq, reg_dcha);
                 return reg;
             }
-           case NODO_ASIGNACION: {
-                const char* reg = generarASM_rec(n->izq);
-                const char* tipo = obtener_tipo(n->nombre);  // ← Consultamos tipo desde la tabla
+case NODO_ASIGNACION: {
+    const char* reg = generarASM_rec(n->izq);
+    const char* tipo = obtener_tipo(n->nombre);
 
-                registrar_variable(n->nombre); // Aseguramos que esté registrada
+    registrar_variable(n->nombre);
 
-                if (tipo && strcmp(tipo, "float") == 0) {
-                    // Asignación de float
-                    if (strcmp(reg, "$f12") != 0) {
-                        fprintf(yyout, "    mov.s $f12, %s\n", reg);
-                    }
-                    fprintf(yyout, "    s.s $f12, %s\n", n->nombre);
-                    return "$f12"; // ← Mantenemos $f12 como registro por convención
-                } 
-                else if (tipo && strcmp(tipo, "string") == 0) {
-                    // No guardamos strings en memoria (asumimos literales)
-                    return reg;
-                } 
-                else {
-                    // int o bool
-                    int esta_inicializada = 0;
-                    for (int i = 0; i < MAX_VARS; i++) {
-                        if (inicializada[i] && strcmp(inicializada[i], n->nombre) == 0) {
-                            esta_inicializada = 1;
-                            break;
-                        }
-                    }
-                    if (!esta_inicializada) {
-                        fprintf(yyout, "    sw %s, %s\n", reg, n->nombre);
-                    } else {
-                        fprintf(yyout, "    # %s ya inicializado (int/bool), se omite sw\n", n->nombre);
-                    }
-                    return reg;
-                }
+    if (tipo && strcmp(tipo, "float") == 0) {
+        if (reg && strcmp(reg, "$f12") != 0) {
+            fprintf(yyout, "    mov.s $f12, %s\n", reg);
+        }
+        fprintf(yyout, "    s.s $f12, %s\n", n->nombre);
+        return "$f12";
+    } else if (tipo && strcmp(tipo, "string") == 0) {
+        // No generes sw para strings
+        return reg;
+    } else if (tipo && (strcmp(tipo, "array") == 0 || strcmp(tipo, "matriz") == 0)) {
+        // No generes sw para arrays/matrices
+        return NULL;
+    } else {
+        // int o bool
+        int esta_inicializada = 0;
+        for (int i = 0; i < MAX_VARS; i++) {
+            if (inicializada[i] && strcmp(inicializada[i], n->nombre) == 0) {
+                esta_inicializada = 1;
+                break;
             }
+        }
+        if (!esta_inicializada && reg) {
+            fprintf(yyout, "    sw %s, %s\n", reg, n->nombre);
+        } else if (!reg) {
+            fprintf(yyout, "    # No se genera sw para %s (no es int/float/bool)\n", n->nombre);
+        } else {
+            fprintf(yyout, "    # %s ya inicializado (int/bool), se omite sw\n", n->nombre);
+        }
+        return reg;
+    }
+}
 
                         case NODO_LISTA: {
                             generarASM_rec(n->izq);
@@ -589,6 +596,8 @@ void generarASM(struct ast *n) {
     for (int i = 0; i < indice; i++) {
         const char* tipo = tabla[i].tipo;
         const char* valor = tabla[i].valor;
+        const char* tipoBase = tabla[i].tipoBase;
+        const char* valores = tabla[i].Valores;
 
         if (strcmp(tipo, "int") == 0 || strcmp(tipo, "bool") == 0) {
             int val = (valor != NULL) ? atoi(valor) : 0;
@@ -603,6 +612,59 @@ void generarASM(struct ast *n) {
         }
         else if (strcmp(tipo, "string") == 0) {
             fprintf(yyout, "%s: .asciiz %s\n", tabla[i].nombre, valor ? valor : "");
+        }
+        else if (strcmp(tipo, "array") == 0 || strcmp(tipo, "matriz") == 0) {
+            if (tipoBase && strcmp(tipoBase, "string") == 0) {
+                // 1. Declarar cada string como strX
+                char* valores_copia = strdup(valores ? valores : "");
+                char* token = strtok(valores_copia, " ");
+                int idx = 0;
+                char* nombres_aux[256]; // Máximo 256 strings por array
+                while (token) {
+                    char nombre_aux[64];
+                    sprintf(nombre_aux, "%s_str%d", tabla[i].nombre, idx);
+                    nombres_aux[idx] = strdup(nombre_aux);
+                    fprintf(yyout, "%s: .asciiz %s\n", nombre_aux, token);
+                    idx++;
+                    token = strtok(NULL, " ");
+                }
+                free(valores_copia);
+
+                // 2. Declarar el array de punteros
+                fprintf(yyout, "%s: .word", tabla[i].nombre);
+                for (int j = 0; j < idx; j++) {
+                    fprintf(yyout, " %s", nombres_aux[j]);
+                    free(nombres_aux[j]);
+                }
+                fprintf(yyout, "\n");
+                continue;
+            } else if (tipoBase && strcmp(tipoBase, "float") == 0) {
+                // Array/matriz de float
+                fprintf(yyout, "%s: .float", tabla[i].nombre);
+                if (valores && strlen(valores) > 0) {
+                    char* valores_copia = strdup(valores);
+                    char* token = strtok(valores_copia, " ");
+                    while (token) {
+                        fprintf(yyout, " %s", token);
+                        token = strtok(NULL, " ");
+                    }
+                    free(valores_copia);
+                }
+                fprintf(yyout, "\n");
+            } else {
+                // Por defecto, array/matriz de int o bool
+                fprintf(yyout, "%s: .word", tabla[i].nombre);
+                if (valores && strlen(valores) > 0) {
+                    char* valores_copia = strdup(valores);
+                    char* token = strtok(valores_copia, " ");
+                    while (token) {
+                        fprintf(yyout, " %s", token);
+                        token = strtok(NULL, " ");
+                    }
+                    free(valores_copia);
+                }
+                fprintf(yyout, "\n");
+            }
         }
     }
     fprintf(yyout, "\n");
