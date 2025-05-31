@@ -38,19 +38,37 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     NUMERICO = 258,
-     NUMERICODECIMAL = 259,
-     IDENTIFICADOR = 260,
-     CADENA = 261,
-     BOOL = 262,
-     SUMA = 263,
+     MENOR = 258,
+     MAYOR = 259,
+     MENORIGUAL = 260,
+     MAYORIGUAL = 261,
+     DIFERENTE = 262,
+     IGUALIGUAL = 263,
      RESTA = 264,
-     MULTI = 265,
+     SUMA = 265,
      DIVISION = 266,
-     CORCHETEABIERTO = 267,
-     CORCHETECERRADO = 268,
-     SEPARADOR = 269,
-     IGUAL = 270
+     MULTI = 267,
+     PARENDER = 268,
+     PARENIZQ = 269,
+     NUMERICO = 270,
+     NUMERICODECIMAL = 271,
+     IDENTIFICADOR = 272,
+     CADENA = 273,
+     BOOL = 274,
+     CORCHETEABIERTO = 275,
+     CORCHETECERRADO = 276,
+     SEPARADOR = 277,
+     IGUAL = 278,
+     SALTO = 279,
+     IF = 280,
+     ELSE = 281,
+     WHILE = 282,
+     FOR = 283,
+     PUTS = 284,
+     END = 285,
+     DEF = 286,
+     INTERP_INI = 287,
+     INTERP_FIN = 288
    };
 #endif
 
@@ -61,7 +79,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1685 of yacc.c  */
-#line 20 "parser_latino.y"
+#line 19 "parser_latino.y"
 
     int enteroVal;
     float realVal;
@@ -69,13 +87,19 @@ typedef union YYSTYPE
     struct {
         char* tipo;
         char* valor;
+        char* tipoBase;
+        int tam;
+        int filas; // Para matrices
+        int columnas; // Para matrices
+        char* valores;
+        char* tipoBaseReal;
         struct ast *n;
     } simbolo;
 
 
 
 /* Line 1685 of yacc.c  */
-#line 79 "parser_latino.tab.h"
+#line 103 "parser_latino.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

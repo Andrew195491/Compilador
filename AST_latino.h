@@ -1,274 +1,50 @@
-// ----------------------------- GLOSARIO DE IMPORTS -------------------------------------------
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h> 
-#include <stdio.h>
+#ifndef AST_LATINO_H
+#define AST_LATINO_H
 
-// ----------------------------- GLOSARIO DE PRIORIDADES -------------------------------------------
-#define NODO_NUMERO 1
-#define NODO_SUMA 2
-#define NODO_RESTA 3
-#define NODO_MULT 4
-#define NODO_DIV 5
-#define NODO_IMPRIMIR 6
-#define NODO_ASIGNACION 7
-#define NODO_VARIABLE 8
-#define NODO_LISTA 9
+#include "tabla_simbolos.h"
 
-// ----------------------------- DECLARACION DE VARIABLES Y ESTRUCTURAS --------------------------------------------
-extern FILE *yyout;
-int contadorEtiqueta = 0;         // Variable para el control de las etiquetas 
-int numMaxRegistros = 32;         // Variable que indica el numero maximo de registros disponibles
-int nombreVariable = 0;           // Almacena el entero que se asociará al nombre de la variable
-
-
-//Por defecto, tenemos 32 registros de tipo f para controlar los registros libres (true) o ocupados (false)
-bool registros[32] = {[0 ... 29] = true, [30 ... 31] = true}; // Los registros 30 y 31 están reservados por defecto para imprimir por pantalla
-
-// Estructura variable, se hará uso de la misma para almacenar y imprimir las variables del codigo latino
-struct variable {
-    float dato;
-    int nombre; //limite de caracteres de la variable
-    bool disponible;
+enum tipoNodoAST {
+    NODO_LISTA, NODO_ASIGNACION, NODO_SUMA, NODO_RESTA, NODO_MULT, NODO_DIV,
+    NODO_NUMERO, NODO_FLOAT, NODO_STRING, NODO_BOOL, NODO_VARIABLE,
+    NODO_ARRAY, NODO_ACCESO_ARRAY, NODO_PUTS, NODO_WHILE, NODO_IF, NODO_ELSE, NODO_FUNCION, NODO_LLAMADA_FUNCION,
+    NODO_IGUALIGUAL,NODO_DIFERENTE, NODO_MENOR, NODO_MAYOR, NODO_MENORIGUAL, NODO_MAYORIGUAL,
 };
 
-struct variable variables[64]; // Declaramos el array de variables usando la estructura definida
-
-// Estructura AST, se define la estructura de los nodos del arbol
-struct ast
-{
-  struct ast *izq;     // Nodo izquierdo del arbol
-  struct ast *dcha;    // Nodo derecho del arbol
-  int tipoNodo;        // Almacena el tipo de nodo
-  double valor;        // Almacena el valor del nodo 
-  char *tipo;          // El tipo de dato que almacena: numericoDecimal, numerico o string
-  int resultado;       // Registro donde está el resultado
-  int nombreVar;       // Indica el nombre de la variable
+struct ast {
+    enum tipoNodoAST tipoNodo;
+    struct ast *izq;
+    struct ast *dcha;
+    char* nombre;
+    char* valor_str;
+    int valor_int;
+    float valor_float;
+    int es_inicializada;
 };
 
-//-----------------------------------------------  METODOS -------------------------------------------------------
+// Prototipos de funciones
+struct ast *crearNodoLista(struct ast *izq, struct ast *dcha);
+struct ast *crearNodoAsignacion(const char* nombre, struct ast *valor);
+struct ast *crearNodoOperacion(enum tipoNodoAST tipo, struct ast *izq, struct ast *dcha);
+struct ast *crearNodoNumero(int valor);
+struct ast *crearNodoFloat(float valor);
+struct ast *crearNodoString(const char* valor);
+struct ast *crearNodoBool(const char* valor);
+struct ast *crearNodoVariable(const char* nombre);
+struct ast* crearNodoArray(struct ast* elemento, struct ast* siguiente);
 
+struct ast *crearNodoPuts(struct ast *expresion);
 
-// METODO "crearNombreVariable", incremente el valor de la variable "nombreVariable"
-int crearNombreVariable(){
-  return nombreVariable++; //retorna la variable y luego la incrementa
-}
+struct ast* crearNodoWhile(struct ast* condicion, struct ast* cuerpo);
 
-// METODO "borrarReg", pone a true de nuevo el registro para que pueda volver a usarse
-void borrarReg(struct ast *izq, struct ast *dcha) { 
-  registros[izq->resultado] = true; registros[dcha->resultado] = true; 
-}
+struct ast* crearNodoIf(struct ast* condicion, struct ast* cuerpo, struct ast* else_cuerpo);
+struct ast* crearNodoElse(struct ast* cuerpo);
 
+struct ast* crearNodoFuncion(const char* nombre, struct ast* parametros, struct ast* cuerpo);
+struct ast* crearNodoParametro(const char* nombre, struct ast* siguiente);
+struct ast* crearNodoLlamadaFuncion(const char* nombre, struct ast* argumentos);
+struct ast* crearNodoArgumento(struct ast* valor, struct ast* siguiente);
 
-// METODO "imprimirVariables", imprime el archivo .asm la estructura del .data
-// Recorrer los registros y devolver la posicion del primero que esté libre
-void imprimirVariables(void){
-  fprintf(yyout, "\n#-------------- Declaracion de variables --------------"); 
-  fprintf(yyout, "\n.data \n");
-  fprintf(yyout, "saltoLinea: .asciiz \"\\n\"\n"); //Variable salto de linea
-  fprintf(yyout, "zero: .float 0.0\n"); //Se inserta una variable auxiliar var_0 con valor 0.000
-  //Bucle que recorre el array de variables y las imprime en el archivo .asm
-  for (int i = 0; i < 64; i++) {
-      if(variables[i].disponible == true){
-        fprintf(yyout, "var_%d: .float %.3f\n", variables[i].nombre, variables[i].dato);
-      }
-  }
-}
+void liberarAST(struct ast *n);
+void generarASM(struct ast *n);
 
-
-// METODO "saltoLinea", incorpora un salto de linea en la salida de nuestro codigo
-void saltoLinea(void){
-	fprintf(yyout, "li $v0, 4\n");                      //especifica al registro $v0 que va a imprimir una cadena de caracteres
-	fprintf(yyout, "la $a0, saltoLinea\n");             //carga en $a0 el valor del salto de linea
-	fprintf(yyout, "syscall #Llamada al sistema\n");
-}
-
-
-// METODO "imprimir", imprime el codigo .asm que hace referencia a la funcion imprimir de latino
-void funcionImprimir(struct ast *n)
-{
-  fprintf(yyout, "li $v0, 2\n"); //entero
-  fprintf(yyout, "add.s $f12, $f31, $f%d\n", n->resultado); // Mover del registro n al registro 30 (es el que empleamos para imprimir)
-  fprintf(yyout, "mov.s $f30, $f12  #Movemos el registro 12 al 30 iniciado a false\n");
-  fprintf(yyout, "syscall #Llamada al sistema\n");
-  saltoLinea(); //Introducimos un salto de linea
-}
-
-// METODO "comprobarValorNodo", se escribe el lenguaje máquina (por tipo de nodo) desde árbol completo generado al nivel del axioma de la gramática
-int comprobarValorNodo(struct ast *n, int contadorEtiquetaLocal)
-{
-  int dato;
-
-  //TIPO NODO 1 - Nueva hoja en el arbol
-  if (n->tipoNodo == NODO_NUMERO) {
-    dato = n->valor;
-    fprintf(yyout, "lwc1 $f%d, var_%d\n", n->resultado, n->nombreVar);
-    fprintf(yyout, "LLAMADA\n");
-
-  //TIPO NODO 3 - Nueva suma
-  }  else if (n->tipoNodo == NODO_SUMA) {
-    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal) + comprobarValorNodo(n->dcha, contadorEtiquetaLocal);
-    fprintf(yyout, "LLAMADA\n");
-    fprintf(yyout, "add.s $f%d, $f%d, $f%d\n", n->resultado, n->izq->resultado, n->dcha->resultado); //se utiliza add.s para + en ASM
-    borrarReg(n->izq, n->dcha); //borrado de registros (se ponen a true)
-
-  //TIPO NODO 4 - Nueva resta
-  } else if (n->tipoNodo == NODO_RESTA) {
-    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal) - comprobarValorNodo(n->dcha, contadorEtiquetaLocal);
-    fprintf(yyout, "sub.s $f%d, $f%d, $f%d\n", n->resultado, n->izq->resultado, n->dcha->resultado); //se utiliza sub.s para - en ASM
-    borrarReg(n->izq, n->dcha); //borrado de registros (se ponen a true)
-  
-  //TIPO NODO 4 - Nueva multiplicacion
-  } else if (n->tipoNodo == NODO_MULT) {
-    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal) * comprobarValorNodo(n->dcha, contadorEtiquetaLocal);
-    fprintf(yyout, "mul.s $f%d, $f%d, $f%d\n", n->resultado, n->izq->resultado, n->dcha->resultado); //se utiliza mul.s para - en ASM
-    borrarReg(n->izq, n->dcha); //borrado de registros (se ponen a true)
-  
-  //TIPO NODO 4 - Nueva division
-  } else if (n->tipoNodo == NODO_DIV) {
-    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal) / comprobarValorNodo(n->dcha, contadorEtiquetaLocal);
-    fprintf(yyout, "div.s $f%d, $f%d, $f%d\n", n->resultado, n->izq->resultado, n->dcha->resultado); //se utiliza div.s para - en ASM
-    borrarReg(n->izq, n->dcha); //borrado de registros (se ponen a true)
-  
-
-  //TIPO NODO 18 - Nuevo imprimir
-  } else if (n->tipoNodo == NODO_IMPRIMIR) {
-    comprobarValorNodo(n->izq, contadorEtiquetaLocal);
-    funcionImprimir(n->izq);
-
-  //TIPO NODO 19 - Nueva asignación 
-  }else if (n->tipoNodo == NODO_ASIGNACION) {
-    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal);
-
-  //TIPO NODO 20 - Nueva variable
-  } else if (n->tipoNodo == NODO_VARIABLE) {
-    dato = n->valor;
-    
-  //TIPO NODO 22 - Lista de sentencias
-  } else if (n->tipoNodo == NODO_LISTA) {
-    dato = comprobarValorNodo(n->izq, contadorEtiquetaLocal); 
-    comprobarValorNodo(n->dcha, contadorEtiquetaLocal);   
-  }
-
-  return dato; //Devolvemos el valor
-}
-
-
-
-// METODO "comprobarAST", imprime el codigo .asm y generas sus respectivos pasos
-void comprobarAST(struct ast *n)
-{
-  printf("hola");
-  imprimirVariables(); //Metodo que realiza la impresion de la parte de variables para Mips
-  fprintf(yyout, "\n#--------------------- Ejecuciones ---------------------");
-  fprintf(yyout, "\n.text\n");
-  fprintf(yyout, "lwc1 $f31, zero\n");
-  comprobarValorNodo(n, contadorEtiqueta); //Comprueba el valor del nodo
-}
-
-
-// METODO "encontrarReg", comprueba si el registro está libre y devuelve su posicion
-// Recorrer los registros y devolver la posicion del primero que esté libre
-int encontrarReg()
-{
-  int posicion = 0;
-  while (posicion <= (numMaxRegistros - 1) && registros[posicion] == 0) {  // registros[posicion] == 0, evita recorrer todo el array
-    posicion++;
-  }
-  registros[posicion] = 0;
-  if (posicion >= numMaxRegistros) {
-    fprintf(stderr, "Error: No hay registros disponibles\n");
-    exit(1);
-  }
-  return posicion; //retorna la posicion donde se encuentra el registro libre
-}
-
-
-//METODO "crearNodoVacio", crea un nuevo nodo sin contenido
-struct ast *crearNodoVacio()
-{
-  struct ast *n = malloc(sizeof(struct ast)); // Asigna memoria dinamicamente para el nuevo nodo
-  n->izq = NULL; 
-  n->dcha = NULL;
-  n->tipoNodo = 0; 
-  return n;
-}
-
-// METODO "crearNodoTerminal", crear una nueva hoja en el arbol AST
-struct ast *crearNodoTerminal(double valor)
-{                   
-  struct ast *n = malloc(sizeof(struct ast)); // Asigna memoria dinamicamente para el nuevo nodo
-  n->izq = NULL; n->dcha = NULL; n->tipoNodo = 1; n->valor = valor;
-  n->resultado = encontrarReg(); //Hacemos llamada al metodo para buscar un nuevo registro
-  n->nombreVar = crearNombreVariable();
-  printf("# [AST] - Registro $f%d ocupado para var_%d = %.3f\n", n->resultado, n->nombreVar, n->valor);
-  variables[n->resultado].dato = n->valor; 
-  variables[n->resultado].nombre = n->nombreVar; 
-  variables[n->resultado].disponible = true;
-  return n;
-}
-
-// METODO "crearNodoNoTerminal", crea un nuevo nodo, asignamos sus hijos y tipo, y buscamos nuevo registro
-struct ast *crearNodoNoTerminal(struct ast *izq, struct ast *dcha, int tipoNodo)
-{     
-  struct ast *n = malloc(sizeof(struct ast)); // Crea un nuevo nodo
-  n->izq = izq; 
-  n->dcha = dcha; 
-  n->tipoNodo = tipoNodo; // Asignamos al nodo genérico sus hijos y tipo
-  n->resultado = encontrarReg(); //Hacemos llamada al metodo para buscar un nuevo registro
-  return n;
-}
-
-// METODO "crearVariableTerminal", crear el nodo hoja para una variable ya creada
-struct ast *crearVariableTerminal(double valor, int registro)
-{                                               
-  struct ast *n = malloc(sizeof(struct ast)); // Asigna memoria dinamicamente para el nuevo nodo
-  n->izq = NULL; 
-  n->dcha = NULL; 
-  n->tipoNodo = 6; 
-  n->valor = valor;
-  n->resultado = registro;
-  return n;
-}
-
-struct ast *crearNodoAsignacion(int identificador, struct ast* expresion) {
-  struct ast* nodo = malloc(sizeof(struct ast));
-  nodo ->tipoNodo = NODO_ASIGNACION;
-  nodo ->nombreVar = identificador;
-  nodo->izq = expresion;
-  nodo->dcha = NULL;
-
-  if(expresion != NULL){
-    nodo->tipo = strdup(expresion->tipo);
-  }else{
-    nodo->tipo = strdup("desconocido");
-  }
-
-  return nodo;
-}
-
-
-void pruebaOperaciones() {
-  // Construye el AST para: (5.0 * 3.0) + (6.0 / 2.0)
-  
-  // Números
-  struct ast *num5 = crearNodoTerminal(5.0);
-  struct ast *num3 = crearNodoTerminal(3.0);
-  struct ast *num6 = crearNodoTerminal(6.0);
-  struct ast *num2 = crearNodoTerminal(2.0);
-  
-  // Multiplicación (5 * 3)
-  struct ast *mult = crearNodoNoTerminal(num5, num3, NODO_MULT);
-  
-  // División (6 / 2)
-  struct ast *div = crearNodoNoTerminal(num6, num2, NODO_DIV);
-  
-  // Suma final ( (5*3) + (6/2) )
-  struct ast *suma = crearNodoNoTerminal(mult, div, NODO_SUMA);
-  
-  // Generar código
-  yyout = fopen("prueba.asm", "w");
-  comprobarAST(suma);
-  fclose(yyout);
-}
+#endif

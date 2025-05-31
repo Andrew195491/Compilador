@@ -6,7 +6,7 @@ BISON = bison
 
 # Nombres de archivos
 TARGET = latino_compiler
-SOURCES = parser_latino.tab.c lex.yy.c tabla_simbolos.c
+SOURCES = parser_latino.tab.c lex.yy.c tabla_simbolos.c AST_latino.c
 HEADERS = parser_latino.tab.h tabla_simbolos.h
 LEX_FILE = scanner_latino.l
 YACC_FILE = parser_latino.y

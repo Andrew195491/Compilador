@@ -1,2 +1,50 @@
-x = 5
-y = 7
+n = "Hola"
+o = 42
+p = 3.14
+q = "Mundo"
+r = 7
+s = 2.71
+t = "Ruby"
+u = 100
+v = 0.99
+w = "Array"
+x = 2024
+y = 1.618
+z = "Zeta"
+a = [1, 2, o]
+b = [3.5, p, 9.8]
+c = ["A", n, "B"]
+d = [r, 4, 5]
+e = [6.6, 7.7, s]
+f = [q, "Q", t]
+g = [8, 9, u]
+h = [v, 10.1, 11.2]
+i = ["I", w, "J"]
+j = [x, 12, 13]
+k = [14.14, y, 15.15]
+l = ["L", "M", z]
+puts n
+puts o
+puts p
+puts q
+puts r
+puts s
+puts t
+puts u
+puts v
+puts w
+puts x
+puts y
+puts z
+puts a
+puts b
+puts c
+puts d
+puts e
+puts f
+puts g
+puts h
+puts i
+puts j
+puts k
+puts l
