@@ -134,13 +134,12 @@ sentencia
 
 asignacion
     : IDENTIFICADOR IGUAL expresion {
+        $3.n->es_inicializada = 1;
         if ($3.tipo && strcmp($3.tipo, "matriz") == 0) {
             // Si tienes forma de calcular filas/columnas, ponlo aquí. Si no, déjalo en 0.
             guardar_simbolo_matriz($1, $3.tipo, $3.tipoBase, $3.filas, $3.columnas, $3.valores ? $3.valores : "NULL");
-            free($3.tipoBase); free($3.valores);
         } else if ($3.tipo && strcmp($3.tipo, "array") == 0) {
-            guardar_simbolo_array($1, $3.tipo, $3.tipoBase, $3.tam, $3.valores ? $3.valores : "NULL");
-            free($3.tipoBase); free($3.valores);
+            guardar_simbolo_array($1, $3.tipo, $3.tipoBase, $3.tam, $3.valores);
         } else {
             guardar_simbolo($1, $3.tipo, $3.valor);
         }
@@ -150,6 +149,7 @@ asignacion
         $$.n = crearNodoAsignacion($1, $3.n);
         mostrar_tabla();
         free($1); free($3.tipo); free($3.valor);
+        free($3.tipoBase); free($3.valores);
     }
 
 if_else_end

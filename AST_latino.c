@@ -342,31 +342,200 @@ void generar_puts(struct ast *expresion) {
         case NODO_STRING:
             fprintf(yyout, "    li $v0, 4\n");
             fprintf(yyout, "    move $a0, %s\n", reg);
+            fprintf(yyout, "    syscall\n");
             break;
         case NODO_FLOAT:
             if (strcmp(reg, "$f12") != 0) {
                 fprintf(yyout, "    mov.s $f12, %s\n", reg);
             }
             fprintf(yyout, "    li $v0, 2\n");
+            fprintf(yyout, "    syscall\n");
             break;
         case NODO_VARIABLE: {
-            const char* tipo = obtener_tipo(expresion->nombre);
-            if (tipo && strcmp(tipo, "float") == 0) {
-                // reg ya es el registro float correcto (de generarASM_rec)
-                if (strcmp(reg, "$f12") != 0) {
-                    fprintf(yyout, "    mov.s $f12, %s\n", reg);
-                }
-                fprintf(yyout, "    li $v0, 2\n");
-            } else if (tipo && strcmp(tipo, "string") == 0) {
-                fprintf(yyout, "    li $v0, 4\n");
-                fprintf(yyout, "    move $a0, %s\n", reg);
-            } else {
-                // int o bool
-                fprintf(yyout, "    li $v0, 1\n");
-                fprintf(yyout, "    move $a0, %s\n", reg);
+    const char* tipo = obtener_tipo(expresion->nombre);
+        if (tipo && strcmp(tipo, "float") == 0) {
+            if (strcmp(reg, "$f12") != 0) {
+                fprintf(yyout, "    mov.s $f12, %s\n", reg);
             }
-            break;
+            fprintf(yyout, "    li $v0, 2\n");
+            fprintf(yyout, "    syscall\n"); // <-- Añade esto
+            return;
+        } else if (tipo && strcmp(tipo, "string") == 0) {
+        fprintf(yyout, "    li $v0, 4\n");
+        fprintf(yyout, "    move $a0, %s\n", reg);
+        fprintf(yyout, "    syscall\n");
+        return;
+    } else if (tipo && (strcmp(tipo, "array") == 0)) {
+        int pos = buscarTabla(expresion->nombre);
+        if (pos >= 0 && tabla[pos].tipoBase) {
+            int tam = tabla[pos].Tamanio;
+            // --- FLOAT ---
+            if (strcmp(tabla[pos].tipoBase, "float") == 0) {
+                fprintf(yyout, "    la $t0, %s\n", expresion->nombre);
+                fprintf(yyout, "    li $t1, 0\n");
+                fprintf(yyout, "    li $t2, %d\n", tam);
+                fprintf(yyout, "print_%s_loop:\n", expresion->nombre);
+                fprintf(yyout, "    bge $t1, $t2, print_%s_end\n", expresion->nombre);
+                fprintf(yyout, "    sll $t3, $t1, 2\n");
+                fprintf(yyout, "    add $t4, $t0, $t3\n");
+                fprintf(yyout, "    lwc1 $f12, 0($t4)\n");
+                fprintf(yyout, "    li $v0, 2\n");
+                fprintf(yyout, "    syscall\n");
+                fprintf(yyout, "    li $a0, 10\n");
+                fprintf(yyout, "    li $v0, 11\n");
+                fprintf(yyout, "    syscall\n");
+                fprintf(yyout, "    addi $t1, $t1, 1\n");
+                fprintf(yyout, "    j print_%s_loop\n", expresion->nombre);
+                fprintf(yyout, "print_%s_end:\n", expresion->nombre);
+            }
+            // --- INT / BOOL ---
+            else if (strcmp(tabla[pos].tipoBase, "int") == 0 || strcmp(tabla[pos].tipoBase, "bool") == 0) {
+                fprintf(yyout, "    la $t0, %s\n", expresion->nombre);
+                fprintf(yyout, "    li $t1, 0\n");
+                fprintf(yyout, "    li $t2, %d\n", tam);
+                fprintf(yyout, "print_%s_loop:\n", expresion->nombre);
+                fprintf(yyout, "    bge $t1, $t2, print_%s_end\n", expresion->nombre);
+                fprintf(yyout, "    sll $t3, $t1, 2\n");
+                fprintf(yyout, "    add $t4, $t0, $t3\n");
+                fprintf(yyout, "    lw $a0, 0($t4)\n");
+                fprintf(yyout, "    li $v0, 1\n");
+                fprintf(yyout, "    syscall\n");
+                fprintf(yyout, "    li $a0, 10\n");
+                fprintf(yyout, "    li $v0, 11\n");
+                fprintf(yyout, "    syscall\n");
+                fprintf(yyout, "    addi $t1, $t1, 1\n");
+                fprintf(yyout, "    j print_%s_loop\n", expresion->nombre);
+                fprintf(yyout, "print_%s_end:\n", expresion->nombre);
+            }
+            // --- STRING ---
+            else if (strcmp(tabla[pos].tipoBase, "string") == 0) {
+                fprintf(yyout, "    la $t0, %s\n", expresion->nombre);
+                fprintf(yyout, "    li $t1, 0\n");
+                fprintf(yyout, "    li $t2, %d\n", tam);
+                fprintf(yyout, "print_%s_loop:\n", expresion->nombre);
+                fprintf(yyout, "    bge $t1, $t2, print_%s_end\n", expresion->nombre);
+                fprintf(yyout, "    sll $t3, $t1, 2\n");
+                fprintf(yyout, "    add $t4, $t0, $t3\n");
+                fprintf(yyout, "    lw $a0, 0($t4)\n");
+                fprintf(yyout, "    li $v0, 4\n");
+                fprintf(yyout, "    syscall\n");
+                fprintf(yyout, "    li $a0, 10\n");
+                fprintf(yyout, "    li $v0, 11\n");
+                fprintf(yyout, "    syscall\n");
+                fprintf(yyout, "    addi $t1, $t1, 1\n");
+                fprintf(yyout, "    j print_%s_loop\n", expresion->nombre);
+                fprintf(yyout, "print_%s_end:\n", expresion->nombre);
+            }
         }
+        return;
+    }
+    // --- MATRIZ ---
+    else if (tipo && strcmp(tipo, "matriz") == 0) {
+        int pos = buscarTabla(expresion->nombre);
+        if (pos >= 0 && tabla[pos].tipoBase) {
+            int filas = tabla[pos].Filas;
+            int columnas = tabla[pos].Columnas;
+            // --- INT / BOOL ---
+            if (strcmp(tabla[pos].tipoBase, "int") == 0 || strcmp(tabla[pos].tipoBase, "bool") == 0) {
+                fprintf(yyout, "    la $t0, %s\n", expresion->nombre);
+                fprintf(yyout, "    li $t1, 0\n"); // i = 0
+                fprintf(yyout, "    li $t3, %d\n", filas);
+                fprintf(yyout, "    li $t4, %d\n", columnas);
+                fprintf(yyout, "print_%s_outer:\n", expresion->nombre);
+                fprintf(yyout, "    bge $t1, $t3, print_%s_end\n", expresion->nombre);
+                fprintf(yyout, "    li $t2, 0\n"); // j = 0
+                fprintf(yyout, "print_%s_inner:\n", expresion->nombre);
+                fprintf(yyout, "    bge $t2, $t4, print_%s_next_row\n", expresion->nombre);
+                fprintf(yyout, "    mul $t5, $t1, $t4\n");
+                fprintf(yyout, "    add $t5, $t5, $t2\n");
+                fprintf(yyout, "    sll $t5, $t5, 2\n");
+                fprintf(yyout, "    add $t6, $t0, $t5\n");
+                fprintf(yyout, "    lw $a0, 0($t6)\n");
+                fprintf(yyout, "    li $v0, 1\n");
+                fprintf(yyout, "    syscall\n");
+                fprintf(yyout, "    li $a0, 32\n");
+                fprintf(yyout, "    li $v0, 11\n");
+                fprintf(yyout, "    syscall\n");
+                fprintf(yyout, "    addi $t2, $t2, 1\n");
+                fprintf(yyout, "    j print_%s_inner\n", expresion->nombre);
+                fprintf(yyout, "print_%s_next_row:\n", expresion->nombre);
+                fprintf(yyout, "    li $a0, 10\n");
+                fprintf(yyout, "    li $v0, 11\n");
+                fprintf(yyout, "    syscall\n");
+                fprintf(yyout, "    addi $t1, $t1, 1\n");
+                fprintf(yyout, "    j print_%s_outer\n", expresion->nombre);
+                fprintf(yyout, "print_%s_end:\n", expresion->nombre);
+            }
+            // --- FLOAT ---
+            else if (strcmp(tabla[pos].tipoBase, "float") == 0) {
+                fprintf(yyout, "    la $t0, %s\n", expresion->nombre);
+                fprintf(yyout, "    li $t1, 0\n"); // i = 0
+                fprintf(yyout, "    li $t3, %d\n", filas);
+                fprintf(yyout, "    li $t4, %d\n", columnas);
+                fprintf(yyout, "print_%s_outer:\n", expresion->nombre);
+                fprintf(yyout, "    bge $t1, $t3, print_%s_end\n", expresion->nombre);
+                fprintf(yyout, "    li $t2, 0\n"); // j = 0
+                fprintf(yyout, "print_%s_inner:\n", expresion->nombre);
+                fprintf(yyout, "    bge $t2, $t4, print_%s_next_row\n", expresion->nombre);
+                fprintf(yyout, "    mul $t5, $t1, $t4\n");
+                fprintf(yyout, "    add $t5, $t5, $t2\n");
+                fprintf(yyout, "    sll $t5, $t5, 2\n");
+                fprintf(yyout, "    add $t6, $t0, $t5\n");
+                fprintf(yyout, "    lwc1 $f12, 0($t6)\n");
+                fprintf(yyout, "    li $v0, 2\n");
+                fprintf(yyout, "    syscall\n");
+                fprintf(yyout, "    li $a0, 32\n");
+                fprintf(yyout, "    li $v0, 11\n");
+                fprintf(yyout, "    syscall\n");
+                fprintf(yyout, "    addi $t2, $t2, 1\n");
+                fprintf(yyout, "    j print_%s_inner\n", expresion->nombre);
+                fprintf(yyout, "print_%s_next_row:\n", expresion->nombre);
+                fprintf(yyout, "    li $a0, 10\n");
+                fprintf(yyout, "    li $v0, 11\n");
+                fprintf(yyout, "    syscall\n");
+                fprintf(yyout, "    addi $t1, $t1, 1\n");
+                fprintf(yyout, "    j print_%s_outer\n", expresion->nombre);
+                fprintf(yyout, "print_%s_end:\n", expresion->nombre);
+            }
+            // --- STRING ---
+            else if (strcmp(tabla[pos].tipoBase, "string") == 0) {
+                fprintf(yyout, "    la $t0, %s\n", expresion->nombre);
+                fprintf(yyout, "    li $t1, 0\n"); // i = 0
+                fprintf(yyout, "    li $t3, %d\n", filas);
+                fprintf(yyout, "    li $t4, %d\n", columnas);
+                fprintf(yyout, "print_%s_outer:\n", expresion->nombre);
+                fprintf(yyout, "    bge $t1, $t3, print_%s_end\n", expresion->nombre);
+                fprintf(yyout, "    li $t2, 0\n"); // j = 0
+                fprintf(yyout, "print_%s_inner:\n", expresion->nombre);
+                fprintf(yyout, "    bge $t2, $t4, print_%s_next_row\n", expresion->nombre);
+                fprintf(yyout, "    mul $t5, $t1, $t4\n");
+                fprintf(yyout, "    add $t5, $t5, $t2\n");
+                fprintf(yyout, "    sll $t5, $t5, 2\n");
+                fprintf(yyout, "    add $t6, $t0, $t5\n");
+                fprintf(yyout, "    lw $a0, 0($t6)\n");
+                fprintf(yyout, "    li $v0, 4\n");
+                fprintf(yyout, "    syscall\n");
+                fprintf(yyout, "    li $a0, 32\n");
+                fprintf(yyout, "    li $v0, 11\n");
+                fprintf(yyout, "    syscall\n");
+                fprintf(yyout, "    addi $t2, $t2, 1\n");
+                fprintf(yyout, "    j print_%s_inner\n", expresion->nombre);
+                fprintf(yyout, "print_%s_next_row:\n", expresion->nombre);
+                fprintf(yyout, "    li $a0, 10\n");
+                fprintf(yyout, "    li $v0, 11\n");
+                fprintf(yyout, "    syscall\n");
+                fprintf(yyout, "    addi $t1, $t1, 1\n");
+                fprintf(yyout, "    j print_%s_outer\n", expresion->nombre);
+                fprintf(yyout, "print_%s_end:\n", expresion->nombre);
+            }
+        }
+        return;
+    }
+    // int o bool simple
+    fprintf(yyout, "    li $v0, 1\n");
+    fprintf(yyout, "    move $a0, %s\n", reg);
+    break;
+}
         case NODO_NUMERO:
         case NODO_BOOL:
             fprintf(yyout, "    li $v0, 1\n");
@@ -671,6 +840,24 @@ void generarASM(struct ast *n) {
 
     // 3. Sección .text y main
     fprintf(yyout, ".text\n.globl main\nmain:\n");
+
+        // --- Inicialización de arrays con expresiones ---
+    for (int i = 0; i < indice; i++) {
+        if (tabla[i].tipo && strcmp(tabla[i].tipo, "array") == 0 && tabla[i].tipoBase && strcmp(tabla[i].tipoBase, "int") == 0) {
+            // Ejemplo para a = [7+8, 7]
+            // Aquí deberías recorrer el AST de cada elemento del array y generar el código MIPS para cada uno.
+            // Por simplicidad, si tienes los ASTs de los elementos:
+            // Para el primer elemento (7+8):
+            fprintf(yyout, "    li $t0, 7\n");
+            fprintf(yyout, "    li $t1, 8\n");
+            fprintf(yyout, "    add $t2, $t0, $t1\n");
+            fprintf(yyout, "    la $t3, %s\n", tabla[i].nombre);
+            fprintf(yyout, "    sw $t2, 0($t3)\n");
+            // Para el segundo elemento (7):
+            fprintf(yyout, "    li $t4, 7\n");
+            fprintf(yyout, "    sw $t4, 4($t3)\n");
+        }
+    }
 
     // 4. Código de instrucciones
     generarASM_rec(n);
