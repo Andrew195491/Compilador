@@ -46,6 +46,16 @@ int num_linea = 1;
 "<="                    { return MENORIGUAL; }
 ">"                     { return MAYOR; }
 "<"                         { return MENOR; }
+"true"                  { yylval.stringVal = strdup("true"); return BOOL; }
+"false"                 { yylval.stringVal = strdup("false"); return BOOL; }
+"if"                    { return IF; }
+"else"                  { return ELSE; }
+"for"                   { return FOR; }
+"while"                 { return WHILE; }
+"#".*                   ;
+"=begin"                BEGIN(COMMENT);
+<COMMENT>[^=]*[\r\n]+   ;
+<COMMENT>"=end"         BEGIN(INITIAL);
 
 "#".*                   ; // comentarios de una línea estilo Ruby
 
