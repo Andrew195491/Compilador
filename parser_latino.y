@@ -58,11 +58,6 @@ void yyerror(const char* s) {
 %type   <simbolo> array expresion_array acceso_array indices_array
 %type   <simbolo> if_else_end while_end funcion_definicion llamada_funcion parametros parametros_opt argumentos argumentos_opt
 
-%token <stringVal> IDENTIFICADOR CADENA BOOL 
-%token SUMA RESTA MULTI DIVISION CORCHETEABIERTO CORCHETECERRADO SEPARADOR IGUAL
-%token IF ELSE
-%token FOR WHILE
-
 
 %start programa
 

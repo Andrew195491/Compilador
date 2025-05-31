@@ -11,7 +11,6 @@ extern FILE *yyout;
 
 #define MAX_VARS 100
 char *lista_vars[MAX_VARS];
-int tipos_vars[MAX_VARS]; // 0=int/bool, 1=float, 2=string
 char* inicializada[MAX_VARS];
 int num_vars = 0;
 const char* nombres_nodo[] = {
@@ -35,7 +34,6 @@ const char* nombres_nodo[] = {
 };
 
 // Para strings en .data
-int string_label_counter = 0;
 int float_label_counter = 0;
 
 
@@ -840,24 +838,6 @@ void generarASM(struct ast *n) {
 
     // 3. Sección .text y main
     fprintf(yyout, ".text\n.globl main\nmain:\n");
-
-        // --- Inicialización de arrays con expresiones ---
-    for (int i = 0; i < indice; i++) {
-        if (tabla[i].tipo && strcmp(tabla[i].tipo, "array") == 0 && tabla[i].tipoBase && strcmp(tabla[i].tipoBase, "int") == 0) {
-            // Ejemplo para a = [7+8, 7]
-            // Aquí deberías recorrer el AST de cada elemento del array y generar el código MIPS para cada uno.
-            // Por simplicidad, si tienes los ASTs de los elementos:
-            // Para el primer elemento (7+8):
-            fprintf(yyout, "    li $t0, 7\n");
-            fprintf(yyout, "    li $t1, 8\n");
-            fprintf(yyout, "    add $t2, $t0, $t1\n");
-            fprintf(yyout, "    la $t3, %s\n", tabla[i].nombre);
-            fprintf(yyout, "    sw $t2, 0($t3)\n");
-            // Para el segundo elemento (7):
-            fprintf(yyout, "    li $t4, 7\n");
-            fprintf(yyout, "    sw $t4, 4($t3)\n");
-        }
-    }
 
     // 4. Código de instrucciones
     generarASM_rec(n);

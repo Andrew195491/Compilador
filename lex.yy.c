@@ -371,8 +371,8 @@ static void yy_fatal_error (yyconst char msg[]  );
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
 
-#define YY_NUM_RULES 39
-#define YY_END_OF_BUFFER 40
+#define YY_NUM_RULES 40
+#define YY_END_OF_BUFFER 41
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -382,14 +382,14 @@ struct yy_trans_info
 	};
 static yyconst flex_int16_t yy_accept[85] =
     {   0,
-        0,    0,    0,    0,   40,   38,    1,    2,   38,   38,
-       33,   19,   20,   25,   23,   18,   24,   26,   35,   32,
-       15,   31,   37,   16,   17,   37,   37,   37,   37,   37,
-       37,   37,   22,   39,    4,   39,    1,   28,    0,   36,
-       33,   21,    0,   35,   30,   27,    0,   29,   37,   37,
-       37,   37,   37,   37,    8,   37,   37,   37,    0,    4,
-        0,   34,    0,    6,   37,    7,   37,   10,   37,   37,
-       37,    0,    0,    9,   37,   12,   13,   37,    5,    0,
+        0,    0,    0,    0,   41,   39,    1,    2,   39,   39,
+       33,   19,   20,   25,   23,   18,   24,   26,   36,   32,
+       15,   31,   38,   16,   17,   38,   38,   38,   38,   38,
+       38,   38,   22,   40,    4,   40,    1,   28,    0,   37,
+       33,   21,    0,   36,   30,   27,    0,   29,   38,   38,
+       38,   38,   38,   38,    8,   38,   38,   38,    0,    4,
+        0,   35,    0,    6,   38,    7,   38,   10,   38,   38,
+       38,    0,    0,    9,   38,   12,   13,   38,    5,    0,
        14,   11,    3,    0
     } ;
 
@@ -962,41 +962,46 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 50 "scanner_latino.l"
-; // comentarios de una línea estilo Ruby
+#line 49 "scanner_latino.l"
+;
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 52 "scanner_latino.l"
-{ yylval.realVal = atof(yytext); return NUMERICODECIMAL; }
+#line 51 "scanner_latino.l"
+; // comentarios de una línea estilo Ruby
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
 #line 53 "scanner_latino.l"
-{ yylval.enteroVal = atoi(yytext); return NUMERICO; }
+{ yylval.realVal = atof(yytext); return NUMERICODECIMAL; }
 	YY_BREAK
 case 36:
-/* rule 36 can match eol */
 YY_RULE_SETUP
 #line 54 "scanner_latino.l"
-{ yylval.stringVal = strdup(yytext); return CADENA; }
+{ yylval.enteroVal = atoi(yytext); return NUMERICO; }
 	YY_BREAK
 case 37:
+/* rule 37 can match eol */
 YY_RULE_SETUP
-#line 56 "scanner_latino.l"
-{ yylval.stringVal = strdup(yytext); return IDENTIFICADOR; }
+#line 55 "scanner_latino.l"
+{ yylval.stringVal = strdup(yytext); return CADENA; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 58 "scanner_latino.l"
-{ printf("[LEX] Caracter no reconocido: %s (linea %d)\n", yytext, num_linea); }
+#line 57 "scanner_latino.l"
+{ yylval.stringVal = strdup(yytext); return IDENTIFICADOR; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 60 "scanner_latino.l"
+#line 59 "scanner_latino.l"
+{ printf("[LEX] Caracter no reconocido: %s (linea %d)\n", yytext, num_linea); }
+	YY_BREAK
+case 40:
+YY_RULE_SETUP
+#line 61 "scanner_latino.l"
 ECHO;
 	YY_BREAK
-#line 1000 "lex.yy.c"
+#line 1005 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 	yyterminate();
@@ -1995,7 +2000,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 60 "scanner_latino.l"
+#line 61 "scanner_latino.l"
 
 
 

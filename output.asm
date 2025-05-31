@@ -40,34 +40,6 @@ l: .word l_str0 l_str1 l_str2
 .text
 .globl main
 main:
-    li $t0, 7
-    li $t1, 8
-    add $t2, $t0, $t1
-    la $t3, a
-    sw $t2, 0($t3)
-    li $t4, 7
-    sw $t4, 4($t3)
-    li $t0, 7
-    li $t1, 8
-    add $t2, $t0, $t1
-    la $t3, d
-    sw $t2, 0($t3)
-    li $t4, 7
-    sw $t4, 4($t3)
-    li $t0, 7
-    li $t1, 8
-    add $t2, $t0, $t1
-    la $t3, g
-    sw $t2, 0($t3)
-    li $t4, 7
-    sw $t4, 4($t3)
-    li $t0, 7
-    li $t1, 8
-    add $t2, $t0, $t1
-    la $t3, j
-    sw $t2, 0($t3)
-    li $t4, 7
-    sw $t4, 4($t3)
     la $t0, n
     # $t1 ya inicializado, se reutiliza
     # o ya inicializado (int/bool), se omite sw
