@@ -18,6 +18,7 @@ struct ast {
     char* valor_str;
     int valor_int;
     float valor_float;
+    int es_inicializada;
 };
 
 // Prototipos de funciones

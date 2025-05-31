@@ -1,8 +1,18 @@
-x = 1
-y = 0
-if x == 0
-  puts "positivo"
-  y = x + 1
-else
-  puts "no positivo"
-end
+ai = 1
+bi = 2
+ci = ai + bi + 3
+puts ai
+puts bi
+puts ci
+as = "Hola"
+bs = "Que"
+cs = "Tal"
+puts as
+puts bs
+puts cs
+af = 1.1
+bf = 2.2
+cf = af + bf
+puts af
+puts bf
+puts cf

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "tabla_simbolos.h"
 
@@ -101,6 +102,7 @@ struct ast *crearNodoNumero(int valor) {
     n->valor_int = valor;
     n->izq = n->dcha = NULL;
     n->nombre = NULL; n->valor_str = NULL;
+    n->es_inicializada = 0;
     return n;
 }
 
@@ -111,6 +113,8 @@ struct ast *crearNodoFloat(float valor) {
     n->izq = n->dcha = NULL;
     n->nombre = NULL; 
     n->valor_str = malloc(32);
+    n->es_inicializada = 0;
+    
     sprintf(n->valor_str, "float_%d", float_label_counter++);
     return n;
 }
@@ -121,6 +125,7 @@ struct ast *crearNodoString(const char* valor) {
     n->valor_str = strdup(valor);
     n->izq = n->dcha = NULL;
     n->nombre = NULL;
+    n->es_inicializada = 0;
     return n;
 }
 
@@ -302,6 +307,16 @@ const char* nuevo_temp() {
     return buffer[idx];
 }
 
+const char* nuevo_temp_float() {
+    static int temp_float_counter = 12;
+    static char buffer[10][6];
+    int idx = (temp_float_counter - 12) % 10;
+    sprintf(buffer[idx], "$f%d", temp_float_counter);
+    temp_float_counter++;
+    if (temp_float_counter > 19) temp_float_counter = 12; // Rango seguro para temporales
+    return buffer[idx];
+}
+
 // Prototipo necesario para evitar error:
 const char* generarASM_rec(struct ast *n);
 
@@ -316,12 +331,31 @@ void generar_puts(struct ast *expresion) {
             fprintf(yyout, "    move $a0, %s\n", reg);
             break;
         case NODO_FLOAT:
-            fprintf(yyout, "    mov.s $f12, %s\n", reg);
+            if (strcmp(reg, "$f12") != 0) {
+                fprintf(yyout, "    mov.s $f12, %s\n", reg);
+            }
             fprintf(yyout, "    li $v0, 2\n");
             break;
+        case NODO_VARIABLE: {
+            const char* tipo = obtener_tipo(expresion->nombre);
+            if (tipo && strcmp(tipo, "float") == 0) {
+                // reg ya es el registro float correcto (de generarASM_rec)
+                if (strcmp(reg, "$f12") != 0) {
+                    fprintf(yyout, "    mov.s $f12, %s\n", reg);
+                }
+                fprintf(yyout, "    li $v0, 2\n");
+            } else if (tipo && strcmp(tipo, "string") == 0) {
+                fprintf(yyout, "    li $v0, 4\n");
+                fprintf(yyout, "    move $a0, %s\n", reg);
+            } else {
+                // int o bool
+                fprintf(yyout, "    li $v0, 1\n");
+                fprintf(yyout, "    move $a0, %s\n", reg);
+            }
+            break;
+        }
         case NODO_NUMERO:
         case NODO_BOOL:
-        case NODO_VARIABLE:
             fprintf(yyout, "    li $v0, 1\n");
             fprintf(yyout, "    move $a0, %s\n", reg);
             break;
@@ -342,8 +376,16 @@ const char* generarASM_rec(struct ast *n) {
     if (!n) return NULL;
     printf("Tipo Nodo: %s\n", nombres_nodo[n->tipoNodo]);
         switch(n->tipoNodo) {
-            case NODO_NUMERO: {
+           case NODO_NUMERO: {
                 const char* reg = nuevo_temp();
+
+                if (!n->es_inicializada) {
+                    fprintf(yyout, "    li %s, %d\n", reg, n->valor_int);
+                    n->es_inicializada = 1;  // Lo marcamos como inicializado después de generarlo
+                } else {
+                    fprintf(yyout, "    # %s ya inicializado, se reutiliza\n", reg);
+                }
+
                 return reg;
             }
             case NODO_BOOL: {
@@ -352,27 +394,89 @@ const char* generarASM_rec(struct ast *n) {
             }
             case NODO_STRING: {
                 const char* reg = nuevo_temp();
-                fprintf(yyout, "    la %s, str_%d\n", reg, string_label_counter);
-                string_label_counter++;
+                // Busca el string literal en la tabla de símbolos por su valor
+                int pos = -1;
+                for (int i = 0; i < indice; i++) {
+                    if (tabla[i].tipo && strcmp(tabla[i].tipo, "string") == 0 && tabla[i].valor && strcmp(tabla[i].valor, n->valor_str) == 0) {
+                        pos = i;
+                        break;
+                    }
+                }
+                if (pos >= 0) {
+                    fprintf(yyout, "    la %s, %s\n", reg, tabla[pos].nombre);
+                } else {
+                    fprintf(yyout, "    # ERROR: string literal no encontrado en tabla de símbolos\n");
+                }
                 return reg;
             }
             case NODO_VARIABLE: {
-                const char* reg = nuevo_temp();
-                registrar_variable(n->nombre);
-                fprintf(yyout, "    lw %s, %s\n", reg, n->nombre);
-                return reg;
+                const char* tipo = obtener_tipo(n->nombre);
+
+                if (tipo && strcmp(tipo, "float") == 0) {
+                    const char* reg = nuevo_temp_float();
+                    fprintf(yyout, "    l.s %s, %s\n", reg, n->nombre);
+                    return reg;
+                } else if (tipo && strcmp(tipo, "string") == 0) {
+                    const char* reg = nuevo_temp();
+                    fprintf(yyout, "    la %s, %s\n", reg, n->nombre);
+                    return reg;
+                } else {
+                    // int o bool
+                    const char* reg = nuevo_temp();
+                    fprintf(yyout, "    lw %s, %s\n", reg, n->nombre);
+                    return reg;
+                }
             }
+
             case NODO_FLOAT: {
-                const char* reg = nuevo_temp();
-                fprintf(yyout, "    l.s %s, %f\n", reg, n->valor_float);
+                const char* reg = nuevo_temp_float();
+                int pos = -1;
+                for (int i = 0; i < indice; i++) {
+                    if (tabla[i].tipo && strcmp(tabla[i].tipo, "float") == 0 && tabla[i].valor) {
+                        float val = atof(tabla[i].valor);
+                        if (fabsf(val - n->valor_float) < 0.0001f) {
+                            pos = i;
+                            break;
+                        }
+                    }
+                }
+                if (pos >= 0) {
+                    fprintf(yyout, "    l.s %s, %s\n", reg, tabla[pos].nombre);
+                } else {
+                    fprintf(yyout, "    # ERROR: float literal no encontrado en tabla de símbolos\n");
+                }
                 return reg;
             }
             case NODO_SUMA: {
-                const char* reg_izq = generarASM_rec(n->izq);
-                const char* reg_dcha = generarASM_rec(n->dcha);
-                const char* reg = nuevo_temp();
-                fprintf(yyout, "    add %s, %s, %s\n", reg, reg_izq, reg_dcha);
-                return reg;
+                // Detecta si alguno de los operandos es float
+                const char* tipo_izq = NULL;
+                const char* tipo_dcha = NULL;
+                if (n->izq->tipoNodo == NODO_VARIABLE)
+                    tipo_izq = obtener_tipo(n->izq->nombre);
+                else if (n->izq->tipoNodo == NODO_FLOAT)
+                    tipo_izq = "float";
+
+                if (n->dcha->tipoNodo == NODO_VARIABLE)
+                    tipo_dcha = obtener_tipo(n->dcha->nombre);
+                else if (n->dcha->tipoNodo == NODO_FLOAT)
+                    tipo_dcha = "float";
+
+                int es_float = (tipo_izq && strcmp(tipo_izq, "float") == 0) ||
+                            (tipo_dcha && strcmp(tipo_dcha, "float") == 0);
+
+                if (es_float) {
+                    const char* reg_izq = generarASM_rec(n->izq);
+                    const char* reg_dcha = generarASM_rec(n->dcha);
+                    const char* reg = nuevo_temp_float();
+                    fprintf(yyout, "    add.s %s, %s, %s\n", reg, reg_izq, reg_dcha);
+                    return reg;
+                } else {
+                    const char* reg_izq = generarASM_rec(n->izq);
+                    const char* reg_dcha = generarASM_rec(n->dcha);
+                    const char* reg = nuevo_temp();
+                    fprintf(yyout, "    add %s, %s, %s\n", reg, reg_izq, reg_dcha);
+                    return reg;
+                }
             }
             case NODO_RESTA: {
                 const char* reg_izq = generarASM_rec(n->izq);
@@ -395,36 +499,26 @@ const char* generarASM_rec(struct ast *n) {
                 fprintf(yyout, "    div %s, %s, %s\n", reg, reg_izq, reg_dcha);
                 return reg;
             }
-            case NODO_ASIGNACION: {
+           case NODO_ASIGNACION: {
                 const char* reg = generarASM_rec(n->izq);
+                const char* tipo = obtener_tipo(n->nombre);  // ← Consultamos tipo desde la tabla
 
-                // Detecta el tipo de la expresión derecha
-                int tipo = -1;
-                switch (n->izq->tipoNodo) {
-                    case NODO_NUMERO:
-                    case NODO_BOOL:
-                        tipo = 0; // int/bool
-                        break;
-                    case NODO_FLOAT:
-                        tipo = 1; // float
-                        break;
-                    case NODO_STRING:
-                        tipo = 2; // string
-                        break;
-                    default:
-                        tipo = 0;
-                }
+                registrar_variable(n->nombre); // Aseguramos que esté registrada
 
-                registrar_variable(n->nombre);
-
-                if (tipo == 1) {
-                    // float
-                    fprintf(yyout, "    s.s %s, %s\n", reg, n->nombre);
-                } else if (tipo == 2) {
-                    // string: reg debe ser la dirección del string
-                    fprintf(yyout, "    sw %s, %s\n", reg, n->nombre);
-                } else {
-                    // int/bool
+                if (tipo && strcmp(tipo, "float") == 0) {
+                    // Asignación de float
+                    if (strcmp(reg, "$f12") != 0) {
+                        fprintf(yyout, "    mov.s $f12, %s\n", reg);
+                    }
+                    fprintf(yyout, "    s.s $f12, %s\n", n->nombre);
+                    return "$f12"; // ← Mantenemos $f12 como registro por convención
+                } 
+                else if (tipo && strcmp(tipo, "string") == 0) {
+                    // No guardamos strings en memoria (asumimos literales)
+                    return reg;
+                } 
+                else {
+                    // int o bool
                     int esta_inicializada = 0;
                     for (int i = 0; i < MAX_VARS; i++) {
                         if (inicializada[i] && strcmp(inicializada[i], n->nombre) == 0) {
@@ -434,26 +528,28 @@ const char* generarASM_rec(struct ast *n) {
                     }
                     if (!esta_inicializada) {
                         fprintf(yyout, "    sw %s, %s\n", reg, n->nombre);
+                    } else {
+                        fprintf(yyout, "    # %s ya inicializado (int/bool), se omite sw\n", n->nombre);
                     }
-
+                    return reg;
                 }
-                return reg;
             }
-            case NODO_LISTA: {
-                generarASM_rec(n->izq);
-                generarASM_rec(n->dcha);
+
+                        case NODO_LISTA: {
+                            generarASM_rec(n->izq);
+                            generarASM_rec(n->dcha);
+                            return NULL;
+                        }
+                        case NODO_PUTS: {
+                            generar_puts(n->izq);
+                            return NULL;
+                        }
+                        default:
+                            break;
+                    }
+                
                 return NULL;
             }
-            case NODO_PUTS: {
-                generar_puts(n->izq);
-                return NULL;
-            }
-            default:
-                break;
-        }
-    
-    return NULL;
-}
 
 // ======== Declaración de variables en .data según tipo ========
 
@@ -493,7 +589,7 @@ void generarASM(struct ast *n) {
             fprintf(yyout, "%s: .float %f\n", tabla[i].nombre, val);
         }
         else if (strcmp(tipo, "string") == 0) {
-            fprintf(yyout, "%s: .asciiz \"%s\"\n", tabla[i].nombre, valor ? valor : "");
+            fprintf(yyout, "%s: .asciiz %s\n", tabla[i].nombre, valor ? valor : "");
         }
     }
     fprintf(yyout, "\n");

@@ -131,6 +131,7 @@ asignacion
         guardar_simbolo($1,$3.tipo, $3.valor);
         $$.tipo = strdup("asignacion");
         $$.valor = NULL;
+        $3.n->es_inicializada = 1;
         $$.n = crearNodoAsignacion($1, $3.n);
         mostrar_tabla();
         free($1); free($3.tipo); free($3.valor);
