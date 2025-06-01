@@ -795,6 +795,57 @@ const char* generarASM_rec(struct ast *n) {
 
                 return reg;
             }
+            case NODO_DIFERENTE: {
+                const char* reg_izq = generarASM_rec(n->izq);
+                const char* reg_dcha = generarASM_rec(n->dcha);
+                const char* reg = nuevo_temp();
+
+                fprintf(yyout, "    sne %s, %s, %s\n", reg, reg_izq, reg_dcha);
+
+                return reg;
+            }
+            case NODO_MENOR: {
+                const char* reg_izq = generarASM_rec(n->izq);
+                const char* reg_dcha = generarASM_rec(n->dcha);
+                const char* reg = nuevo_temp();
+
+                fprintf(yyout, "    slt %s, %s, %s\n", reg, reg_izq, reg_dcha);
+
+                return reg;
+            }
+            case NODO_MENORIGUAL: {
+                const char* reg_izq = generarASM_rec(n->izq);
+                const char* reg_dcha = generarASM_rec(n->dcha);
+                const char* reg = nuevo_temp();
+
+                fprintf(yyout,
+                                "    slt $at, %s, %s\n"
+                                "    xori %s, $at, 1\n",
+                                reg_dcha, reg_izq, reg);
+
+                return reg;
+            }
+            case NODO_MAYOR: {
+                const char* reg_izq = generarASM_rec(n->izq);
+                const char* reg_dcha = generarASM_rec(n->dcha);
+                const char* reg = nuevo_temp();
+
+                fprintf(yyout, "    sgt %s, %s, %s\n", reg, reg_izq, reg_dcha);
+
+                return reg;
+            }
+            case NODO_MAYORIGUAL: {
+                const char* reg_izq = generarASM_rec(n->izq);
+                const char* reg_dcha = generarASM_rec(n->dcha);
+                const char* reg = nuevo_temp();
+
+                  fprintf(yyout,
+                                "    sgt $at, %s, %s\n"
+                                "    xori %s, $at, 1\n",
+                                reg_dcha, reg_izq, reg);
+
+                return reg;
+            }
             case NODO_ASIGNACION: {
                 const char* reg = generarASM_rec(n->izq);
                 const char* tipo = obtener_tipo(n->nombre);
@@ -853,6 +904,7 @@ const char* generarASM_rec(struct ast *n) {
 
 void recolectar_vars_tipos(struct ast *nodo) {
     if (!nodo) return;
+    printf("Recolectando variable: %s, tipo: %d\n", nodo->nombre, nodo->tipoNodo);
     if (nodo->tipoNodo == NODO_ASIGNACION) {
         registrar_variable(nodo->nombre);
     }
@@ -884,7 +936,12 @@ void generarASM(struct ast *n) {
                 strchr(tabla[i].valor, '-') != NULL ||
                 strchr(tabla[i].valor, '*') != NULL || 
                 strchr(tabla[i].valor, '/') != NULL || 
-                strstr(tabla[i].valor, "==") != NULL  ));
+                strstr(tabla[i].valor, "==") != NULL ||
+                strstr(tabla[i].valor, "!=") != NULL ||
+                strstr(tabla[i].valor, "<") != NULL ||
+                strstr(tabla[i].valor, "<=") != NULL ||
+                strstr(tabla[i].valor, ">") != NULL ||
+                strstr(tabla[i].valor, ">=") != NULL ));
 
             if (!es_expresion) {
                 int val = (valor != NULL) ? atoi(valor) : 0;
@@ -904,7 +961,12 @@ void generarASM(struct ast *n) {
                 strchr(tabla[i].valor, '-') != NULL ||
                 strchr(tabla[i].valor, '*') != NULL || 
                 strchr(tabla[i].valor, '/') != NULL || 
-                strstr(tabla[i].valor, "==") != NULL  ));
+                strstr(tabla[i].valor, "==") != NULL || 
+                strstr(tabla[i].valor, "!=") != NULL ||
+                strstr(tabla[i].valor, "<") != NULL ||
+                strstr(tabla[i].valor, "<=") != NULL ||
+                strstr(tabla[i].valor, ">") != NULL ||
+                strstr(tabla[i].valor, ">=") != NULL ));
 
             if (!es_expresion) {    
                 float val = (valor != NULL) ? atof(valor) : 0.0;

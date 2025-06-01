@@ -462,6 +462,17 @@ expresion
         $$.n = crearNodoOperacion(NODO_DIFERENTE, $1.n, $3.n);
         free($1.tipo); free($3.tipo);
     }
+    | expresion MENORIGUAL expresion {
+        if (strcmp($1.tipo, $3.tipo) != 0) {
+            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
+            exit(1);
+        }
+        $$.tipo = strdup("bool");
+        $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
+        sprintf($$.valor, "%s<=%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
+        $$.n = crearNodoOperacion(NODO_MENORIGUAL, $1.n, $3.n);
+        free($1.tipo); free($3.tipo);
+    }
     | expresion MENOR expresion {
         if (strcmp($1.tipo, $3.tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
@@ -487,17 +498,6 @@ expresion
         $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
         sprintf($$.valor, "%s>%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
         $$.n = crearNodoOperacion(NODO_MAYOR, $1.n, $3.n);
-        free($1.tipo); free($3.tipo);
-    }
-    | expresion MENORIGUAL expresion {
-        if (strcmp($1.tipo, $3.tipo) != 0) {
-            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
-            exit(1);
-        }
-        $$.tipo = strdup("bool");
-        $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
-        sprintf($$.valor, "%s<=%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
-        $$.n = crearNodoOperacion(NODO_MENORIGUAL, $1.n, $3.n);
         free($1.tipo); free($3.tipo);
     }
     | expresion MAYORIGUAL expresion {
