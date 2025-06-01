@@ -4,6 +4,16 @@ a: .word 98
 .text
 .globl main
 main:
-    # No se genera sw para a (no es int/float/bool)
+    li $t0, 98
+    li $t1, 7
+    seq $t2, $t0, $t1
+    # a ya inicializado (int/bool), se omite sw
+    la $t3, a
+    li $v0, 1
+    move $a0, $t3
+    syscall
+    li $a0, 10
+    li $v0, 11
+    syscall
     li $v0, 10
     syscall

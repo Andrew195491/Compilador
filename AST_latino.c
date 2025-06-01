@@ -31,6 +31,12 @@ const char* nombres_nodo[] = {
     "NODO_ELSE",
     "NODO_FUNCION",
     "NODO_LLAMADA_FUNCION",
+    "NODO_IGUALIGUAL",
+    "NODO_DIFERENTE",
+    "NODO_MENOR",
+    "NODO_MENORIGUAL",
+    "NODO_MAYOR",
+    "NODO_MAYORIGUAL",
 };
 
 // Para strings en .data
@@ -293,6 +299,24 @@ void recorrerAST(struct ast *n) {
             break;
         case NODO_BOOL:
             printf("%s", n->valor_str);
+            break;
+        case NODO_IGUALIGUAL:
+            printf("("); recorrerAST(n->izq); printf(" == "); recorrerAST(n->dcha); printf(")");
+            break;
+        case NODO_DIFERENTE:
+            printf("("); recorrerAST(n->izq); printf(" != "); recorrerAST(n->dcha); printf(")");
+            break;
+        case NODO_MENOR:
+            printf("("); recorrerAST(n->izq); printf(" < "); recorrerAST(n->dcha); printf(")");
+            break;
+        case NODO_MAYOR:
+            printf("("); recorrerAST(n->izq); printf(" > "); recorrerAST(n->dcha); printf(")");
+            break;
+        case NODO_MENORIGUAL:
+            printf("("); recorrerAST(n->izq); printf(" <= "); recorrerAST(n->dcha); printf(")");
+            break;
+        case NODO_MAYORIGUAL:
+            printf("("); recorrerAST(n->izq); printf(" >= "); recorrerAST(n->dcha); printf(")");
             break;
         case NODO_VARIABLE:
             printf("%s", n->nombre);
@@ -570,6 +594,8 @@ const char* generarASM_rec(struct ast *n) {
             }
             case NODO_BOOL: {
                 const char* reg = nuevo_temp();
+                int val = strcmp(n->valor_str, "true") == 0 ? 1:0;
+                fprintf(yyout, "    li %s, %d\n", reg, val);
                 return reg;
             }
             case NODO_STRING: {
@@ -597,6 +623,10 @@ const char* generarASM_rec(struct ast *n) {
                     fprintf(yyout, "    l.s %s, %s\n", reg, n->nombre);
                     return reg;
                 } else if (tipo && strcmp(tipo, "string") == 0) {
+                    const char* reg = nuevo_temp();
+                    fprintf(yyout, "    la %s, %s\n", reg, n->nombre);
+                    return reg;
+                } else if (tipo && strcmp(tipo, "bool") == 0) {
                     const char* reg = nuevo_temp();
                     fprintf(yyout, "    la %s, %s\n", reg, n->nombre);
                     return reg;
@@ -756,6 +786,15 @@ const char* generarASM_rec(struct ast *n) {
                     return reg;
                 }
             }
+            case NODO_IGUALIGUAL: {
+                const char* reg_izq = generarASM_rec(n->izq);
+                const char* reg_dcha = generarASM_rec(n->dcha);
+                const char* reg = nuevo_temp();
+
+                fprintf(yyout, "    seq %s, %s, %s\n", reg, reg_izq, reg_dcha);
+
+                return reg;
+            }
 case NODO_ASIGNACION: {
     const char* reg = generarASM_rec(n->izq);
     const char* tipo = obtener_tipo(n->nombre);
@@ -844,7 +883,7 @@ void generarASM(struct ast *n) {
                 strchr(tabla[i].valor, '+') != NULL || 
                 strchr(tabla[i].valor, '-') != NULL ||
                 strchr(tabla[i].valor, '*') != NULL || 
-                strchr(tabla[i].valor, '/') != NULL));
+                strchr(tabla[i].valor, '/') != NULL   ));
 
             if (!es_expresion) {
                 int val = (valor != NULL) ? atoi(valor) : 0;
@@ -863,7 +902,7 @@ void generarASM(struct ast *n) {
                 strchr(tabla[i].valor, '+') != NULL || 
                 strchr(tabla[i].valor, '-') != NULL ||
                 strchr(tabla[i].valor, '*') != NULL || 
-                strchr(tabla[i].valor, '/') != NULL));
+                strchr(tabla[i].valor, '/') != NULL  ));
 
             if (!es_expresion) {    
                 float val = (valor != NULL) ? atof(valor) : 0.0;

@@ -498,8 +498,8 @@ static const yytype_uint16 yyrline[] =
      116,   122,   128,   137,   157,   164,   175,   184,   190,   201,
      202,   206,   212,   222,   231,   232,   236,   242,   251,   274,
      287,   309,   329,   338,   344,   353,   359,   368,   374,   390,
-     405,   420,   441,   451,   461,   471,   487,   498,   509,   524,
-     530,   537,   543,   550,   556,   562
+     405,   420,   441,   451,   458,   465,   481,   492,   503,   518,
+     524,   531,   537,   544,   550,   556
 };
 #endif
 
@@ -2058,9 +2058,6 @@ yyreduce:
 /* Line 1464 of yacc.c  */
 #line 451 "parser_latino.y"
     {
-        if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
-            (yyval.simbolo).n = crearNodoBool("false");
-        }
         (yyval.simbolo).tipo = strdup("bool");
         (yyval.simbolo).valor = malloc(strlen((yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "") + strlen((yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "") + 4);
         sprintf((yyval.simbolo).valor, "%s==%s", (yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "", (yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "");
@@ -2072,11 +2069,8 @@ yyreduce:
   case 44:
 
 /* Line 1464 of yacc.c  */
-#line 461 "parser_latino.y"
+#line 458 "parser_latino.y"
     {
-        if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) == 0) {
-            (yyval.simbolo).n = crearNodoBool("false");
-        }
         (yyval.simbolo).tipo = strdup("bool");
         (yyval.simbolo).valor = malloc(strlen((yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "") + strlen((yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "") + 4);
         sprintf((yyval.simbolo).valor, "%s!=%s", (yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "", (yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "");
@@ -2088,7 +2082,7 @@ yyreduce:
   case 45:
 
 /* Line 1464 of yacc.c  */
-#line 471 "parser_latino.y"
+#line 465 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2110,7 +2104,7 @@ yyreduce:
   case 46:
 
 /* Line 1464 of yacc.c  */
-#line 487 "parser_latino.y"
+#line 481 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2127,7 +2121,7 @@ yyreduce:
   case 47:
 
 /* Line 1464 of yacc.c  */
-#line 498 "parser_latino.y"
+#line 492 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2144,7 +2138,7 @@ yyreduce:
   case 48:
 
 /* Line 1464 of yacc.c  */
-#line 509 "parser_latino.y"
+#line 503 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2161,7 +2155,7 @@ yyreduce:
   case 49:
 
 /* Line 1464 of yacc.c  */
-#line 524 "parser_latino.y"
+#line 518 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("int");
         (yyval.simbolo).valor = malloc(12);
@@ -2173,7 +2167,7 @@ yyreduce:
   case 50:
 
 /* Line 1464 of yacc.c  */
-#line 530 "parser_latino.y"
+#line 524 "parser_latino.y"
     {
         (yyvsp[(2) - (2)].enteroVal) = -(yyvsp[(2) - (2)].enteroVal); // Negar el número
         (yyval.simbolo).tipo = strdup("int");
@@ -2186,7 +2180,7 @@ yyreduce:
   case 51:
 
 /* Line 1464 of yacc.c  */
-#line 537 "parser_latino.y"
+#line 531 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("float");
         (yyval.simbolo).valor = malloc(32);
@@ -2198,7 +2192,7 @@ yyreduce:
   case 52:
 
 /* Line 1464 of yacc.c  */
-#line 543 "parser_latino.y"
+#line 537 "parser_latino.y"
     {
         (yyvsp[(2) - (2)].realVal) = -(yyvsp[(2) - (2)].realVal); // Negar el número
         (yyval.simbolo).tipo = strdup("float");
@@ -2211,7 +2205,7 @@ yyreduce:
   case 53:
 
 /* Line 1464 of yacc.c  */
-#line 550 "parser_latino.y"
+#line 544 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("string");
         (yyval.simbolo).valor = strdup((yyvsp[(1) - (1)].stringVal));
@@ -2223,7 +2217,7 @@ yyreduce:
   case 54:
 
 /* Line 1464 of yacc.c  */
-#line 556 "parser_latino.y"
+#line 550 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("bool");
         (yyval.simbolo).valor = strdup((yyvsp[(1) - (1)].stringVal));
@@ -2235,7 +2229,7 @@ yyreduce:
   case 55:
 
 /* Line 1464 of yacc.c  */
-#line 562 "parser_latino.y"
+#line 556 "parser_latino.y"
     {
         int pos = buscarTabla((yyvsp[(1) - (1)].stringVal));
         if (pos == -1){
@@ -2257,7 +2251,7 @@ yyreduce:
 
 
 /* Line 1464 of yacc.c  */
-#line 2261 "parser_latino.tab.c"
+#line 2255 "parser_latino.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2469,7 +2463,7 @@ yyreturn:
 
 
 /* Line 1684 of yacc.c  */
-#line 580 "parser_latino.y"
+#line 574 "parser_latino.y"
 
 
 int main(int argc, char** argv) {
