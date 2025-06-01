@@ -71,8 +71,8 @@ programa
     }
     ;
 
-salto:
-    | SALTO
+salto: /*vacio*/
+    | SALTO salto
     ;
 
 lista_sentencias
@@ -86,7 +86,7 @@ lista_sentencias
         $$.n = $1.n;
         free($1.tipo); free($1.valor);
     }
-    | lista_sentencias sentencia SALTO {
+    | lista_sentencias sentencia salto {
         $$.tipo = strdup("lista");
         $$.valor = NULL;
         $$.n = crearNodoLista($1.n, $2.n);
