@@ -814,17 +814,18 @@ const char* generarASM_rec(struct ast *n) {
                 return reg;
             }
             case NODO_MENORIGUAL: {
+                printf("Generando código para NODO_MENORIGUAL\n");
                 const char* reg_izq = generarASM_rec(n->izq);
                 const char* reg_dcha = generarASM_rec(n->dcha);
                 const char* reg = nuevo_temp();
 
-                fprintf(yyout,
-                                "    slt $at, %s, %s\n"
-                                "    xori %s, $at, 1\n",
-                                reg_dcha, reg_izq, reg);
+                // a <= b  <=>  !(a > b)
+                fprintf(yyout, "    sgt $at, %s, %s\n", reg_izq, reg_dcha); // $at = (a > b)
+                fprintf(yyout, "    xori %s, $at, 1\n", reg);               // reg = !$at => a <= b
 
                 return reg;
             }
+
             case NODO_MAYOR: {
                 const char* reg_izq = generarASM_rec(n->izq);
                 const char* reg_dcha = generarASM_rec(n->dcha);
@@ -835,20 +836,19 @@ const char* generarASM_rec(struct ast *n) {
                 return reg;
             }
             case NODO_MAYORIGUAL: {
+                printf("<============");
                 const char* reg_izq = generarASM_rec(n->izq);
                 const char* reg_dcha = generarASM_rec(n->dcha);
                 const char* reg = nuevo_temp();
 
-                  fprintf(yyout,
-                                "    sgt $at, %s, %s\n"
-                                "    xori %s, $at, 1\n",
-                                reg_dcha, reg_izq, reg);
+                  fprintf(yyout,"    sgt $at, %s, %s\n    xori %s, $at, 1\n", reg_dcha, reg_izq, reg);
 
                 return reg;
             }
             case NODO_ASIGNACION: {
                 const char* reg = generarASM_rec(n->izq);
                 const char* tipo = obtener_tipo(n->nombre);
+                 printf("Nodo ASIGNACION con hijo tipo: %s\n", nombres_nodo[n->izq->tipoNodo]);
 
                 registrar_variable(n->nombre);
 
