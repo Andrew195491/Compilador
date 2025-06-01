@@ -518,11 +518,25 @@ valor
         sprintf($$.valor, "%d", $1);
         $$.n = crearNodoNumero($1);
     }
+    | RESTA NUMERICO {
+        $2 = -$2; // Negar el número
+        $$.tipo = strdup("int");
+        $$.valor = malloc(12);
+        sprintf($$.valor, "%d", $2);
+        $$.n = crearNodoNumero($2);
+    }
     | NUMERICODECIMAL {
         $$.tipo = strdup("float");
         $$.valor = malloc(32);
         sprintf($$.valor, "%.2f", $1);
         $$.n = crearNodoFloat($1);
+    }
+    | RESTA NUMERICODECIMAL {
+        $2 = -$2; // Negar el número
+        $$.tipo = strdup("float");
+        $$.valor = malloc(32);
+        sprintf($$.valor, "%.2f", $2);
+        $$.n = crearNodoFloat($2);
     }
     | CADENA {
         $$.tipo = strdup("string");
