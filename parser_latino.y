@@ -449,22 +449,16 @@ expresion
         free($2.tipo); free($2.valor);
     }
     | expresion IGUALIGUAL expresion {
-        if (strcmp($1.tipo, $3.tipo) != 0) {
-            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
-            exit(1);
-        }
         $$.tipo = strdup("bool");
-        $$.valor = NULL;
+        $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
+        sprintf($$.valor, "%s==%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
         $$.n = crearNodoOperacion(NODO_IGUALIGUAL, $1.n, $3.n);
         free($1.tipo); free($3.tipo);
     }
     | expresion DIFERENTE expresion {
-        if (strcmp($1.tipo, $3.tipo) != 0) {
-            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
-            exit(1);
-        }
         $$.tipo = strdup("bool");
-        $$.valor = NULL;
+        $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
+        sprintf($$.valor, "%s!=%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
         $$.n = crearNodoOperacion(NODO_DIFERENTE, $1.n, $3.n);
         free($1.tipo); free($3.tipo);
     }
@@ -473,8 +467,14 @@ expresion
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
             exit(1);
         }
+        if (strcmp($1.valor, $3.valor) != 0){
+            $$.valor = "true";
+        }  else {
+            $$.valor = "false";
+        }
         $$.tipo = strdup("bool");
-        $$.valor = NULL;
+        $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
+        sprintf($$.valor, "%s<%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
         $$.n = crearNodoOperacion(NODO_MENOR, $1.n, $3.n);
         free($1.tipo); free($3.tipo);
     }
@@ -484,7 +484,8 @@ expresion
             exit(1);
         }
         $$.tipo = strdup("bool");
-        $$.valor = NULL;
+        $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
+        sprintf($$.valor, "%s>%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
         $$.n = crearNodoOperacion(NODO_MAYOR, $1.n, $3.n);
         free($1.tipo); free($3.tipo);
     }
@@ -494,7 +495,8 @@ expresion
             exit(1);
         }
         $$.tipo = strdup("bool");
-        $$.valor = NULL;
+        $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
+        sprintf($$.valor, "%s<=%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
         $$.n = crearNodoOperacion(NODO_MENORIGUAL, $1.n, $3.n);
         free($1.tipo); free($3.tipo);
     }
@@ -504,7 +506,8 @@ expresion
             exit(1);
         }
         $$.tipo = strdup("bool");
-        $$.valor = NULL;
+        $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
+        sprintf($$.valor, "%s>=%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
         $$.n = crearNodoOperacion(NODO_MAYORIGUAL, $1.n, $3.n);
         free($1.tipo); free($3.tipo);
     }

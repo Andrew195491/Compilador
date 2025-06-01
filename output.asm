@@ -1,19 +1,9 @@
 .data
-a: .word 0
+a: .word 98
 
 .text
 .globl main
 main:
-    li $t0, -4
-    li $t1, 6
-    sub $t2, $t0, $t1
-    sw $t2, a
-    lw $t3, a
-    li $v0, 1
-    move $a0, $t3
-    syscall
-    li $a0, 10
-    li $v0, 11
-    syscall
+    # No se genera sw para a (no es int/float/bool)
     li $v0, 10
     syscall
