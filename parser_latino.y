@@ -38,7 +38,7 @@ void yyerror(const char* s) {
 %left MULTI DIVISION
 %left PARENIZQ PARENDER
 
-%token <enteroVal> NUMERICO
+%token <enteroVal> NUMERICO 
 %token <realVal> NUMERICODECIMAL
 
 %token <stringVal> IDENTIFICADOR CADENA BOOL
@@ -376,8 +376,8 @@ expresion
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
             exit(1);
         }
-        if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0) {
-            fprintf(stderr, "[ERROR] Operación aritmética no permitida con tipo string (línea %d)\n", num_linea);
+        if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0 || strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
+            fprintf(stderr, "[ERROR] Operacion aritmetica no permitida con tipo string/bool (linea %d)\n", num_linea);
             exit(1);
         }
         $$.tipo = strdup($1.tipo);
@@ -392,12 +392,13 @@ expresion
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
             exit(1);
         }
-         if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0) {
-            fprintf(stderr, "[ERROR] Operación aritmética no permitida con tipo string (línea %d)\n", num_linea);
+        if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0 || strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
+            fprintf(stderr, "[ERROR] Operacion aritmetica no permitida con tipo string/bool (linea %d)\n", num_linea);
             exit(1);
         }
         $$.tipo = strdup($1.tipo);
-        $$.valor = NULL;
+        $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
+        sprintf($$.valor, "%s-%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
         $$.n = crearNodoOperacion(NODO_RESTA, $1.n, $3.n);
         free($1.tipo); free($3.tipo);
     }
@@ -406,12 +407,13 @@ expresion
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
             exit(1);
         }
-         if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0) {
-            fprintf(stderr, "[ERROR] Operación aritmética no permitida con tipo string (línea %d)\n", num_linea);
+        if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0 || strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
+            fprintf(stderr, "[ERROR] Operacion aritmetica no permitida con tipo string/bool (linea %d)\n", num_linea);
             exit(1);
         }
         $$.tipo = strdup($1.tipo);
-        $$.valor = NULL;
+        $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
+        sprintf($$.valor, "%s*%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
         $$.n = crearNodoOperacion(NODO_MULT, $1.n, $3.n);
         free($1.tipo); free($3.tipo);
     }
@@ -420,17 +422,19 @@ expresion
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
             exit(1);
         }
-         if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0) {
-            fprintf(stderr, "[ERROR] Operación aritmética no permitida con tipo string (línea %d)\n", num_linea);
+        if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0 || strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
+            fprintf(stderr, "[ERROR] Operacion aritmetica no permitida con tipo string/bool (linea %d)\n", num_linea);
             exit(1);
         }
-        if ((strcmp($3.tipo, "int") == 0 && $3.n && $3.n->valor_int == 0) ||
+        printf("%s\n", $3.valor);
+        if ((strcmp($3.tipo, "int") == 0 && $3.n && $3.valor == 0) ||
             (strcmp($3.tipo, "float") == 0 && $3.n && $3.n->valor_float == 0.0)) {
             fprintf(stderr, "[ERROR] Division por cero (linea %d)\n", num_linea);
             exit(1);
         }
         $$.tipo = strdup($1.tipo);
-        $$.valor = NULL;
+        $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
+        sprintf($$.valor, "%s/%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
         $$.n = crearNodoOperacion(NODO_DIV, $1.n, $3.n);
         free($1.tipo); free($3.tipo);
     }

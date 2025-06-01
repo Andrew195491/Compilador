@@ -664,25 +664,97 @@ const char* generarASM_rec(struct ast *n) {
                 }
             }
             case NODO_RESTA: {
-                const char* reg_izq = generarASM_rec(n->izq);
-                const char* reg_dcha = generarASM_rec(n->dcha);
-                const char* reg = nuevo_temp();
-                fprintf(yyout, "    sub %s, %s, %s\n", reg, reg_izq, reg_dcha);
-                return reg;
+                 // Detecta si alguno de los operandos es float
+                const char* tipo_izq = NULL;
+                const char* tipo_dcha = NULL;
+                if (n->izq->tipoNodo == NODO_VARIABLE)
+                    tipo_izq = obtener_tipo(n->izq->nombre);
+                else if (n->izq->tipoNodo == NODO_FLOAT)
+                    tipo_izq = "float";
+
+                if (n->dcha->tipoNodo == NODO_VARIABLE)
+                    tipo_dcha = obtener_tipo(n->dcha->nombre);
+                else if (n->dcha->tipoNodo == NODO_FLOAT)
+                    tipo_dcha = "float";
+
+                int es_float = (tipo_izq && strcmp(tipo_izq, "float") == 0) ||
+                            (tipo_dcha && strcmp(tipo_dcha, "float") == 0);
+
+                if (es_float) {
+                    const char* reg_izq = generarASM_rec(n->izq);
+                    const char* reg_dcha = generarASM_rec(n->dcha);
+                    const char* reg = nuevo_temp_float();
+                    fprintf(yyout, "    sub.s %s, %s, %s\n", reg, reg_izq, reg_dcha);
+                    return reg;
+                } else {
+                    const char* reg_izq = generarASM_rec(n->izq);
+                    const char* reg_dcha = generarASM_rec(n->dcha);
+                    const char* reg = nuevo_temp();
+                    fprintf(yyout, "    sub %s, %s, %s\n", reg, reg_izq, reg_dcha);
+                    return reg;
+                }
             }
             case NODO_MULT: {
-                const char* reg_izq = generarASM_rec(n->izq);
-                const char* reg_dcha = generarASM_rec(n->dcha);
-                const char* reg = nuevo_temp();
-                fprintf(yyout, "    mul %s, %s, %s\n", reg, reg_izq, reg_dcha);
-                return reg;
+                const char* tipo_izq = NULL;
+                const char* tipo_dcha = NULL;
+                if (n->izq->tipoNodo == NODO_VARIABLE)
+                    tipo_izq = obtener_tipo(n->izq->nombre);
+                else if (n->izq->tipoNodo == NODO_FLOAT)
+                    tipo_izq = "float";
+
+                if (n->dcha->tipoNodo == NODO_VARIABLE)
+                    tipo_dcha = obtener_tipo(n->dcha->nombre);
+                else if (n->dcha->tipoNodo == NODO_FLOAT)
+                    tipo_dcha = "float";
+
+                int es_float = (tipo_izq && strcmp(tipo_izq, "float") == 0) ||
+                            (tipo_dcha && strcmp(tipo_dcha, "float") == 0);
+
+                if (es_float) {
+                    const char* reg_izq = generarASM_rec(n->izq);
+                    const char* reg_dcha = generarASM_rec(n->dcha);
+                    const char* reg = nuevo_temp_float();
+                    fprintf(yyout, "    mul.s %s, %s, %s\n", reg, reg_izq, reg_dcha);
+                    return reg;
+                } else {
+                    const char* reg_izq = generarASM_rec(n->izq);
+                    const char* reg_dcha = generarASM_rec(n->dcha);
+                    const char* reg = nuevo_temp();
+                    fprintf(yyout, "    mul %s, %s, %s\n", reg, reg_izq, reg_dcha);
+                    return reg;
+                }
             }
             case NODO_DIV: {
-                const char* reg_izq = generarASM_rec(n->izq);
-                const char* reg_dcha = generarASM_rec(n->dcha);
-                const char* reg = nuevo_temp();
-                fprintf(yyout, "    div %s, %s, %s\n", reg, reg_izq, reg_dcha);
-                return reg;
+                const char* tipo_izq = NULL;
+                const char* tipo_dcha = NULL;
+                if (n->izq->tipoNodo == NODO_VARIABLE)
+                    tipo_izq = obtener_tipo(n->izq->nombre);
+                else if (n->izq->tipoNodo == NODO_FLOAT)
+                    tipo_izq = "float";
+
+                if (n->dcha->tipoNodo == NODO_VARIABLE)
+                    tipo_dcha = obtener_tipo(n->dcha->nombre);
+                else if (n->dcha->tipoNodo == NODO_FLOAT)
+                    tipo_dcha = "float";
+
+                int es_float = (tipo_izq && strcmp(tipo_izq, "float") == 0) ||
+                            (tipo_dcha && strcmp(tipo_dcha, "float") == 0);
+
+                if (es_float) {
+                    const char* reg_izq = generarASM_rec(n->izq);
+                    const char* reg_dcha = generarASM_rec(n->dcha);
+                    const char* reg = nuevo_temp_float();
+                    fprintf(yyout, "    div.s %s, %s\n", reg_izq, reg_dcha);
+                    fprintf(yyout, "    mflo %s\n", reg);
+                    return reg;
+                } else {
+                    const char* reg_izq = generarASM_rec(n->izq);
+                    const char* reg_dcha = generarASM_rec(n->dcha);
+                    const char* reg = nuevo_temp();
+                    fprintf(yyout, "    div %s, %s\n", reg_izq, reg_dcha);
+                    fprintf(yyout, "    mflo %s\n", reg);
+                    return reg;
+                }
             }
 case NODO_ASIGNACION: {
     const char* reg = generarASM_rec(n->izq);
@@ -767,15 +839,39 @@ void generarASM(struct ast *n) {
         const char* valores = tabla[i].Valores;
 
         if (strcmp(tipo, "int") == 0 || strcmp(tipo, "bool") == 0) {
-            int val = (valor != NULL) ? atoi(valor) : 0;
-            fprintf(yyout, "%s: .word %d\n", tabla[i].nombre, val);
-            if(tabla[i].valor != NULL){
-                inicializada[i] =tabla[i].nombre;
+            // Si contiene operación, no inicializar
+            int es_expresion = (tabla[i].valor && (
+                strchr(tabla[i].valor, '+') != NULL || 
+                strchr(tabla[i].valor, '-') != NULL ||
+                strchr(tabla[i].valor, '*') != NULL || 
+                strchr(tabla[i].valor, '/') != NULL));
+
+            if (!es_expresion) {
+                int val = (valor != NULL) ? atoi(valor) : 0;
+                fprintf(yyout, "%s: .word %d\n", tabla[i].nombre, val);
+                if (tabla[i].valor != NULL) {
+                    inicializada[i] = tabla[i].nombre;
+                }
+            } else {
+                // No inicializar, reservar espacio para la variable
+                fprintf(yyout, "%s: .word 0\n", tabla[i].nombre); // o usa solo `.space 4`
             }
         }
+
         else if (strcmp(tipo, "float") == 0) {
-            float val = (valor != NULL) ? atof(valor) : 0.0;
-            fprintf(yyout, "%s: .float %f\n", tabla[i].nombre, val);
+            int es_expresion = (tabla[i].valor && (
+                strchr(tabla[i].valor, '+') != NULL || 
+                strchr(tabla[i].valor, '-') != NULL ||
+                strchr(tabla[i].valor, '*') != NULL || 
+                strchr(tabla[i].valor, '/') != NULL));
+
+            if (!es_expresion) {    
+                float val = (valor != NULL) ? atof(valor) : 0.0;
+                fprintf(yyout, "%s: .float %f\n", tabla[i].nombre, val);
+            } else {
+                // No inicializar, reservar espacio para la variable
+                fprintf(yyout, "%s: .float 0.0\n", tabla[i].nombre); // o usa solo `.space 4`
+            }
         }
         else if (strcmp(tipo, "string") == 0) {
             fprintf(yyout, "%s: .asciiz %s\n", tabla[i].nombre, valor ? valor : "");

@@ -48,7 +48,7 @@ int num_linea = 1;
 "<"                         { return MENOR; }
 "#".*                   ;
 
-"#".*                   ; // comentarios de una línea estilo Ruby
+"#".*                   ; 
 
 [0-9]+\.[0-9]+          { yylval.realVal = atof(yytext); return NUMERICODECIMAL; }
 [0-9]+                  { yylval.enteroVal = atoi(yytext); return NUMERICO; }
