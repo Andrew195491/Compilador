@@ -1,14 +1,14 @@
 .data
-a: .word 98
+a: .word 0
 
 .text
 .globl main
 main:
     li $t0, 98
-    li $t1, 7
+    li $t1, 97
     seq $t2, $t0, $t1
-    # a ya inicializado (int/bool), se omite sw
-    la $t3, a
+    sw $t2, a
+    lw $t3, a
     li $v0, 1
     move $a0, $t3
     syscall

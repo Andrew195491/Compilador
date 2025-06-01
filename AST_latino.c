@@ -628,7 +628,7 @@ const char* generarASM_rec(struct ast *n) {
                     return reg;
                 } else if (tipo && strcmp(tipo, "bool") == 0) {
                     const char* reg = nuevo_temp();
-                    fprintf(yyout, "    la %s, %s\n", reg, n->nombre);
+                    fprintf(yyout, "    lw %s, %s\n", reg, n->nombre);
                     return reg;
                 } else {
                     // int o bool
@@ -795,59 +795,59 @@ const char* generarASM_rec(struct ast *n) {
 
                 return reg;
             }
-case NODO_ASIGNACION: {
-    const char* reg = generarASM_rec(n->izq);
-    const char* tipo = obtener_tipo(n->nombre);
+            case NODO_ASIGNACION: {
+                const char* reg = generarASM_rec(n->izq);
+                const char* tipo = obtener_tipo(n->nombre);
 
-    registrar_variable(n->nombre);
+                registrar_variable(n->nombre);
 
-    if (tipo && strcmp(tipo, "float") == 0) {
-        if (reg && strcmp(reg, "$f12") != 0) {
-            fprintf(yyout, "    mov.s $f12, %s\n", reg);
-        }
-        fprintf(yyout, "    s.s $f12, %s\n", n->nombre);
-        return "$f12";
-    } else if (tipo && strcmp(tipo, "string") == 0) {
-        // No generes sw para strings
-        return reg;
-    } else if (tipo && (strcmp(tipo, "array") == 0 || strcmp(tipo, "matriz") == 0)) {
-        // No generes sw para arrays/matrices
-        return NULL;
-    } else {
-        // int o bool
-        int esta_inicializada = 0;
-        for (int i = 0; i < MAX_VARS; i++) {
-            if (inicializada[i] && strcmp(inicializada[i], n->nombre) == 0) {
-                esta_inicializada = 1;
-                break;
-            }
-        }
-        if (!esta_inicializada && reg) {
-            fprintf(yyout, "    sw %s, %s\n", reg, n->nombre);
-        } else if (!reg) {
-            fprintf(yyout, "    # No se genera sw para %s (no es int/float/bool)\n", n->nombre);
-        } else {
-            fprintf(yyout, "    # %s ya inicializado (int/bool), se omite sw\n", n->nombre);
-        }
-        return reg;
-    }
-}
-
-                        case NODO_LISTA: {
-                            generarASM_rec(n->izq);
-                            generarASM_rec(n->dcha);
-                            return NULL;
-                        }
-                        case NODO_PUTS: {
-                            generar_puts(n->izq);
-                            return NULL;
-                        }
-                        default:
-                            break;
+                if (tipo && strcmp(tipo, "float") == 0) {
+                    if (reg && strcmp(reg, "$f12") != 0) {
+                        fprintf(yyout, "    mov.s $f12, %s\n", reg);
                     }
-                
+                    fprintf(yyout, "    s.s $f12, %s\n", n->nombre);
+                    return "$f12";
+                } else if (tipo && strcmp(tipo, "string") == 0) {
+                    // No generes sw para strings
+                    return reg;
+                } else if (tipo && (strcmp(tipo, "array") == 0 || strcmp(tipo, "matriz") == 0)) {
+                    // No generes sw para arrays/matrices
+                    return NULL;
+                } else {
+                    // int o bool
+                    int esta_inicializada = 0;
+                    for (int i = 0; i < MAX_VARS; i++) {
+                        if (inicializada[i] && strcmp(inicializada[i], n->nombre) == 0) {
+                            esta_inicializada = 1;
+                            break;
+                        }
+                    }
+                    if ((!esta_inicializada && reg) || strcmp(tipo, "bool") == 0) {
+                        fprintf(yyout, "    sw %s, %s\n", reg, n->nombre);
+                    } else if (!reg) {
+                        fprintf(yyout, "    # No se genera sw para %s (no es int/float/bool)\n", n->nombre);
+                    } else {
+                        fprintf(yyout, "    # %s ya inicializado (int/bool), se omite sw\n", n->nombre);
+                    }
+                    return reg;
+                }
+            }
+
+            case NODO_LISTA: {
+                generarASM_rec(n->izq);
+                generarASM_rec(n->dcha);
                 return NULL;
             }
+            case NODO_PUTS: {
+                generar_puts(n->izq);
+                return NULL;
+            }
+            default:
+                break;
+            }
+        
+        return NULL;
+    }
 
 // ======== Declaración de variables en .data según tipo ========
 
@@ -883,7 +883,8 @@ void generarASM(struct ast *n) {
                 strchr(tabla[i].valor, '+') != NULL || 
                 strchr(tabla[i].valor, '-') != NULL ||
                 strchr(tabla[i].valor, '*') != NULL || 
-                strchr(tabla[i].valor, '/') != NULL   ));
+                strchr(tabla[i].valor, '/') != NULL || 
+                strstr(tabla[i].valor, "==") != NULL  ));
 
             if (!es_expresion) {
                 int val = (valor != NULL) ? atoi(valor) : 0;
@@ -902,7 +903,8 @@ void generarASM(struct ast *n) {
                 strchr(tabla[i].valor, '+') != NULL || 
                 strchr(tabla[i].valor, '-') != NULL ||
                 strchr(tabla[i].valor, '*') != NULL || 
-                strchr(tabla[i].valor, '/') != NULL  ));
+                strchr(tabla[i].valor, '/') != NULL || 
+                strstr(tabla[i].valor, "==") != NULL  ));
 
             if (!es_expresion) {    
                 float val = (valor != NULL) ? atof(valor) : 0.0;
