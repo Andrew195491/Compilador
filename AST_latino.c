@@ -40,12 +40,11 @@ const char* nombres_nodo[] = {
     "NODO_GRUPO",
     "NODO_AND",
     "NODO_OR",
+    "NODO_NOT"
 };
 
 // Para strings en .data
 int float_label_counter = 0;
-
-
 
 static char* strdup_safe(const char* s) {
     if (!s) return NULL;
@@ -99,6 +98,15 @@ struct ast *crearNodoOperacion(enum tipoNodoAST tipo, struct ast *izq, struct as
     n->tipoNodo = tipo;
     n->izq = izq;
     n->dcha = dcha;
+    n->nombre = NULL; n->valor_str = NULL;
+    return n;
+}
+
+struct ast *crearNodoNot(enum tipoNodoAST tipo, struct ast *izq) {
+    struct ast *n = malloc(sizeof(struct ast));
+    n->tipoNodo = tipo;
+    n->izq = izq;
+    n->dcha = NULL;
     n->nombre = NULL; n->valor_str = NULL;
     return n;
 }
@@ -1060,6 +1068,16 @@ const char* generarASM_rec(struct ast *n) {
 
                 return temp;
             }
+            case NODO_NOT: {
+                const char* reg_izq = generarASM_rec(n->izq);  // condición
+                const char* temp = nuevo_temp();
+
+                fprintf(yyout, "    # NOT\n");
+                fprintf(yyout, "    seq %s, %s, $zero\n", temp, reg_izq);  // temp = (reg_izq == 0) → NOT lógico
+
+                return temp;
+            }
+
             case NODO_ASIGNACION: {
                 const char* reg = generarASM_rec(n->izq);
                 const char* tipo = obtener_tipo(n->nombre);

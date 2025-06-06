@@ -33,6 +33,8 @@ void yyerror(const char* s) {
     } simbolo;
 }
 
+%left OR AND
+%right NOT
 %left IGUALIGUAL DIFERENTE MAYORIGUAL MENORIGUAL MAYOR MENOR
 %left SUMA RESTA
 %left MULTI DIVISION
@@ -52,7 +54,7 @@ void yyerror(const char* s) {
 %token  PUTS
 %token  END DEF
 %token  INTERP_INI INTERP_FIN
-%token IGUALIGUAL DIFERENTE MAYORIGUAL MENORIGUAL MAYOR MENOR AND OR
+%token IGUALIGUAL DIFERENTE MAYORIGUAL MENORIGUAL MAYOR MENOR AND OR NOT
 
 %type   <simbolo> programa lista_sentencias sentencia asignacion expresion valor
 %type   <simbolo> array expresion_array acceso_array indices_array
@@ -377,8 +379,8 @@ expresion
             $$.tipo = strdup("string");
 
             // Prepara las cadenas (quita comillas si quieres, opcional)
-            char* val1 = $1.valor ? strdup($1.valor) : strdup("");
-            char* val2 = $3.valor ? strdup($3.valor) : strdup("");
+            char* val1 = $1.valor;
+            char* val2 = $3.valor;
 
             // Quitar comillas alrededor si necesario (opcional)
             // Aquí simplemente concatenamos las representaciones tal como están
@@ -471,10 +473,6 @@ expresion
         free($2.tipo); free($2.valor);
     }
     | expresion IGUALIGUAL expresion {
-        if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0 || strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
-            fprintf(stderr, "[ERROR] Operacion relacional no permitida con tipo string/bool (linea %d)\n", num_linea);
-            exit(1);
-        }
         $$.tipo = strdup("bool");
         $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
         sprintf($$.valor, "%s==%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
@@ -482,10 +480,6 @@ expresion
         free($1.tipo); free($3.tipo);
     }
     | expresion DIFERENTE expresion {
-        if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0 || strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
-            fprintf(stderr, "[ERROR] Operacion relacional no permitida con tipo string/bool (linea %d)\n", num_linea);
-            exit(1);
-        }
         $$.tipo = strdup("bool");
         $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
         sprintf($$.valor, "%s!=%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
@@ -594,6 +588,27 @@ expresion
         // Liberar memoria
         free($1.tipo); free($3.tipo);
         free($1.valor); free($3.valor);
+    }
+    | NOT expresion {
+        // Validación de tipos
+        if (strcmp($2.tipo, "bool") != 0) {
+            fprintf(stderr, "[ERROR] Operacion logica NOT requiere operandos bool (linea %d)\n", num_linea);
+            exit(1);
+        }
+
+        $$.tipo = strdup("bool");
+
+        // Evaluación del valor (asumiendo que los valores son "true" o "false")
+        int val = (strcmp($2.valor, "true") != 0);
+
+        $$.valor = strdup((val) ? "true" : "false");
+
+        // Nodo del AST
+        $$.n = crearNodoNot(NODO_NOT, $2.n);
+
+        // Liberar memoria
+        free($2.tipo);
+        free($2.valor);
     }
     ;
     

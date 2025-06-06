@@ -1,29 +1,33 @@
 .data
-x: .float 3.100000
-str1: .asciiz "Mayor"
-str2: .asciiz "Menor"
+x: .asciiz "Hola"
+y: .asciiz "si"
 
 .text
 .globl main
 main:
-    l.s $f12, x
-    s.s $f12, x
-    l.s $f13, x
-    # ERROR: float literal no encontrado en tabla de símbolos
-    c.le.s $f13, $f14
-    beqz FLOAT_CMP_GT, L0
-    la $t1, str1
-    la $a0, str1
-    li $v0, 4
+    la $t0, x
+    la $t1, y
+    la $t2, x
+    la $t3, y
+    move $a0, $t2
+    move $a1, $t3
+    jal strcmp
+    seq $t4, $v0, $zero
+    beqz $t4, L0
+    li $t5, 66
+    li $a0, 66
+    li $v0, 1
+    syscall
     syscall
     li $a0, 10
     li $v0, 11
     syscall
     j L1
 L0:
-    la $t2, str2
-    la $a0, str2
-    li $v0, 4
+    li $t6, 77
+    li $a0, 77
+    li $v0, 1
+    syscall
     syscall
     li $a0, 10
     li $v0, 11

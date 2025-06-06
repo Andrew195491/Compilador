@@ -114,37 +114,40 @@ void yyerror(const char* s) {
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     MENOR = 258,
-     MAYOR = 259,
-     MENORIGUAL = 260,
-     MAYORIGUAL = 261,
-     DIFERENTE = 262,
-     IGUALIGUAL = 263,
-     RESTA = 264,
-     SUMA = 265,
-     DIVISION = 266,
-     MULTI = 267,
-     PARENDER = 268,
-     PARENIZQ = 269,
-     NUMERICO = 270,
-     NUMERICODECIMAL = 271,
-     IDENTIFICADOR = 272,
-     CADENA = 273,
-     BOOL = 274,
-     CORCHETEABIERTO = 275,
-     CORCHETECERRADO = 276,
-     SEPARADOR = 277,
-     IGUAL = 278,
-     SALTO = 279,
-     IF = 280,
-     ELSE = 281,
-     WHILE = 282,
-     FOR = 283,
-     PUTS = 284,
-     END = 285,
-     DEF = 286,
-     INTERP_INI = 287,
-     INTERP_FIN = 288
+     AND = 258,
+     OR = 259,
+     NOT = 260,
+     MENOR = 261,
+     MAYOR = 262,
+     MENORIGUAL = 263,
+     MAYORIGUAL = 264,
+     DIFERENTE = 265,
+     IGUALIGUAL = 266,
+     RESTA = 267,
+     SUMA = 268,
+     DIVISION = 269,
+     MULTI = 270,
+     PARENDER = 271,
+     PARENIZQ = 272,
+     NUMERICO = 273,
+     NUMERICODECIMAL = 274,
+     IDENTIFICADOR = 275,
+     CADENA = 276,
+     BOOL = 277,
+     CORCHETEABIERTO = 278,
+     CORCHETECERRADO = 279,
+     SEPARADOR = 280,
+     IGUAL = 281,
+     SALTO = 282,
+     IF = 283,
+     ELSE = 284,
+     WHILE = 285,
+     FOR = 286,
+     PUTS = 287,
+     END = 288,
+     DEF = 289,
+     INTERP_INI = 290,
+     INTERP_FIN = 291
    };
 #endif
 
@@ -175,7 +178,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 179 "parser_latino.tab.c"
+#line 182 "parser_latino.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -187,7 +190,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 191 "parser_latino.tab.c"
+#line 194 "parser_latino.tab.c"
 
 #ifdef short
 # undef short
@@ -400,22 +403,22 @@ union yyalloc
 #endif
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  32
+#define YYFINAL  33
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   211
+#define YYLAST   240
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  34
+#define YYNTOKENS  37
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  20
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  55
+#define YYNRULES  58
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  104
+#define YYNSTATES  110
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   288
+#define YYMAXUTOK   291
 
 #define YYTRANSLATE(YYX)						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -451,7 +454,8 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    30,    31,    32,    33
+      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
+      35,    36
 };
 
 #if YYDEBUG
@@ -464,42 +468,43 @@ static const yytype_uint8 yyprhs[] =
       70,    72,    74,    78,    81,    82,    86,    88,    92,    96,
       99,   103,   105,   108,   112,   117,   119,   121,   123,   127,
      131,   135,   139,   143,   147,   151,   155,   159,   163,   167,
-     169,   172,   174,   177,   179,   181
+     171,   175,   178,   180,   183,   185,   188,   190,   192
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      35,     0,    -1,    37,    -1,    -1,    24,    36,    -1,    38,
-      36,    -1,    37,    38,    36,    -1,    39,    -1,    29,    52,
-      -1,    40,    -1,    41,    -1,    42,    -1,    45,    -1,    17,
-      23,    52,    -1,    25,    52,    36,    37,    30,    -1,    25,
-      52,    36,    37,    26,    36,    37,    30,    -1,    27,    52,
-      36,    37,    30,    -1,    31,    17,    14,    43,    13,    36,
-      37,    30,    -1,    31,    17,    36,    37,    30,    -1,    -1,
-      44,    -1,    17,    -1,    44,    22,    17,    -1,    17,    46,
-      -1,    -1,    14,    47,    13,    -1,    52,    -1,    47,    22,
-      52,    -1,    20,    49,    21,    -1,    20,    21,    -1,    52,
-      22,    49,    -1,    52,    -1,    17,    51,    -1,    20,    52,
-      21,    -1,    51,    20,    52,    21,    -1,    53,    -1,    48,
-      -1,    50,    -1,    52,    10,    52,    -1,    52,     9,    52,
-      -1,    52,    12,    52,    -1,    52,    11,    52,    -1,    14,
-      52,    13,    -1,    52,     8,    52,    -1,    52,     7,    52,
-      -1,    52,     3,    52,    -1,    52,     4,    52,    -1,    52,
-       5,    52,    -1,    52,     6,    52,    -1,    15,    -1,     9,
-      15,    -1,    16,    -1,     9,    16,    -1,    18,    -1,    19,
-      -1,    17,    -1
+      38,     0,    -1,    40,    -1,    -1,    27,    39,    -1,    41,
+      39,    -1,    40,    41,    39,    -1,    42,    -1,    32,    55,
+      -1,    43,    -1,    44,    -1,    45,    -1,    48,    -1,    20,
+      26,    55,    -1,    28,    55,    39,    40,    33,    -1,    28,
+      55,    39,    40,    29,    39,    40,    33,    -1,    30,    55,
+      39,    40,    33,    -1,    34,    20,    17,    46,    16,    39,
+      40,    33,    -1,    34,    20,    39,    40,    33,    -1,    -1,
+      47,    -1,    20,    -1,    47,    25,    20,    -1,    20,    49,
+      -1,    -1,    17,    50,    16,    -1,    55,    -1,    50,    25,
+      55,    -1,    23,    52,    24,    -1,    23,    24,    -1,    55,
+      25,    52,    -1,    55,    -1,    20,    54,    -1,    23,    55,
+      24,    -1,    54,    23,    55,    24,    -1,    56,    -1,    51,
+      -1,    53,    -1,    55,    13,    55,    -1,    55,    12,    55,
+      -1,    55,    15,    55,    -1,    55,    14,    55,    -1,    17,
+      55,    16,    -1,    55,    11,    55,    -1,    55,    10,    55,
+      -1,    55,     6,    55,    -1,    55,     7,    55,    -1,    55,
+       8,    55,    -1,    55,     9,    55,    -1,    55,     3,    55,
+      -1,    55,     4,    55,    -1,     5,    55,    -1,    18,    -1,
+      12,    18,    -1,    19,    -1,    12,    19,    -1,    21,    -1,
+      22,    -1,    20,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    67,    67,    74,    75,    79,    89,    98,   104,   110,
-     116,   122,   128,   137,   157,   164,   175,   184,   190,   201,
-     202,   206,   212,   222,   231,   232,   236,   242,   251,   274,
-     287,   309,   329,   338,   344,   353,   359,   368,   374,   390,
-     405,   420,   441,   451,   462,   473,   488,   503,   518,   537,
-     543,   550,   556,   563,   569,   575
+       0,    69,    69,    76,    77,    81,    91,   100,   106,   112,
+     118,   124,   130,   139,   159,   166,   177,   186,   192,   203,
+     204,   208,   214,   224,   233,   234,   238,   244,   253,   276,
+     289,   311,   331,   340,   346,   355,   361,   370,   376,   414,
+     429,   444,   465,   475,   482,   489,   504,   519,   534,   549,
+     570,   592,   617,   623,   630,   636,   643,   649,   655
 };
 #endif
 
@@ -508,15 +513,15 @@ static const yytype_uint16 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "MENOR", "MAYOR", "MENORIGUAL",
-  "MAYORIGUAL", "DIFERENTE", "IGUALIGUAL", "RESTA", "SUMA", "DIVISION",
-  "MULTI", "PARENDER", "PARENIZQ", "NUMERICO", "NUMERICODECIMAL",
-  "IDENTIFICADOR", "CADENA", "BOOL", "CORCHETEABIERTO", "CORCHETECERRADO",
-  "SEPARADOR", "IGUAL", "SALTO", "IF", "ELSE", "WHILE", "FOR", "PUTS",
-  "END", "DEF", "INTERP_INI", "INTERP_FIN", "$accept", "programa", "salto",
-  "lista_sentencias", "sentencia", "asignacion", "if_else_end",
-  "while_end", "funcion_definicion", "parametros_opt", "parametros",
-  "llamada_funcion", "argumentos_opt", "argumentos", "array",
+  "$end", "error", "$undefined", "AND", "OR", "NOT", "MENOR", "MAYOR",
+  "MENORIGUAL", "MAYORIGUAL", "DIFERENTE", "IGUALIGUAL", "RESTA", "SUMA",
+  "DIVISION", "MULTI", "PARENDER", "PARENIZQ", "NUMERICO",
+  "NUMERICODECIMAL", "IDENTIFICADOR", "CADENA", "BOOL", "CORCHETEABIERTO",
+  "CORCHETECERRADO", "SEPARADOR", "IGUAL", "SALTO", "IF", "ELSE", "WHILE",
+  "FOR", "PUTS", "END", "DEF", "INTERP_INI", "INTERP_FIN", "$accept",
+  "programa", "salto", "lista_sentencias", "sentencia", "asignacion",
+  "if_else_end", "while_end", "funcion_definicion", "parametros_opt",
+  "parametros", "llamada_funcion", "argumentos_opt", "argumentos", "array",
   "expresion_array", "acceso_array", "indices_array", "expresion", "valor", 0
 };
 #endif
@@ -529,19 +534,19 @@ static const yytype_uint16 yytoknum[] =
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
      275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
-     285,   286,   287,   288
+     285,   286,   287,   288,   289,   290,   291
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    34,    35,    36,    36,    37,    37,    38,    38,    38,
-      38,    38,    38,    39,    40,    40,    41,    42,    42,    43,
-      43,    44,    44,    45,    46,    46,    47,    47,    48,    48,
-      49,    49,    50,    51,    51,    52,    52,    52,    52,    52,
-      52,    52,    52,    52,    52,    52,    52,    52,    52,    53,
-      53,    53,    53,    53,    53,    53
+       0,    37,    38,    39,    39,    40,    40,    41,    41,    41,
+      41,    41,    41,    42,    43,    43,    44,    45,    45,    46,
+      46,    47,    47,    48,    49,    49,    50,    50,    51,    51,
+      52,    52,    53,    54,    54,    55,    55,    55,    55,    55,
+      55,    55,    55,    55,    55,    55,    55,    55,    55,    55,
+      55,    55,    56,    56,    56,    56,    56,    56,    56
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
@@ -551,8 +556,8 @@ static const yytype_uint8 yyr2[] =
        1,     1,     1,     3,     5,     8,     5,     8,     5,     0,
        1,     1,     3,     2,     0,     3,     1,     3,     3,     2,
        3,     1,     2,     3,     4,     1,     1,     1,     3,     3,
-       3,     3,     3,     3,     3,     3,     3,     3,     3,     1,
-       2,     1,     2,     1,     1,     1
+       3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
+       3,     2,     1,     2,     1,     2,     1,     1,     1
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -561,48 +566,48 @@ static const yytype_uint8 yyr2[] =
 static const yytype_uint8 yydefact[] =
 {
        0,    24,     0,     0,     0,     0,     0,     2,     3,     7,
-       9,    10,    11,    12,     0,     0,    23,     0,     0,    49,
-      51,    55,    53,    54,     0,    36,    37,     3,    35,     3,
-       8,     3,     1,     3,     3,     5,     0,    26,    13,    50,
-      52,     0,     0,    32,    29,     0,    31,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,    19,
-       0,     6,     4,    25,     0,    42,     0,     0,    28,     0,
-      45,    46,    47,    48,    44,    43,    39,    38,    41,    40,
-       0,     0,    21,     0,    20,     0,    27,    33,     0,    30,
-       3,    14,    16,     3,     0,    18,    34,     0,     0,    22,
-       0,     0,    15,    17
+       9,    10,    11,    12,     0,     0,    23,     0,     0,     0,
+      52,    54,    58,    56,    57,     0,    36,    37,     3,    35,
+       3,     8,     3,     1,     3,     3,     5,     0,    26,    13,
+      51,    53,    55,     0,     0,    32,    29,     0,    31,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,    19,     0,     6,     4,    25,     0,    42,
+       0,     0,    28,     0,    49,    50,    45,    46,    47,    48,
+      44,    43,    39,    38,    41,    40,     0,     0,    21,     0,
+      20,     0,    27,    33,     0,    30,     3,    14,    16,     3,
+       0,    18,    34,     0,     0,    22,     0,     0,    15,    17
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     6,    35,     7,     8,     9,    10,    11,    12,    83,
-      84,    13,    16,    36,    25,    45,    26,    43,    46,    28
+      -1,     6,    36,     7,     8,     9,    10,    11,    12,    89,
+      90,    13,    16,    37,    26,    47,    27,    45,    48,    29
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -49
+#define YYPACT_NINF -50
 static const yytype_int16 yypact[] =
 {
-     138,   -12,   170,   170,   170,   -13,     6,   138,    38,   -49,
-     -49,   -49,   -49,   -49,   170,   170,   -49,    30,   170,   -49,
-     -49,    24,   -49,   -49,   157,   -49,   -49,    10,   -49,    10,
-     199,    19,   -49,    38,    38,   -49,    50,   199,   199,   -49,
-     -49,   188,   170,    48,   -49,    55,    20,   170,   170,   170,
-     170,   170,   170,   170,   170,   170,   170,   138,   138,    52,
-     138,   -49,   -49,   -49,   170,   -49,    49,   170,   -49,   170,
-      29,    29,    29,    29,    29,    29,    54,    54,   -49,   -49,
-      95,   106,   -49,    58,    57,   113,   199,   -49,    98,   -49,
-      38,   -49,   -49,    38,    60,   -49,   -49,   138,   138,   -49,
-     122,   129,   -49,   -49
+     179,    51,   149,   149,   149,   -18,     4,   179,    -4,   -50,
+     -50,   -50,   -50,   -50,   149,   149,   -50,   149,    52,   149,
+     -50,   -50,     2,   -50,   -50,   129,   -50,   -50,    25,   -50,
+      25,   225,     0,   -50,    -4,    -4,   -50,   119,   225,   225,
+      35,   -50,   -50,   211,   149,    30,   -50,     6,    79,   149,
+     149,   149,   149,   149,   149,   149,   149,   149,   149,   149,
+     149,   179,   179,    56,   179,   -50,   -50,   -50,   149,   -50,
+      99,   149,   -50,   149,    35,    35,    83,    83,    83,    83,
+      83,    83,    59,    59,   -50,   -50,   145,   -14,   -50,    65,
+      76,   156,   225,   -50,   118,   -50,    -4,   -50,   -50,    -4,
+      95,   -50,   -50,   179,   179,   -50,   163,   172,   -50,   -50
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -49,   -49,   -26,   -48,    -7,   -49,   -49,   -49,   -49,   -49,
-     -49,   -49,   -49,   -49,   -49,    21,   -49,   -49,    33,   -49
+     -50,   -50,   -27,   -49,    -7,   -50,   -50,   -50,   -50,   -50,
+     -50,   -50,   -50,   -50,   -50,    43,   -50,   -50,     7,   -50
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -612,71 +617,77 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-      33,    57,    14,    58,    31,    60,    32,    61,    62,    80,
-      81,    15,    85,    47,    48,    49,    50,    51,    52,    53,
-      54,    55,    56,    47,    48,    49,    50,    51,    52,    53,
-      54,    55,    56,    59,    34,    27,    29,    30,    53,    54,
-      55,    56,    69,    34,    42,    39,    40,    37,    38,   100,
-     101,    41,    47,    48,    49,    50,    51,    52,    53,    54,
-      55,    56,    34,    63,    97,    55,    56,    98,    67,    82,
-      87,    93,    64,    33,    33,    66,    68,    99,    33,    94,
-      70,    71,    72,    73,    74,    75,    76,    77,    78,    79,
-      89,     0,     0,    33,    33,     0,     0,    86,     0,     0,
-      88,    47,    48,    49,    50,    51,    52,    53,    54,    55,
-      56,     0,     1,     0,     0,     0,     0,     0,     0,    96,
-       2,    90,     3,     1,     4,    91,     5,     0,     0,     0,
-       1,     2,     0,     3,     0,     4,    92,     5,     2,     1,
-       3,     0,     4,    95,     5,     0,     1,     2,     0,     3,
-       0,     4,   102,     5,     2,     1,     3,     0,     4,   103,
-       5,     0,     0,     2,     0,     3,    17,     4,     0,     5,
-       0,    18,    19,    20,    21,    22,    23,    24,    44,    17,
-       0,     0,     0,     0,    18,    19,    20,    21,    22,    23,
-      24,    47,    48,    49,    50,    51,    52,    53,    54,    55,
-      56,    65,    47,    48,    49,    50,    51,    52,    53,    54,
-      55,    56
+      34,    61,    32,    62,    33,    64,     1,    65,    66,    28,
+      30,    31,    86,    87,     2,    91,     3,    63,     4,    98,
+       5,    38,    39,    35,    40,    44,    43,    35,    49,    50,
+      72,    51,    52,    53,    54,    55,    56,    57,    58,    59,
+      60,    51,    52,    53,    54,    55,    56,    57,    58,    59,
+      60,    70,    35,    71,   106,   107,    74,    75,    76,    77,
+      78,    79,    80,    81,    82,    83,    84,    85,    14,   103,
+      41,    42,   104,    59,    60,    92,    88,    15,    94,    34,
+      34,    99,    49,    50,    34,    51,    52,    53,    54,    55,
+      56,    57,    58,    59,    60,    57,    58,    59,    60,    34,
+      34,   100,    49,    50,    73,    51,    52,    53,    54,    55,
+      56,    57,    58,    59,    60,   105,    95,     0,     0,     0,
+       0,    49,    50,    93,    51,    52,    53,    54,    55,    56,
+      57,    58,    59,    60,    17,    67,     0,     0,     0,     0,
+       0,    18,   102,     0,    68,     0,    19,    20,    21,    22,
+      23,    24,    25,    46,    17,     0,     0,     0,     0,     0,
+       0,    18,     0,     0,     0,     1,    19,    20,    21,    22,
+      23,    24,    25,     2,    96,     3,     1,     4,    97,     5,
+       0,     0,     0,     1,     2,     0,     3,     0,     4,   101,
+       5,     2,     1,     3,     0,     4,   108,     5,     0,     1,
+       2,     0,     3,     0,     4,   109,     5,     2,     0,     3,
+       0,     4,     0,     5,    49,    50,     0,    51,    52,    53,
+      54,    55,    56,    57,    58,    59,    60,    69,    49,    50,
+       0,    51,    52,    53,    54,    55,    56,    57,    58,    59,
+      60
 };
 
 static const yytype_int8 yycheck[] =
 {
-       7,    27,    14,    29,    17,    31,     0,    33,    34,    57,
-      58,    23,    60,     3,     4,     5,     6,     7,     8,     9,
-      10,    11,    12,     3,     4,     5,     6,     7,     8,     9,
-      10,    11,    12,    14,    24,     2,     3,     4,     9,    10,
-      11,    12,    22,    24,    20,    15,    16,    14,    15,    97,
-      98,    18,     3,     4,     5,     6,     7,     8,     9,    10,
-      11,    12,    24,    13,    90,    11,    12,    93,    20,    17,
-      21,    13,    22,    80,    81,    42,    21,    17,    85,    22,
-      47,    48,    49,    50,    51,    52,    53,    54,    55,    56,
-      69,    -1,    -1,   100,   101,    -1,    -1,    64,    -1,    -1,
-      67,     3,     4,     5,     6,     7,     8,     9,    10,    11,
-      12,    -1,    17,    -1,    -1,    -1,    -1,    -1,    -1,    21,
-      25,    26,    27,    17,    29,    30,    31,    -1,    -1,    -1,
-      17,    25,    -1,    27,    -1,    29,    30,    31,    25,    17,
-      27,    -1,    29,    30,    31,    -1,    17,    25,    -1,    27,
-      -1,    29,    30,    31,    25,    17,    27,    -1,    29,    30,
-      31,    -1,    -1,    25,    -1,    27,     9,    29,    -1,    31,
-      -1,    14,    15,    16,    17,    18,    19,    20,    21,     9,
-      -1,    -1,    -1,    -1,    14,    15,    16,    17,    18,    19,
-      20,     3,     4,     5,     6,     7,     8,     9,    10,    11,
-      12,    13,     3,     4,     5,     6,     7,     8,     9,    10,
-      11,    12
+       7,    28,    20,    30,     0,    32,    20,    34,    35,     2,
+       3,     4,    61,    62,    28,    64,    30,    17,    32,    33,
+      34,    14,    15,    27,    17,    23,    19,    27,     3,     4,
+      24,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+      15,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+      15,    44,    27,    23,   103,   104,    49,    50,    51,    52,
+      53,    54,    55,    56,    57,    58,    59,    60,    17,    96,
+      18,    19,    99,    14,    15,    68,    20,    26,    71,    86,
+      87,    16,     3,     4,    91,     6,     7,     8,     9,    10,
+      11,    12,    13,    14,    15,    12,    13,    14,    15,   106,
+     107,    25,     3,     4,    25,     6,     7,     8,     9,    10,
+      11,    12,    13,    14,    15,    20,    73,    -1,    -1,    -1,
+      -1,     3,     4,    24,     6,     7,     8,     9,    10,    11,
+      12,    13,    14,    15,     5,    16,    -1,    -1,    -1,    -1,
+      -1,    12,    24,    -1,    25,    -1,    17,    18,    19,    20,
+      21,    22,    23,    24,     5,    -1,    -1,    -1,    -1,    -1,
+      -1,    12,    -1,    -1,    -1,    20,    17,    18,    19,    20,
+      21,    22,    23,    28,    29,    30,    20,    32,    33,    34,
+      -1,    -1,    -1,    20,    28,    -1,    30,    -1,    32,    33,
+      34,    28,    20,    30,    -1,    32,    33,    34,    -1,    20,
+      28,    -1,    30,    -1,    32,    33,    34,    28,    -1,    30,
+      -1,    32,    -1,    34,     3,     4,    -1,     6,     7,     8,
+       9,    10,    11,    12,    13,    14,    15,    16,     3,     4,
+      -1,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+      15
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,    17,    25,    27,    29,    31,    35,    37,    38,    39,
-      40,    41,    42,    45,    14,    23,    46,     9,    14,    15,
-      16,    17,    18,    19,    20,    48,    50,    52,    53,    52,
-      52,    17,     0,    38,    24,    36,    47,    52,    52,    15,
-      16,    52,    20,    51,    21,    49,    52,     3,     4,     5,
-       6,     7,     8,     9,    10,    11,    12,    36,    36,    14,
-      36,    36,    36,    13,    22,    13,    52,    20,    21,    22,
-      52,    52,    52,    52,    52,    52,    52,    52,    52,    52,
-      37,    37,    17,    43,    44,    37,    52,    21,    52,    49,
-      26,    30,    30,    13,    22,    30,    21,    36,    36,    17,
-      37,    37,    30,    30
+       0,    20,    28,    30,    32,    34,    38,    40,    41,    42,
+      43,    44,    45,    48,    17,    26,    49,     5,    12,    17,
+      18,    19,    20,    21,    22,    23,    51,    53,    55,    56,
+      55,    55,    20,     0,    41,    27,    39,    50,    55,    55,
+      55,    18,    19,    55,    23,    54,    24,    52,    55,     3,
+       4,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+      15,    39,    39,    17,    39,    39,    39,    16,    25,    16,
+      55,    23,    24,    25,    55,    55,    55,    55,    55,    55,
+      55,    55,    55,    55,    55,    55,    40,    40,    20,    46,
+      47,    40,    55,    24,    55,    52,    29,    33,    33,    16,
+      25,    33,    24,    39,    39,    20,    40,    40,    33,    33
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1499,7 +1510,7 @@ yyreduce:
         case 2:
 
 /* Line 1464 of yacc.c  */
-#line 67 "parser_latino.y"
+#line 69 "parser_latino.y"
     {
         printf("Llamando a recorrerAST\n");
         generarASM((yyvsp[(1) - (1)].simbolo).n);
@@ -1510,7 +1521,7 @@ yyreduce:
   case 5:
 
 /* Line 1464 of yacc.c  */
-#line 79 "parser_latino.y"
+#line 81 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup((yyvsp[(1) - (2)].simbolo).tipo);
         if ((yyvsp[(1) - (2)].simbolo).valor != NULL) {
@@ -1526,7 +1537,7 @@ yyreduce:
   case 6:
 
 /* Line 1464 of yacc.c  */
-#line 89 "parser_latino.y"
+#line 91 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("lista");
         (yyval.simbolo).valor = NULL;
@@ -1538,7 +1549,7 @@ yyreduce:
   case 7:
 
 /* Line 1464 of yacc.c  */
-#line 98 "parser_latino.y"
+#line 100 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup((yyvsp[(1) - (1)].simbolo).tipo);
         (yyval.simbolo).valor = NULL;
@@ -1550,7 +1561,7 @@ yyreduce:
   case 8:
 
 /* Line 1464 of yacc.c  */
-#line 104 "parser_latino.y"
+#line 106 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("puts");
         (yyval.simbolo).valor = NULL;
@@ -1562,7 +1573,7 @@ yyreduce:
   case 9:
 
 /* Line 1464 of yacc.c  */
-#line 110 "parser_latino.y"
+#line 112 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("if_else");
         (yyval.simbolo).valor = NULL;
@@ -1574,7 +1585,7 @@ yyreduce:
   case 10:
 
 /* Line 1464 of yacc.c  */
-#line 116 "parser_latino.y"
+#line 118 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("while");
         (yyval.simbolo).valor = NULL;
@@ -1586,7 +1597,7 @@ yyreduce:
   case 11:
 
 /* Line 1464 of yacc.c  */
-#line 122 "parser_latino.y"
+#line 124 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("funcion_definicion");
         (yyval.simbolo).valor = NULL;
@@ -1598,7 +1609,7 @@ yyreduce:
   case 12:
 
 /* Line 1464 of yacc.c  */
-#line 128 "parser_latino.y"
+#line 130 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("llamada_funcion");
         (yyval.simbolo).valor = NULL;
@@ -1610,7 +1621,7 @@ yyreduce:
   case 13:
 
 /* Line 1464 of yacc.c  */
-#line 137 "parser_latino.y"
+#line 139 "parser_latino.y"
     {
         (yyvsp[(3) - (3)].simbolo).n->es_inicializada = 1;
         if ((yyvsp[(3) - (3)].simbolo).tipo && strcmp((yyvsp[(3) - (3)].simbolo).tipo, "matriz") == 0) {
@@ -1634,7 +1645,7 @@ yyreduce:
   case 14:
 
 /* Line 1464 of yacc.c  */
-#line 157 "parser_latino.y"
+#line 159 "parser_latino.y"
     {
         // if sin else
         (yyval.simbolo).tipo = strdup("if");
@@ -1647,7 +1658,7 @@ yyreduce:
   case 15:
 
 /* Line 1464 of yacc.c  */
-#line 164 "parser_latino.y"
+#line 166 "parser_latino.y"
     {
         // if con else
         (yyval.simbolo).tipo = strdup("if_else");
@@ -1660,7 +1671,7 @@ yyreduce:
   case 16:
 
 /* Line 1464 of yacc.c  */
-#line 175 "parser_latino.y"
+#line 177 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("while");
         (yyval.simbolo).valor = NULL;
@@ -1672,7 +1683,7 @@ yyreduce:
   case 17:
 
 /* Line 1464 of yacc.c  */
-#line 184 "parser_latino.y"
+#line 186 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("funcion");
         (yyval.simbolo).valor = strdup((yyvsp[(2) - (8)].stringVal));
@@ -1684,7 +1695,7 @@ yyreduce:
   case 18:
 
 /* Line 1464 of yacc.c  */
-#line 190 "parser_latino.y"
+#line 192 "parser_latino.y"
     {
         // Definición sin paréntesis ni parámetros
         (yyval.simbolo).tipo = strdup("funcion");
@@ -1697,14 +1708,14 @@ yyreduce:
   case 19:
 
 /* Line 1464 of yacc.c  */
-#line 201 "parser_latino.y"
+#line 203 "parser_latino.y"
     { (yyval.simbolo).tipo = strdup("parametros"); (yyval.simbolo).valor = NULL; (yyval.simbolo).n = NULL; ;}
     break;
 
   case 21:
 
 /* Line 1464 of yacc.c  */
-#line 206 "parser_latino.y"
+#line 208 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("parametros");
         (yyval.simbolo).valor = NULL;
@@ -1716,7 +1727,7 @@ yyreduce:
   case 22:
 
 /* Line 1464 of yacc.c  */
-#line 212 "parser_latino.y"
+#line 214 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("parametros");
         (yyval.simbolo).valor = NULL;
@@ -1728,7 +1739,7 @@ yyreduce:
   case 23:
 
 /* Line 1464 of yacc.c  */
-#line 222 "parser_latino.y"
+#line 224 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("llamada_funcion");
         (yyval.simbolo).valor = strdup((yyvsp[(1) - (2)].stringVal));
@@ -1740,21 +1751,21 @@ yyreduce:
   case 24:
 
 /* Line 1464 of yacc.c  */
-#line 231 "parser_latino.y"
+#line 233 "parser_latino.y"
     { (yyval.simbolo).tipo = strdup("argumentos"); (yyval.simbolo).valor = NULL; (yyval.simbolo).n = NULL; ;}
     break;
 
   case 25:
 
 /* Line 1464 of yacc.c  */
-#line 232 "parser_latino.y"
+#line 234 "parser_latino.y"
     { (yyval.simbolo).tipo = strdup("argumentos"); (yyval.simbolo).valor = NULL; (yyval.simbolo).n = (yyvsp[(2) - (3)].simbolo).n; free((yyvsp[(2) - (3)].simbolo).tipo); free((yyvsp[(2) - (3)].simbolo).valor);;}
     break;
 
   case 26:
 
 /* Line 1464 of yacc.c  */
-#line 236 "parser_latino.y"
+#line 238 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("argumentos");
         (yyval.simbolo).valor = NULL;
@@ -1766,7 +1777,7 @@ yyreduce:
   case 27:
 
 /* Line 1464 of yacc.c  */
-#line 242 "parser_latino.y"
+#line 244 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("argumentos");
         (yyval.simbolo).valor = NULL;
@@ -1778,7 +1789,7 @@ yyreduce:
   case 28:
 
 /* Line 1464 of yacc.c  */
-#line 251 "parser_latino.y"
+#line 253 "parser_latino.y"
     {
         if ((yyvsp[(2) - (3)].simbolo).tipoBase && strcmp((yyvsp[(2) - (3)].simbolo).tipoBase, "array") == 0) {
             (yyval.simbolo).tipo = strdup("matriz");
@@ -1807,7 +1818,7 @@ yyreduce:
   case 29:
 
 /* Line 1464 of yacc.c  */
-#line 274 "parser_latino.y"
+#line 276 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("array");
         (yyval.simbolo).valor = NULL;
@@ -1823,7 +1834,7 @@ yyreduce:
   case 30:
 
 /* Line 1464 of yacc.c  */
-#line 287 "parser_latino.y"
+#line 289 "parser_latino.y"
     {
         if ((yyvsp[(1) - (3)].simbolo).tipo && strcmp((yyvsp[(1) - (3)].simbolo).tipo, "array") == 0) {
             (yyval.simbolo).tipoBase = strdup((yyvsp[(1) - (3)].simbolo).tipo);
@@ -1851,7 +1862,7 @@ yyreduce:
   case 31:
 
 /* Line 1464 of yacc.c  */
-#line 309 "parser_latino.y"
+#line 311 "parser_latino.y"
     {
         (yyval.simbolo).tipoBase = strdup((yyvsp[(1) - (1)].simbolo).tipo);
         (yyval.simbolo).tam = 1;
@@ -1874,7 +1885,7 @@ yyreduce:
   case 32:
 
 /* Line 1464 of yacc.c  */
-#line 329 "parser_latino.y"
+#line 331 "parser_latino.y"
     {
         //$$.tipo = strdup("acceso_array");
         //$$.valor = NULL;
@@ -1886,7 +1897,7 @@ yyreduce:
   case 33:
 
 /* Line 1464 of yacc.c  */
-#line 338 "parser_latino.y"
+#line 340 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("lista");
         (yyval.simbolo).valor = NULL;
@@ -1898,7 +1909,7 @@ yyreduce:
   case 34:
 
 /* Line 1464 of yacc.c  */
-#line 344 "parser_latino.y"
+#line 346 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("lista");
         (yyval.simbolo).valor = NULL;
@@ -1910,7 +1921,7 @@ yyreduce:
   case 35:
 
 /* Line 1464 of yacc.c  */
-#line 353 "parser_latino.y"
+#line 355 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup((yyvsp[(1) - (1)].simbolo).tipo);
         (yyval.simbolo).valor = strdup((yyvsp[(1) - (1)].simbolo).valor);
@@ -1922,7 +1933,7 @@ yyreduce:
   case 36:
 
 /* Line 1464 of yacc.c  */
-#line 359 "parser_latino.y"
+#line 361 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup((yyvsp[(1) - (1)].simbolo).tipo); // <-- Propaga "array" o "matriz"
         (yyval.simbolo).valor = NULL;
@@ -1937,7 +1948,7 @@ yyreduce:
   case 37:
 
 /* Line 1464 of yacc.c  */
-#line 368 "parser_latino.y"
+#line 370 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("acceso_array");
         (yyval.simbolo).valor = NULL;
@@ -1949,21 +1960,43 @@ yyreduce:
   case 38:
 
 /* Line 1464 of yacc.c  */
-#line 374 "parser_latino.y"
+#line 376 "parser_latino.y"
     {
-        if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
-            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
-            exit(1);
+        if ((strcmp((yyvsp[(1) - (3)].simbolo).tipo, "string") == 0 || strcmp((yyvsp[(3) - (3)].simbolo).tipo, "string") == 0)){
+            // Concatenación de cadenas
+            (yyval.simbolo).tipo = strdup("string");
+
+            // Prepara las cadenas (quita comillas si quieres, opcional)
+            char* val1 = (yyvsp[(1) - (3)].simbolo).valor;
+            char* val2 = (yyvsp[(3) - (3)].simbolo).valor;
+
+            // Quitar comillas alrededor si necesario (opcional)
+            // Aquí simplemente concatenamos las representaciones tal como están
+
+            (yyval.simbolo).valor = malloc(strlen(val1) + strlen(val2) + 1);
+            sprintf((yyval.simbolo).valor, "%s%s", val1, val2);
+
+            // Crea un nodo de concatenación (usa NODO_CONCAT si tienes, o NODO_SUMA)
+            (yyval.simbolo).n = crearNodoOperacion(NODO_CONCAT, (yyvsp[(1) - (3)].simbolo).n, (yyvsp[(3) - (3)].simbolo).n); // o NODO_SUMA si no tienes NODO_CONCAT
+
+            free(val1);
+            free(val2);
         }
-        if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, "string") == 0 || strcmp((yyvsp[(3) - (3)].simbolo).tipo, "string") == 0 || strcmp((yyvsp[(1) - (3)].simbolo).tipo, "bool") == 0 || strcmp((yyvsp[(3) - (3)].simbolo).tipo, "bool") == 0) {
-            fprintf(stderr, "[ERROR] Operacion aritmetica no permitida con tipo string/bool (linea %d)\n", num_linea);
-            exit(1);
+        else {
+            if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
+                fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
+                exit(1);
+            }
+            if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, "string") == 0 || strcmp((yyvsp[(3) - (3)].simbolo).tipo, "string") == 0 || strcmp((yyvsp[(1) - (3)].simbolo).tipo, "bool") == 0 || strcmp((yyvsp[(3) - (3)].simbolo).tipo, "bool") == 0) {
+                fprintf(stderr, "[ERROR] Operacion aritmetica no permitida con tipo string/bool (linea %d)\n", num_linea);
+                exit(1);
+            }
+            (yyval.simbolo).tipo = strdup((yyvsp[(1) - (3)].simbolo).tipo);
+            // SIEMPRE guarda la expresión textual, no el resultado
+            (yyval.simbolo).valor = malloc(strlen((yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "") + strlen((yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "") + 4);
+            sprintf((yyval.simbolo).valor, "%s+%s", (yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "", (yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "");
+            (yyval.simbolo).n = crearNodoOperacion(NODO_SUMA, (yyvsp[(1) - (3)].simbolo).n, (yyvsp[(3) - (3)].simbolo).n);
         }
-        (yyval.simbolo).tipo = strdup((yyvsp[(1) - (3)].simbolo).tipo);
-        // SIEMPRE guarda la expresión textual, no el resultado
-        (yyval.simbolo).valor = malloc(strlen((yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "") + strlen((yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "") + 4);
-        sprintf((yyval.simbolo).valor, "%s+%s", (yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "", (yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "");
-        (yyval.simbolo).n = crearNodoOperacion(NODO_SUMA, (yyvsp[(1) - (3)].simbolo).n, (yyvsp[(3) - (3)].simbolo).n);
         free((yyvsp[(1) - (3)].simbolo).tipo); free((yyvsp[(3) - (3)].simbolo).tipo); free((yyvsp[(1) - (3)].simbolo).valor); free((yyvsp[(3) - (3)].simbolo).valor);
     ;}
     break;
@@ -1971,7 +2004,7 @@ yyreduce:
   case 39:
 
 /* Line 1464 of yacc.c  */
-#line 390 "parser_latino.y"
+#line 414 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -1992,7 +2025,7 @@ yyreduce:
   case 40:
 
 /* Line 1464 of yacc.c  */
-#line 405 "parser_latino.y"
+#line 429 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2013,7 +2046,7 @@ yyreduce:
   case 41:
 
 /* Line 1464 of yacc.c  */
-#line 420 "parser_latino.y"
+#line 444 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2040,7 +2073,7 @@ yyreduce:
   case 42:
 
 /* Line 1464 of yacc.c  */
-#line 441 "parser_latino.y"
+#line 465 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup((yyvsp[(2) - (3)].simbolo).tipo);
         if ((yyvsp[(2) - (3)].simbolo).valor != NULL) {
@@ -2056,12 +2089,8 @@ yyreduce:
   case 43:
 
 /* Line 1464 of yacc.c  */
-#line 451 "parser_latino.y"
+#line 475 "parser_latino.y"
     {
-        if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, "string") == 0 || strcmp((yyvsp[(3) - (3)].simbolo).tipo, "string") == 0 || strcmp((yyvsp[(1) - (3)].simbolo).tipo, "bool") == 0 || strcmp((yyvsp[(3) - (3)].simbolo).tipo, "bool") == 0) {
-            fprintf(stderr, "[ERROR] Operacion relacional no permitida con tipo string/bool (linea %d)\n", num_linea);
-            exit(1);
-        }
         (yyval.simbolo).tipo = strdup("bool");
         (yyval.simbolo).valor = malloc(strlen((yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "") + strlen((yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "") + 4);
         sprintf((yyval.simbolo).valor, "%s==%s", (yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "", (yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "");
@@ -2073,12 +2102,8 @@ yyreduce:
   case 44:
 
 /* Line 1464 of yacc.c  */
-#line 462 "parser_latino.y"
+#line 482 "parser_latino.y"
     {
-        if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, "string") == 0 || strcmp((yyvsp[(3) - (3)].simbolo).tipo, "string") == 0 || strcmp((yyvsp[(1) - (3)].simbolo).tipo, "bool") == 0 || strcmp((yyvsp[(3) - (3)].simbolo).tipo, "bool") == 0) {
-            fprintf(stderr, "[ERROR] Operacion relacional no permitida con tipo string/bool (linea %d)\n", num_linea);
-            exit(1);
-        }
         (yyval.simbolo).tipo = strdup("bool");
         (yyval.simbolo).valor = malloc(strlen((yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "") + strlen((yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "") + 4);
         sprintf((yyval.simbolo).valor, "%s!=%s", (yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "", (yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "");
@@ -2090,7 +2115,7 @@ yyreduce:
   case 45:
 
 /* Line 1464 of yacc.c  */
-#line 473 "parser_latino.y"
+#line 489 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2111,7 +2136,7 @@ yyreduce:
   case 46:
 
 /* Line 1464 of yacc.c  */
-#line 488 "parser_latino.y"
+#line 504 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2132,7 +2157,7 @@ yyreduce:
   case 47:
 
 /* Line 1464 of yacc.c  */
-#line 503 "parser_latino.y"
+#line 519 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2153,7 +2178,7 @@ yyreduce:
   case 48:
 
 /* Line 1464 of yacc.c  */
-#line 518 "parser_latino.y"
+#line 534 "parser_latino.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2174,7 +2199,89 @@ yyreduce:
   case 49:
 
 /* Line 1464 of yacc.c  */
-#line 537 "parser_latino.y"
+#line 549 "parser_latino.y"
+    {
+        // Validación de tipos
+        if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, "bool") != 0 || strcmp((yyvsp[(3) - (3)].simbolo).tipo, "bool") != 0) {
+            fprintf(stderr, "[ERROR] Operacion logica AND requiere operandos bool (linea %d)\n", num_linea);
+            exit(1);
+        }
+
+        (yyval.simbolo).tipo = strdup("bool");
+
+        // Evaluación del valor (asumiendo que los valores son "true" o "false")
+        int val1 = (strcmp((yyvsp[(1) - (3)].simbolo).valor, "true") == 0);
+        int val2 = (strcmp((yyvsp[(3) - (3)].simbolo).valor, "true") == 0);
+
+        (yyval.simbolo).valor = strdup((val1 && val2) ? "true" : "false");
+
+        // Nodo del AST
+        (yyval.simbolo).n = crearNodoOperacion(NODO_AND, (yyvsp[(1) - (3)].simbolo).n, (yyvsp[(3) - (3)].simbolo).n);
+
+        // Liberar memoria
+        free((yyvsp[(1) - (3)].simbolo).tipo); free((yyvsp[(3) - (3)].simbolo).tipo); free((yyvsp[(1) - (3)].simbolo).valor); free((yyvsp[(3) - (3)].simbolo).valor);
+    ;}
+    break;
+
+  case 50:
+
+/* Line 1464 of yacc.c  */
+#line 570 "parser_latino.y"
+    {
+        // Validación de tipos
+        if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, "bool") != 0 || strcmp((yyvsp[(3) - (3)].simbolo).tipo, "bool") != 0) {
+            fprintf(stderr, "[ERROR] Operacion logica OR requiere operandos bool (linea %d)\n", num_linea);
+            exit(1);
+        }
+
+        (yyval.simbolo).tipo = strdup("bool");
+
+        // Evaluación del valor (asumiendo que los valores son "true" o "false")
+        int val1 = (strcmp((yyvsp[(1) - (3)].simbolo).valor, "true") == 0);
+        int val2 = (strcmp((yyvsp[(3) - (3)].simbolo).valor, "true") == 0);
+
+        (yyval.simbolo).valor = strdup((val1 || val2) ? "true" : "false");
+
+        // Nodo del AST
+        (yyval.simbolo).n = crearNodoOperacion(NODO_OR, (yyvsp[(1) - (3)].simbolo).n, (yyvsp[(3) - (3)].simbolo).n);
+
+        // Liberar memoria
+        free((yyvsp[(1) - (3)].simbolo).tipo); free((yyvsp[(3) - (3)].simbolo).tipo);
+        free((yyvsp[(1) - (3)].simbolo).valor); free((yyvsp[(3) - (3)].simbolo).valor);
+    ;}
+    break;
+
+  case 51:
+
+/* Line 1464 of yacc.c  */
+#line 592 "parser_latino.y"
+    {
+        // Validación de tipos
+        if (strcmp((yyvsp[(2) - (2)].simbolo).tipo, "bool") != 0) {
+            fprintf(stderr, "[ERROR] Operacion logica NOT requiere operandos bool (linea %d)\n", num_linea);
+            exit(1);
+        }
+
+        (yyval.simbolo).tipo = strdup("bool");
+
+        // Evaluación del valor (asumiendo que los valores son "true" o "false")
+        int val = (strcmp((yyvsp[(2) - (2)].simbolo).valor, "true") != 0);
+
+        (yyval.simbolo).valor = strdup((val) ? "true" : "false");
+
+        // Nodo del AST
+        (yyval.simbolo).n = crearNodoNot(NODO_NOT, (yyvsp[(2) - (2)].simbolo).n);
+
+        // Liberar memoria
+        free((yyvsp[(2) - (2)].simbolo).tipo);
+        free((yyvsp[(2) - (2)].simbolo).valor);
+    ;}
+    break;
+
+  case 52:
+
+/* Line 1464 of yacc.c  */
+#line 617 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("int");
         (yyval.simbolo).valor = malloc(12);
@@ -2183,10 +2290,10 @@ yyreduce:
     ;}
     break;
 
-  case 50:
+  case 53:
 
 /* Line 1464 of yacc.c  */
-#line 543 "parser_latino.y"
+#line 623 "parser_latino.y"
     {
         (yyvsp[(2) - (2)].enteroVal) = -(yyvsp[(2) - (2)].enteroVal); // Negar el número
         (yyval.simbolo).tipo = strdup("int");
@@ -2196,10 +2303,10 @@ yyreduce:
     ;}
     break;
 
-  case 51:
+  case 54:
 
 /* Line 1464 of yacc.c  */
-#line 550 "parser_latino.y"
+#line 630 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("float");
         (yyval.simbolo).valor = malloc(32);
@@ -2208,10 +2315,10 @@ yyreduce:
     ;}
     break;
 
-  case 52:
+  case 55:
 
 /* Line 1464 of yacc.c  */
-#line 556 "parser_latino.y"
+#line 636 "parser_latino.y"
     {
         (yyvsp[(2) - (2)].realVal) = -(yyvsp[(2) - (2)].realVal); // Negar el número
         (yyval.simbolo).tipo = strdup("float");
@@ -2221,10 +2328,10 @@ yyreduce:
     ;}
     break;
 
-  case 53:
+  case 56:
 
 /* Line 1464 of yacc.c  */
-#line 563 "parser_latino.y"
+#line 643 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("string");
         (yyval.simbolo).valor = strdup((yyvsp[(1) - (1)].stringVal));
@@ -2233,10 +2340,10 @@ yyreduce:
     ;}
     break;
 
-  case 54:
+  case 57:
 
 /* Line 1464 of yacc.c  */
-#line 569 "parser_latino.y"
+#line 649 "parser_latino.y"
     {
         (yyval.simbolo).tipo = strdup("bool");
         (yyval.simbolo).valor = strdup((yyvsp[(1) - (1)].stringVal));
@@ -2245,10 +2352,10 @@ yyreduce:
     ;}
     break;
 
-  case 55:
+  case 58:
 
 /* Line 1464 of yacc.c  */
-#line 575 "parser_latino.y"
+#line 655 "parser_latino.y"
     {
         int pos = buscarTabla((yyvsp[(1) - (1)].stringVal));
         if (pos == -1){
@@ -2270,7 +2377,7 @@ yyreduce:
 
 
 /* Line 1464 of yacc.c  */
-#line 2274 "parser_latino.tab.c"
+#line 2381 "parser_latino.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2482,7 +2589,7 @@ yyreturn:
 
 
 /* Line 1684 of yacc.c  */
-#line 593 "parser_latino.y"
+#line 673 "parser_latino.y"
 
 
 int main(int argc, char** argv) {

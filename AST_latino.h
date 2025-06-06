@@ -7,7 +7,7 @@ enum tipoNodoAST {
     NODO_LISTA, NODO_ASIGNACION, NODO_SUMA, NODO_RESTA, NODO_MULT, NODO_DIV,
     NODO_NUMERO, NODO_FLOAT, NODO_STRING, NODO_BOOL, NODO_VARIABLE,
     NODO_ARRAY, NODO_PUTS, NODO_WHILE, NODO_IF, NODO_ELSE, NODO_FUNCION, NODO_LLAMADA_FUNCION,
-    NODO_IGUALIGUAL,NODO_DIFERENTE, NODO_MENOR, NODO_MAYOR, NODO_MENORIGUAL, NODO_MAYORIGUAL, NODO_AND, NODO_OR, NODO_GRUPO
+    NODO_IGUALIGUAL,NODO_DIFERENTE, NODO_MENOR, NODO_MAYOR, NODO_MENORIGUAL, NODO_MAYORIGUAL, NODO_AND, NODO_OR, NODO_GRUPO, NODO_NOT, NODO_CONCAT
 };
 
 struct ast {
@@ -31,6 +31,7 @@ struct ast *crearNodoString(const char* valor);
 struct ast *crearNodoBool(const char* valor);
 struct ast *crearNodoVariable(const char* nombre);
 struct ast* crearNodoArray(struct ast* elemento, struct ast* siguiente);
+struct ast* crearNodoNot(enum tipoNodoAST tipo, struct ast* izq);
 
 struct ast *crearNodoPuts(struct ast *expresion);
 

@@ -38,37 +38,40 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     MENOR = 258,
-     MAYOR = 259,
-     MENORIGUAL = 260,
-     MAYORIGUAL = 261,
-     DIFERENTE = 262,
-     IGUALIGUAL = 263,
-     RESTA = 264,
-     SUMA = 265,
-     DIVISION = 266,
-     MULTI = 267,
-     PARENDER = 268,
-     PARENIZQ = 269,
-     NUMERICO = 270,
-     NUMERICODECIMAL = 271,
-     IDENTIFICADOR = 272,
-     CADENA = 273,
-     BOOL = 274,
-     CORCHETEABIERTO = 275,
-     CORCHETECERRADO = 276,
-     SEPARADOR = 277,
-     IGUAL = 278,
-     SALTO = 279,
-     IF = 280,
-     ELSE = 281,
-     WHILE = 282,
-     FOR = 283,
-     PUTS = 284,
-     END = 285,
-     DEF = 286,
-     INTERP_INI = 287,
-     INTERP_FIN = 288
+     AND = 258,
+     OR = 259,
+     NOT = 260,
+     MENOR = 261,
+     MAYOR = 262,
+     MENORIGUAL = 263,
+     MAYORIGUAL = 264,
+     DIFERENTE = 265,
+     IGUALIGUAL = 266,
+     RESTA = 267,
+     SUMA = 268,
+     DIVISION = 269,
+     MULTI = 270,
+     PARENDER = 271,
+     PARENIZQ = 272,
+     NUMERICO = 273,
+     NUMERICODECIMAL = 274,
+     IDENTIFICADOR = 275,
+     CADENA = 276,
+     BOOL = 277,
+     CORCHETEABIERTO = 278,
+     CORCHETECERRADO = 279,
+     SEPARADOR = 280,
+     IGUAL = 281,
+     SALTO = 282,
+     IF = 283,
+     ELSE = 284,
+     WHILE = 285,
+     FOR = 286,
+     PUTS = 287,
+     END = 288,
+     DEF = 289,
+     INTERP_INI = 290,
+     INTERP_FIN = 291
    };
 #endif
 
@@ -99,7 +102,7 @@ typedef union YYSTYPE
 
 
 /* Line 1685 of yacc.c  */
-#line 103 "parser_latino.tab.h"
+#line 106 "parser_latino.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
