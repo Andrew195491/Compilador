@@ -1,2 +1,7 @@
-a = 7 >= 7
-puts a
+x = 3.1
+
+if x > 2.1
+  puts "Mayor"
+else
+  puts "Menor"
+end

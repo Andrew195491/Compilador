@@ -449,6 +449,10 @@ expresion
         free($2.tipo); free($2.valor);
     }
     | expresion IGUALIGUAL expresion {
+        if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0 || strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
+            fprintf(stderr, "[ERROR] Operacion relacional no permitida con tipo string/bool (linea %d)\n", num_linea);
+            exit(1);
+        }
         $$.tipo = strdup("bool");
         $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
         sprintf($$.valor, "%s==%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
@@ -456,6 +460,10 @@ expresion
         free($1.tipo); free($3.tipo);
     }
     | expresion DIFERENTE expresion {
+        if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0 || strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
+            fprintf(stderr, "[ERROR] Operacion relacional no permitida con tipo string/bool (linea %d)\n", num_linea);
+            exit(1);
+        }
         $$.tipo = strdup("bool");
         $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
         sprintf($$.valor, "%s!=%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
@@ -465,6 +473,10 @@ expresion
     | expresion MENOR expresion {
         if (strcmp($1.tipo, $3.tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
+            exit(1);
+        }
+        if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0 || strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
+            fprintf(stderr, "[ERROR] Operacion relacional no permitida con tipo string/bool (linea %d)\n", num_linea);
             exit(1);
         }
         $$.tipo = strdup("bool");
@@ -478,6 +490,10 @@ expresion
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
             exit(1);
         }
+        if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0 || strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
+            fprintf(stderr, "[ERROR] Operacion relacional no permitida con tipo string/bool (linea %d)\n", num_linea);
+            exit(1);
+        }
         $$.tipo = strdup("bool");
         $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
         sprintf($$.valor, "%s>%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
@@ -489,6 +505,10 @@ expresion
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
             exit(1);
         }
+        if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0 || strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
+            fprintf(stderr, "[ERROR] Operacion relacional no permitida con tipo string/bool (linea %d)\n", num_linea);
+            exit(1);
+        }
         $$.tipo = strdup("bool");
         $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
         sprintf($$.valor, "%s<=%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
@@ -498,6 +518,10 @@ expresion
     | expresion MAYORIGUAL expresion {
         if (strcmp($1.tipo, $3.tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
+            exit(1);
+        }
+        if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0 || strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
+            fprintf(stderr, "[ERROR] Operacion relacional no permitida con tipo string/bool (linea %d)\n", num_linea);
             exit(1);
         }
         $$.tipo = strdup("bool");
