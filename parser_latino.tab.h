@@ -71,7 +71,8 @@
      END = 288,
      DEF = 289,
      INTERP_INI = 290,
-     INTERP_FIN = 291
+     INTERP_FIN = 291,
+     COMENTARIOLINEA = 292
    };
 #endif
 
@@ -102,7 +103,7 @@ typedef union YYSTYPE
 
 
 /* Line 1685 of yacc.c  */
-#line 106 "parser_latino.tab.h"
+#line 107 "parser_latino.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

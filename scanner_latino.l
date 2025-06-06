@@ -14,6 +14,7 @@ int num_linea = 1;
 [ \t]+                  ; // ignorar espacios
 \n                      { num_linea++; return SALTO; }
 
+
 "=begin"                { BEGIN(COMMENT); }
 <COMMENT>[^=]*[\r\n]+   ;
 <COMMENT>"=end"         { BEGIN(INITIAL); }
@@ -49,9 +50,7 @@ int num_linea = 1;
 "&&"                    { return AND; }
 "||"                    { return OR; }
 "!"                     { return NOT; }
-"#".*                   ;
-
-"#".*                   ; 
+"#".*                   { return COMENTARIOLINEA; }
 
 [0-9]+\.[0-9]+          { yylval.realVal = atof(yytext); return NUMERICODECIMAL; }
 [0-9]+                  { yylval.enteroVal = atoi(yytext); return NUMERICO; }

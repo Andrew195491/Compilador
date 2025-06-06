@@ -55,6 +55,7 @@ void yyerror(const char* s) {
 %token  END DEF
 %token  INTERP_INI INTERP_FIN
 %token IGUALIGUAL DIFERENTE MAYORIGUAL MENORIGUAL MAYOR MENOR AND OR NOT
+%token  COMENTARIOLINEA 
 
 %type   <simbolo> programa lista_sentencias sentencia asignacion expresion valor
 %type   <simbolo> array expresion_array acceso_array indices_array
@@ -96,6 +97,7 @@ lista_sentencias
     }
     ;
 
+
 sentencia
     : asignacion {
         $$.tipo = strdup($1.tipo);
@@ -132,6 +134,12 @@ sentencia
         $$.valor = NULL;
         $$.n = $1.n;
         free($1.tipo); free($1.valor);
+    }
+    | COMENTARIOLINEA {
+        $$.tipo = strdup("comentario_linea");
+        $$.valor = NULL;
+        $$.n = NULL; 
+        printf("Comentario de línea\n");
     }
     ;
 
