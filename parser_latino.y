@@ -372,19 +372,41 @@ expresion
         free($1.tipo); free($1.valor);
     }
     | expresion SUMA expresion {
-        if (strcmp($1.tipo, $3.tipo) != 0) {
-            fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
-            exit(1);
+        if ((strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0)){
+            // Concatenación de cadenas
+            $$.tipo = strdup("string");
+
+            // Prepara las cadenas (quita comillas si quieres, opcional)
+            char* val1 = $1.valor ? strdup($1.valor) : strdup("");
+            char* val2 = $3.valor ? strdup($3.valor) : strdup("");
+
+            // Quitar comillas alrededor si necesario (opcional)
+            // Aquí simplemente concatenamos las representaciones tal como están
+
+            $$.valor = malloc(strlen(val1) + strlen(val2) + 1);
+            sprintf($$.valor, "%s%s", val1, val2);
+
+            // Crea un nodo de concatenación (usa NODO_CONCAT si tienes, o NODO_SUMA)
+            $$.n = crearNodoOperacion(NODO_CONCAT, $1.n, $3.n); // o NODO_SUMA si no tienes NODO_CONCAT
+
+            free(val1);
+            free(val2);
         }
-        if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0 || strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
-            fprintf(stderr, "[ERROR] Operacion aritmetica no permitida con tipo string/bool (linea %d)\n", num_linea);
-            exit(1);
+        else {
+            if (strcmp($1.tipo, $3.tipo) != 0) {
+                fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
+                exit(1);
+            }
+            if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0 || strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
+                fprintf(stderr, "[ERROR] Operacion aritmetica no permitida con tipo string/bool (linea %d)\n", num_linea);
+                exit(1);
+            }
+            $$.tipo = strdup($1.tipo);
+            // SIEMPRE guarda la expresión textual, no el resultado
+            $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
+            sprintf($$.valor, "%s+%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
+            $$.n = crearNodoOperacion(NODO_SUMA, $1.n, $3.n);
         }
-        $$.tipo = strdup($1.tipo);
-        // SIEMPRE guarda la expresión textual, no el resultado
-        $$.valor = malloc(strlen($1.valor ? $1.valor : "") + strlen($3.valor ? $3.valor : "") + 4);
-        sprintf($$.valor, "%s+%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
-        $$.n = crearNodoOperacion(NODO_SUMA, $1.n, $3.n);
         free($1.tipo); free($3.tipo); free($1.valor); free($3.valor);
     }
     | expresion RESTA expresion {
