@@ -1,8 +1,1 @@
-x = "Hola"
-y = "si"
-
-if x == y
-  puts 66
-else
-  puts 77
-end
+x = 1
