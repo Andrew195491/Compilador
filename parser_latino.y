@@ -52,7 +52,7 @@ void yyerror(const char* s) {
 %token  PUTS
 %token  END DEF
 %token  INTERP_INI INTERP_FIN
-%token IGUALIGUAL DIFERENTE MAYORIGUAL MENORIGUAL MAYOR MENOR
+%token IGUALIGUAL DIFERENTE MAYORIGUAL MENORIGUAL MAYOR MENOR AND OR
 
 %type   <simbolo> programa lista_sentencias sentencia asignacion expresion valor
 %type   <simbolo> array expresion_array acceso_array indices_array
@@ -551,6 +551,49 @@ expresion
         sprintf($$.valor, "%s>=%s", $1.valor ? $1.valor : "", $3.valor ? $3.valor : "");
         $$.n = crearNodoOperacion(NODO_MAYORIGUAL, $1.n, $3.n);
         free($1.tipo); free($3.tipo);
+    }
+    | expresion AND expresion {
+        // Validación de tipos
+        if (strcmp($1.tipo, "bool") != 0 || strcmp($3.tipo, "bool") != 0) {
+            fprintf(stderr, "[ERROR] Operacion logica AND requiere operandos bool (linea %d)\n", num_linea);
+            exit(1);
+        }
+
+        $$.tipo = strdup("bool");
+
+        // Evaluación del valor (asumiendo que los valores son "true" o "false")
+        int val1 = (strcmp($1.valor, "true") == 0);
+        int val2 = (strcmp($3.valor, "true") == 0);
+
+        $$.valor = strdup((val1 && val2) ? "true" : "false");
+
+        // Nodo del AST
+        $$.n = crearNodoOperacion(NODO_AND, $1.n, $3.n);
+
+        // Liberar memoria
+        free($1.tipo); free($3.tipo); free($1.valor); free($3.valor);
+    }
+    | expresion OR expresion {
+        // Validación de tipos
+        if (strcmp($1.tipo, "bool") != 0 || strcmp($3.tipo, "bool") != 0) {
+            fprintf(stderr, "[ERROR] Operacion logica OR requiere operandos bool (linea %d)\n", num_linea);
+            exit(1);
+        }
+
+        $$.tipo = strdup("bool");
+
+        // Evaluación del valor (asumiendo que los valores son "true" o "false")
+        int val1 = (strcmp($1.valor, "true") == 0);
+        int val2 = (strcmp($3.valor, "true") == 0);
+
+        $$.valor = strdup((val1 || val2) ? "true" : "false");
+
+        // Nodo del AST
+        $$.n = crearNodoOperacion(NODO_OR, $1.n, $3.n);
+
+        // Liberar memoria
+        free($1.tipo); free($3.tipo);
+        free($1.valor); free($3.valor);
     }
     ;
     

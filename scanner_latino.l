@@ -46,6 +46,8 @@ int num_linea = 1;
 "<="                    { return MENORIGUAL; }
 ">"                     { return MAYOR; }
 "<"                     { return MENOR; }
+"&&"                    { return AND; }
+"//"                    { return OR; }
 "#".*                   ;
 
 "#".*                   ; 

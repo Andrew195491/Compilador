@@ -38,6 +38,8 @@ const char* nombres_nodo[] = {
     "NODO_MAYOR",
     "NODO_MAYORIGUAL",
     "NODO_GRUPO",
+    "NODO_AND",
+    "NODO_OR",
 };
 
 // Para strings en .data
@@ -317,6 +319,12 @@ void recorrerAST(struct ast *n) {
             break;
         case NODO_MAYORIGUAL:
             printf("("); recorrerAST(n->izq); printf(" >= "); recorrerAST(n->dcha); printf(")");
+            break;
+        case NODO_AND:
+            printf("("); recorrerAST(n->izq); printf(" && "); recorrerAST(n->dcha); printf(")");
+            break;
+        case NODO_OR:
+            printf("("); recorrerAST(n->izq); printf(" || "); recorrerAST(n->dcha); printf(")");
             break;
         case NODO_VARIABLE:
             printf("%s", n->nombre);
@@ -1013,6 +1021,44 @@ const char* generarASM_rec(struct ast *n) {
                 }
 
                 return reg;
+            }
+            case NODO_AND: {
+                const char* reg_izq = generarASM_rec(n->izq);
+                const char* reg_dcha = generarASM_rec(n->dcha);
+                const char* temp = nuevo_temp();
+
+                const char* label_false = nuevo_label();
+                const char* label_end = nuevo_label();
+
+                fprintf(yyout, "    # AND\n");
+                fprintf(yyout, "    beq %s, $zero, %s\n", reg_izq, label_false);  // si izq es false → resultado 0
+                fprintf(yyout, "    beq %s, $zero, %s\n", reg_dcha, label_false); // si der es false → resultado 0
+                fprintf(yyout, "    li %s, 1\n", temp);                           // ambos son true → resultado 1
+                fprintf(yyout, "    j %s\n", label_end);
+                fprintf(yyout, "%s:\n", label_false);
+                fprintf(yyout, "    li %s, 0\n", temp);                           // alguno es false → resultado 0
+                fprintf(yyout, "%s:\n", label_end);
+
+                return temp;
+            }
+            case NODO_OR: {
+                const char* reg_izq = generarASM_rec(n->izq);
+                const char* reg_dcha = generarASM_rec(n->dcha);
+                const char* temp = nuevo_temp();
+
+                const char* label_true = nuevo_label();
+                const char* label_end = nuevo_label();
+
+                fprintf(yyout, "    # OR\n");
+                fprintf(yyout, "    bne %s, $zero, %s\n", reg_izq, label_true);  // si izq es true --> salto
+                fprintf(yyout, "    bne %s, $zero, %s\n", reg_dcha, label_true);  // si der es true --> salto
+                fprintf(yyout, "    li %s, 0\n", temp);                          // ambos son false → resultado 0
+                fprintf(yyout, "    j %s\n", label_end);
+                fprintf(yyout, "%s:\n", label_true);
+                fprintf(yyout, "    li %s, 1\n", temp);                          // si al menos uno true → resultado 1
+                fprintf(yyout, "%s:\n", label_end);
+
+                return temp;
             }
             case NODO_ASIGNACION: {
                 const char* reg = generarASM_rec(n->izq);
