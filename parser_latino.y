@@ -165,20 +165,52 @@ asignacion
 
 if_else_end
     : IF expresion salto lista_sentencias END {
-        // if sin else
         $$.tipo = strdup("if");
         $$.valor = NULL;
-        $$.n = crearNodoIf($2.n, $4.n, NULL);
-        free($2.tipo); free($2.valor); free($4.tipo); free($4.valor);
+
+        struct ast* nodo = malloc(sizeof(struct ast));
+        nodo->tipoNodo = NODO_IF;
+        nodo->izq = $2.n;
+
+        // Construir el else vacío manualmente como lista vacía (para mantener la estructura)
+        struct ast* nodoLista = malloc(sizeof(struct ast));
+        nodoLista->tipoNodo = NODO_LISTA;
+        nodoLista->izq = $4.n;
+        nodoLista->dcha = NULL;
+
+        nodo->dcha = nodoLista;
+        nodo->nombre = NULL;
+
+        $$.n = nodo;
+
+        free($2.tipo); free($2.valor);
+        free($4.tipo); free($4.valor);
     }
     | IF expresion salto lista_sentencias ELSE salto lista_sentencias END {
-        // if con else
         $$.tipo = strdup("if_else");
         $$.valor = NULL;
-        $$.n = crearNodoIf($2.n, $4.n, $7.n);
-        free($2.tipo); free($2.valor); free($4.tipo); free($4.valor); free($7.tipo); free($7.valor);
+
+        struct ast* nodo = malloc(sizeof(struct ast));
+        nodo->tipoNodo = NODO_IF;
+        nodo->izq = $2.n;
+
+        // Construimos manualmente la lista con THEN y ELSE
+        struct ast* nodoLista = malloc(sizeof(struct ast));
+        nodoLista->tipoNodo = NODO_LISTA;
+        nodoLista->izq = $4.n;     // cuerpo THEN
+        nodoLista->dcha = $7.n;    // cuerpo ELSE
+
+        nodo->dcha = nodoLista;
+        nodo->nombre = NULL;
+
+        $$.n = nodo;
+
+        free($2.tipo); free($2.valor);
+        free($4.tipo); free($4.valor);
+        free($7.tipo); free($7.valor);
     }
-    ;
+;
+
 
 
 while_end

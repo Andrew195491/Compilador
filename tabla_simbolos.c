@@ -30,10 +30,8 @@ void guardar_simbolo(const char* nombre, const char* tipo, const char* valor) {
     if (pos >= 0) { // Si existe, limpia su tipo y lo modifica con el nuevo
         /* Actualizar tipo si necesario */
         free(tabla[pos].tipo);
-        free(tabla[pos].valor);
 
         tabla[pos].tipo = strdup(tipo);
-        tabla[pos].valor = strdup(valor);
     } else {
         if (indice >= MAX_SIMBOLOS) { // Si no existe, comprueba que haya espacio en la tabla
             fprintf(stderr, "[ERROR] Tabla de simbolos llena.\n"); // Si no hay espacio, salta error

@@ -12,6 +12,7 @@ extern FILE *yyout;
 #define MAX_VARS 100
 char *lista_vars[MAX_VARS];
 char* inicializada[MAX_VARS];
+int ya_asignado[MAX_VARS] = {0};
 int num_vars = 0;
 const char* nombres_nodo[] = {
     "NODO_LISTA",
@@ -597,7 +598,16 @@ void generar_puts(struct ast *expresion) {
                         fprintf(yyout, "    move $a0, %s\n", reg);
                         break;
                     default:
-                        fprintf(yyout, "    # tipo no soportado en puts\n");
+                        if (reg) {
+                            fprintf(yyout, "    li $v0, 1\n");
+                            fprintf(yyout, "    move $a0, %s\n", reg);
+                            fprintf(yyout, "    syscall\n");
+                            fprintf(yyout, "    li $a0, 10\n");
+                            fprintf(yyout, "    li $v0, 11\n");
+                            fprintf(yyout, "    syscall\n");
+                        } else {
+                            fprintf(yyout, "    # tipo no soportado o reg nulo en puts\n");
+                        }
                         return;
                 }
 
@@ -613,16 +623,9 @@ const char* generarASM_rec(struct ast *n) {
     if (!n) return NULL;
     printf("Tipo Nodo: %s\n", nombres_nodo[n->tipoNodo]);
         switch(n->tipoNodo) {
-           case NODO_NUMERO: {
+            case NODO_NUMERO: {
                 const char* reg = nuevo_temp();
-
-                if (!n->es_inicializada) {
-                    fprintf(yyout, "    li %s, %d\n", reg, n->valor_int);
-                    n->es_inicializada = 1;  // Lo marcamos como inicializado después de generarlo
-                } else {
-                    fprintf(yyout, "    # %s ya inicializado, se reutiliza\n", reg);
-                }
-
+                fprintf(yyout, "    li %s, %d\n", reg, n->valor_int);
                 return reg;
             }
             case NODO_BOOL: {
@@ -674,24 +677,38 @@ const char* generarASM_rec(struct ast *n) {
 
             case NODO_FLOAT: {
                 const char* reg = nuevo_temp_float();
+
+                // Verifica si ya existe el literal en la tabla de símbolos
                 int pos = -1;
+                char buffer[32];
+                sprintf(buffer, "%.4f", n->valor_float);
+
                 for (int i = 0; i < indice; i++) {
-                    if (tabla[i].tipo && strcmp(tabla[i].tipo, "float") == 0 
-                        && tabla[i].valor) {
-                        float val = atof(tabla[i].valor);
-                        if (fabsf(val - n->valor_float) < 0.0001f) {
+                    if (tabla[i].tipo && strcmp(tabla[i].tipo, "float") == 0 && tabla[i].valor) {
+                        if (fabs(atof(tabla[i].valor) - n->valor_float) < 0.0001f) {
                             pos = i;
                             break;
                         }
                     }
                 }
-                if (pos >= 0) {
-                    fprintf(yyout, "    l.s %s, %s\n", reg, tabla[pos].nombre);
-                } else {
-                    fprintf(yyout, "    # ERROR: float literal no encontrado en tabla de símbolos\n");
+
+                if (pos == -1) {
+                    // No está, lo añadimos a la tabla
+                    tabla[indice].nombre = strdup(n->valor_str); // "float_0"
+                    tabla[indice].tipo = strdup("float");
+                    tabla[indice].valor = strdup(buffer);        // "2.0"
+                    n->es_inicializada = 1;
+                    pos = indice++;
+                    
+                    // Escribimos en .data (yyout o yyout_data según cómo lo tengas)
+                    fprintf(yyout, "%s: .float %s\n", n->valor_str, buffer);
                 }
+
+                // Cargamos ese literal en un registro float
+                fprintf(yyout, "    l.s %s, %s\n", reg, tabla[pos].nombre);
                 return reg;
             }
+
             case NODO_ARRAY: {
                 // Los arrays/matrices ya están declarados e inicializados en .data
                 // No se genera código en .text para ellos
@@ -1075,123 +1092,195 @@ const char* generarASM_rec(struct ast *n) {
             case NODO_ASIGNACION: {
                 const char* reg = generarASM_rec(n->izq);
                 const char* tipo = obtener_tipo(n->nombre);
-                 printf("Nodo ASIGNACION con hijo tipo: %s\n", nombres_nodo[n->izq->tipoNodo]);
+                printf("Nodo ASIGNACION con hijo tipo: %s\n", nombres_nodo[n->izq->tipoNodo]);
 
-                registrar_variable(n->nombre);
+                // Ya está registrada antes, no la registres de nuevo
+                // registrar_variable(n->nombre); <-- ¡no es necesario aquí!
 
+                // Float
                 if (tipo && strcmp(tipo, "float") == 0) {
                     if (reg && strcmp(reg, "$f12") != 0) {
                         fprintf(yyout, "    mov.s $f12, %s\n", reg);
                     }
                     fprintf(yyout, "    s.s $f12, %s\n", n->nombre);
                     return "$f12";
-                } else if (tipo && strcmp(tipo, "string") == 0) {
-                    // No generes sw para strings
+                }
+
+                // String → sin `sw`
+                else if (tipo && strcmp(tipo, "string") == 0) {
                     return reg;
-                } else if (tipo && (strcmp(tipo, "array") == 0 || strcmp(tipo, "matriz") == 0)) {
-                    // No generes sw para arrays/matrices
+                }
+
+                // Array o matriz → sin `sw`
+                else if (tipo && (strcmp(tipo, "array") == 0 || strcmp(tipo, "matriz") == 0)) {
                     return NULL;
-                } else {
-                    // int o bool
-                    int esta_inicializada = 0;
-                    for (int i = 0; i < MAX_VARS; i++) {
-                        if (inicializada[i] && strcmp(inicializada[i], n->nombre) == 0) {
-                            esta_inicializada = 1;
-                            break;
-                        }
-                    }
-                    if ((!esta_inicializada && reg) || strcmp(tipo, "bool") == 0) {
+                }
+
+                // Int o bool
+                else {
+                    if (reg) {
                         fprintf(yyout, "    sw %s, %s\n", reg, n->nombre);
-                    } else if (!reg) {
-                        fprintf(yyout, "    # No se genera sw para %s (no es int/float/bool)\n", n->nombre);
+                        n->es_inicializada = 1;  // ✅ Ya está inicializada correctamente
+                        printf("Asignación para '%s' → sw generado\n", n->nombre);
                     } else {
-                        fprintf(yyout, "    # %s ya inicializado (int/bool), se omite sw\n", n->nombre);
+                        fprintf(yyout, "    # No se genera sw para %s (registro nulo)\n", n->nombre);
                     }
                     return reg;
                 }
             }
-case NODO_IF: {
-    const char* label_else = nuevo_label();
-    const char* label_end = nuevo_label();
-
-    // 🔍 1. Determinar el tipo de la condición
-    const char* tipo = NULL;
-
-    // Si la condición es una comparación (como ==, !=, <, etc.)
-    if (n->izq->tipoNodo == NODO_IGUALIGUAL || n->izq->tipoNodo == NODO_DIFERENTE ||
-        n->izq->tipoNodo == NODO_MENOR || n->izq->tipoNodo == NODO_MENORIGUAL ||
-        n->izq->tipoNodo == NODO_MAYOR || n->izq->tipoNodo == NODO_MAYORIGUAL) {
-
-        struct ast* op_izq = n->izq->izq;
-        struct ast* op_dcha = n->izq->dcha;
-
-        const char* tipo_izq = (op_izq && op_izq->tipoNodo == NODO_VARIABLE) ? obtener_tipo(op_izq->nombre) :
-                               (op_izq && op_izq->tipoNodo == NODO_FLOAT) ? "float" :
-                               (op_izq && op_izq->tipoNodo == NODO_STRING) ? "string" : "int";
-
-        const char* tipo_dcha = (op_dcha && op_dcha->tipoNodo == NODO_VARIABLE) ? obtener_tipo(op_dcha->nombre) :
-                                (op_dcha && op_dcha->tipoNodo == NODO_FLOAT) ? "float" :
-                                (op_dcha && op_dcha->tipoNodo == NODO_STRING) ? "string" : "int";
-
-        if (strcmp(tipo_izq, "float") == 0 || strcmp(tipo_dcha, "float") == 0)
-            tipo = "float";
-        else if (strcmp(tipo_izq, "string") == 0 || strcmp(tipo_dcha, "string") == 0)
-            tipo = "string";
-        else
-            tipo = "int";
-
-    } else {
-        // Si la condición no es una comparación
-        if (n->izq->tipoNodo == NODO_VARIABLE)
-            tipo = obtener_tipo(n->izq->nombre);
-        else if (n->izq->tipoNodo == NODO_FLOAT)
-            tipo = "float";
-        else if (n->izq->tipoNodo == NODO_STRING)
-            tipo = "string";
-        else
-            tipo = "int";
-    }
-
-    // 🧠 2. Generar el ASM de la condición
-    const char* reg_cond = generarASM_rec(n->izq);
-
-    if (!reg_cond) {
-        fprintf(yyout, "    # Error: condición no generó registro\n");
-        return NULL;
-    }
-
-    // 🎯 3. Generar salto condicional según tipo
-    if (strcmp(tipo, "float") == 0) {
-        // Asumimos que el flag de comparación se puso ya en generarASM_rec
-        fprintf(yyout, "    bc1f %s\n", label_else);  // Salta si la condición es falsa
-    } else if (strcmp(tipo, "string") == 0) {
-        // strcmp ya compara y devuelve resultado en $v0, convertido a bool en reg_cond
-        fprintf(yyout, "    bnez %s, %s\n", reg_cond, label_else);
-    } else {
-        // int o bool
-        fprintf(yyout, "    beqz %s, %s\n", reg_cond, label_else);
-    }
-
-    // ✅ THEN
-    if (n->dcha && n->dcha->izq)
-        generarASM_rec(n->dcha->izq);
-
-    if (n->dcha && n->dcha->dcha)
-        fprintf(yyout, "    j %s\n", label_end);
-
-    // ❌ ELSE
-    fprintf(yyout, "%s:\n", label_else);
-    if (n->dcha && n->dcha->dcha)
-        generarASM_rec(n->dcha->dcha);
-
-    // 🔚 END
-    fprintf(yyout, "%s:\n", label_end);
-
-    return NULL;
-}
 
 
-           
+            case NODO_IF: {
+                const char* label_else = nuevo_label();
+                const char* label_end = nuevo_label();
+
+                // 🔍 1. Determinar el tipo de la condición
+                const char* tipo = NULL;
+
+                // Si la condición es una comparación (como ==, !=, <, etc.)
+                if (n->izq->tipoNodo == NODO_IGUALIGUAL || n->izq->tipoNodo == NODO_DIFERENTE ||
+                    n->izq->tipoNodo == NODO_MENOR || n->izq->tipoNodo == NODO_MENORIGUAL ||
+                    n->izq->tipoNodo == NODO_MAYOR || n->izq->tipoNodo == NODO_MAYORIGUAL) {
+
+                    struct ast* op_izq = n->izq->izq;
+                    struct ast* op_dcha = n->izq->dcha;
+
+                    const char* tipo_izq = (op_izq && op_izq->tipoNodo == NODO_VARIABLE) ? obtener_tipo(op_izq->nombre) :
+                                        (op_izq && op_izq->tipoNodo == NODO_FLOAT) ? "float" :
+                                        (op_izq && op_izq->tipoNodo == NODO_STRING) ? "string" : "int";
+
+                    const char* tipo_dcha = (op_dcha && op_dcha->tipoNodo == NODO_VARIABLE) ? obtener_tipo(op_dcha->nombre) :
+                                            (op_dcha && op_dcha->tipoNodo == NODO_FLOAT) ? "float" :
+                                            (op_dcha && op_dcha->tipoNodo == NODO_STRING) ? "string" : "int";
+
+                    if (strcmp(tipo_izq, "float") == 0 || strcmp(tipo_dcha, "float") == 0)
+                        tipo = "float";
+                    else if (strcmp(tipo_izq, "string") == 0 || strcmp(tipo_dcha, "string") == 0)
+                        tipo = "string";
+                    else
+                        tipo = "int";
+
+                } else {
+                    // Si la condición no es una comparación
+                    if (n->izq->tipoNodo == NODO_VARIABLE)
+                        tipo = obtener_tipo(n->izq->nombre);
+                    else if (n->izq->tipoNodo == NODO_FLOAT)
+                        tipo = "float";
+                    else if (n->izq->tipoNodo == NODO_STRING)
+                        tipo = "string";
+                    else
+                        tipo = "int";
+                }
+
+                // 🧠 2. Generar el ASM de la condición
+                const char* reg_cond = generarASM_rec(n->izq);
+
+                if (!reg_cond) {
+                    fprintf(yyout, "    # Error: condición no generó registro\n");
+                    return NULL;
+                }
+
+                // 🎯 3. Generar salto condicional según tipo
+                if (strcmp(tipo, "float") == 0) {
+                    // Asumimos que el flag de comparación se puso ya en generarASM_rec
+                    fprintf(yyout, "    bc1f %s\n", label_else);  // Salta si la condición es falsa
+                } else if (strcmp(tipo, "string") == 0) {
+                    // strcmp ya compara y devuelve resultado en $v0, convertido a bool en reg_cond
+                    fprintf(yyout, "    bnez %s, %s\n", reg_cond, label_else);
+                } else {
+                    // int o bool
+                    fprintf(yyout, "    beqz %s, %s\n", reg_cond, label_else);
+                }
+
+                // ✅ THEN
+                if (n->dcha && n->dcha->izq)
+                    generarASM_rec(n->dcha->izq);
+
+                if (n->dcha && n->dcha->dcha)
+                    fprintf(yyout, "    j %s\n", label_end);
+
+                // ❌ ELSE
+                fprintf(yyout, "%s:\n", label_else);
+                if (n->dcha && n->dcha->dcha)
+                    generarASM_rec(n->dcha->dcha);
+
+                // 🔚 END
+                fprintf(yyout, "%s:\n", label_end);
+
+                return NULL;
+            }
+
+            case NODO_WHILE: {
+                const char* label_start = nuevo_label();
+                const char* label_end = nuevo_label();
+
+                fprintf(yyout, "%s:\n", label_start);  // 🔁 Inicio del while
+
+                // 1. Determinar tipo de la condición
+                const char* tipo = NULL;
+
+                if (n->izq->tipoNodo == NODO_IGUALIGUAL || n->izq->tipoNodo == NODO_DIFERENTE ||
+                    n->izq->tipoNodo == NODO_MENOR || n->izq->tipoNodo == NODO_MENORIGUAL ||
+                    n->izq->tipoNodo == NODO_MAYOR || n->izq->tipoNodo == NODO_MAYORIGUAL) {
+
+                    struct ast* op_izq = n->izq->izq;
+                    struct ast* op_dcha = n->izq->dcha;
+
+                    const char* tipo_izq = (op_izq && op_izq->tipoNodo == NODO_VARIABLE) ? obtener_tipo(op_izq->nombre) :
+                                        (op_izq && op_izq->tipoNodo == NODO_FLOAT) ? "float" :
+                                        (op_izq && op_izq->tipoNodo == NODO_STRING) ? "string" : "int";
+
+                    const char* tipo_dcha = (op_dcha && op_dcha->tipoNodo == NODO_VARIABLE) ? obtener_tipo(op_dcha->nombre) :
+                                            (op_dcha && op_dcha->tipoNodo == NODO_FLOAT) ? "float" :
+                                            (op_dcha && op_dcha->tipoNodo == NODO_STRING) ? "string" : "int";
+
+                    if (strcmp(tipo_izq, "float") == 0 || strcmp(tipo_dcha, "float") == 0)
+                        tipo = "float";
+                    else if (strcmp(tipo_izq, "string") == 0 || strcmp(tipo_dcha, "string") == 0)
+                        tipo = "string";
+                    else
+                        tipo = "int";
+
+                } else {
+                    if (n->izq->tipoNodo == NODO_VARIABLE)
+                        tipo = obtener_tipo(n->izq->nombre);
+                    else if (n->izq->tipoNodo == NODO_FLOAT)
+                        tipo = "float";
+                    else if (n->izq->tipoNodo == NODO_STRING)
+                        tipo = "string";
+                    else
+                        tipo = "int";
+                }
+
+                // 2. Generar ASM de la condición
+                const char* reg_cond = generarASM_rec(n->izq);
+                if (!reg_cond) {
+                    fprintf(yyout, "    # Error: condición del while no generó registro\n");
+                    return NULL;
+                }
+
+                // 3. Salto si condición es falsa
+                if (strcmp(tipo, "float") == 0) {
+                    fprintf(yyout, "    bc1f %s\n", label_end);  // Falso → salir del while
+                } else if (strcmp(tipo, "string") == 0) {
+                    fprintf(yyout, "    beqz %s, %s\n", reg_cond, label_end);  // strcmp devuelve 0 si iguales
+                } else {
+                    fprintf(yyout, "    beqz %s, %s\n", reg_cond, label_end);  // condición booleana falsa
+                }
+
+                // 4. Cuerpo del while
+                if (n->dcha)
+                    generarASM_rec(n->dcha);
+
+                // 5. Volver al inicio
+                fprintf(yyout, "    j %s\n", label_start);
+
+                // 6. Fin del bucle
+                fprintf(yyout, "%s:\n", label_end);
+
+                return NULL;
+            }
+        
 
             case NODO_LISTA: {
                 generarASM_rec(n->izq);
