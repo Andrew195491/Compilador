@@ -163,6 +163,18 @@ asignacion
             case NODO_FLOAT:  tipoNodo = "float"; break;
             case NODO_STRING: tipoNodo = "string"; break;
             case NODO_BOOL:   tipoNodo = "bool"; break;
+            case NODO_ARRAY:   tipoNodo = "array"; break;
+            case NODO_SUMA: {
+                struct ast* izq = $3.n->izq;
+                struct ast* dcha = $3.n->dcha;
+
+                if ((izq && izq->tipoNodo == NODO_FLOAT) || (dcha && dcha->tipoNodo == NODO_FLOAT)) {
+                    $3.tipo = strdup("float");
+                } else {
+                    tipoNodo = "int";
+                }
+        break;
+    }
             default: tipoNodo = "otro"; break;
         }
 
@@ -435,25 +447,19 @@ expresion
         free($1.tipo); free($1.valor);
     }
     | expresion SUMA expresion {
-        if ((strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0)){
-            // Concatenación de cadenas
+        if ((strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0)) {
+            // ✅ Concatenación de strings → tipo resultante es string
             $$.tipo = strdup("string");
 
-            // Prepara las cadenas (quita comillas si quieres, opcional)
-            char* val1 = $1.valor;
-            char* val2 = $3.valor;
-
-            // Quitar comillas alrededor si necesario (opcional)
-            // Aquí simplemente concatenamos las representaciones tal como están
+            // ✅ Asegura que los valores no son NULL antes de concatenar
+            const char* val1 = $1.valor ? $1.valor : "";
+            const char* val2 = $3.valor ? $3.valor : "";
 
             $$.valor = malloc(strlen(val1) + strlen(val2) + 1);
             sprintf($$.valor, "%s%s", val1, val2);
 
-            // Crea un nodo de concatenación (usa NODO_CONCAT si tienes, o NODO_SUMA)
-            $$.n = crearNodoOperacion(NODO_CONCAT, $1.n, $3.n); // o NODO_SUMA si no tienes NODO_CONCAT
-
-            free(val1);
-            free(val2);
+            // ✅ Nodo del AST correcto
+            $$.n = crearNodoConcat($1.n, $3.n);
         }
         else {
             if (strcmp($1.tipo, $3.tipo) != 0) {

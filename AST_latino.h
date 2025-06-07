@@ -44,6 +44,7 @@ struct ast {
     int valor_int;
     float valor_float;
     int es_inicializada;
+    char* nombre_literal;
 };
 
 // Prototipos de funciones
@@ -69,6 +70,7 @@ struct ast* crearNodoFuncion(const char* nombre, struct ast* parametros, struct 
 struct ast* crearNodoParametro(const char* nombre, struct ast* siguiente);
 struct ast* crearNodoLlamadaFuncion(const char* nombre, struct ast* argumentos);
 struct ast* crearNodoArgumento(struct ast* valor, struct ast* siguiente);
+struct ast* crearNodoConcat(struct ast* izq, struct ast* dcha);
 
 void liberarAST(struct ast *n);
 void generarASM(struct ast *n);

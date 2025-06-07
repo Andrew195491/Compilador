@@ -13,6 +13,11 @@ extern FILE *yyout;
 char *lista_vars[MAX_VARS];
 char* inicializada[MAX_VARS];
 int num_vars = 0;
+int contador_temp = 0;
+char nombres_concat[256][64];  // Hasta 256 strings concatenados
+int total_concats = 0;
+char literales_concat[256][64];
+int num_literales_concat = 0;
 const char* nombres_nodo[] = {
     "NODO_LISTA",
     "NODO_ASIGNACION",
@@ -219,6 +224,19 @@ struct ast* crearNodoParametro(const char* nombre, struct ast* siguiente) {
     return nodo;
 }
 
+struct ast* crearNodoConcat(struct ast* izq, struct ast* dcha) {
+    struct ast* n = malloc(sizeof(struct ast));
+    n->tipoNodo = NODO_CONCAT;
+    n->izq = izq;
+    n->dcha = dcha;
+    n->nombre = NULL;
+    n->valor_str = NULL;
+    n->es_inicializada = 0;
+    return n;
+}
+
+
+
 struct ast* crearNodoLlamadaFuncion(const char* nombre, struct ast* argumentos) {
     struct ast* nodo = malloc(sizeof(struct ast));
     nodo->tipoNodo = NODO_LLAMADA_FUNCION;
@@ -417,11 +435,17 @@ void generar_puts(struct ast *expresion) {
                     fprintf(yyout, "    syscall\n"); // <-- Añade esto
                     return;
                 } else if (tipo && strcmp(tipo, "string") == 0) {
+                    int pos = buscarTabla(expresion->nombre);
+                    if (pos >= 0 && tabla[pos].valor && strcmp(tabla[pos].valor, "buffer_concat") == 0) {
+                        fprintf(yyout, "    la $a0, buffer_concat\n");
+                    } else {
+                        fprintf(yyout, "    move $a0, %s\n", reg);
+                    }
                     fprintf(yyout, "    li $v0, 4\n");
-                    fprintf(yyout, "    move $a0, %s\n", reg);
                     fprintf(yyout, "    syscall\n");
-                    return;    
-                } else if (tipo && (strcmp(tipo, "array") == 0)) {
+                    return;
+                }
+                else if (tipo && (strcmp(tipo, "array") == 0)) {
                     int pos = buscarTabla(expresion->nombre);
                     if (pos >= 0 && tabla[pos].tipoBase) {
                         int tam = tabla[pos].Tamanio;
@@ -634,23 +658,19 @@ const char* generarASM_rec(struct ast *n) {
                 return reg;
             }
             case NODO_STRING: {
-                const char* reg = nuevo_temp();
-                // Busca el string literal en la tabla de símbolos por su valor
-                int pos = -1;
                 for (int i = 0; i < indice; i++) {
-                    if (tabla[i].tipo && strcmp(tabla[i].tipo, "string") == 0 && 
+                    if (tabla[i].tipo && strcmp(tabla[i].tipo, "string") == 0 &&
                         tabla[i].valor && strcmp(tabla[i].valor, n->valor_str) == 0) {
-                        pos = i;
-                        break;
+                        n->nombre_literal = strdup(tabla[i].nombre); // Guarda el nombre
+                        const char* reg = nuevo_temp();
+                        fprintf(yyout, "    la %s, %s\n", reg, tabla[i].nombre); // Carga dirección en registro
+                        return reg;
                     }
                 }
-                if (pos >= 0) {
-                    fprintf(yyout, "    la %s, %s\n", reg, tabla[pos].nombre);
-                } else {
-                    fprintf(yyout, "    # ERROR: string literal no encontrado en tabla de símbolos\n");
-                }
-                return reg;
+                fprintf(yyout, "    # ERROR: string literal no encontrado en tabla de símbolos\n");
+                return "ERROR_STRING_NO_ENCONTRADO";
             }
+
             case NODO_VARIABLE: {
                 const char* tipo = obtener_tipo(n->nombre);
 
@@ -1088,13 +1108,24 @@ const char* generarASM_rec(struct ast *n) {
                 return temp;
             }
 
-            case NODO_ASIGNACION: {
-                const char* reg = generarASM_rec(n->izq);
-                const char* tipo = obtener_tipo(n->nombre);
-                printf("Nodo ASIGNACION con hijo tipo: %s\n", nombres_nodo[n->izq->tipoNodo]);
+        case NODO_ASIGNACION: {
+            const char* reg = generarASM_rec(n->izq);
+            const char* tipo = obtener_tipo(n->nombre);
+            printf("Nodo ASIGNACION con hijo tipo: %s\n", nombres_nodo[n->izq->tipoNodo]);
+
+        // registrar_variable(n->nombre);
+
+            // CORREGIDO: Actualiza valor simbólico si viene de una concatenación
+            if (n->izq->tipoNodo == NODO_CONCAT) {
+                int pos = buscarTabla(n->nombre);
+                if (pos >= 0) {
+                    tabla[pos].valor = strdup("buffer_concat");
+                }
+            }
 
                 // Ya está registrada antes, no la registres de nuevo
-                // registrar_variable(n->nombre); <-- ¡no es necesario aquí!
+                // registrar_variable(n->nombre
+                // ); <-- ¡no es necesario aquí!
 
                 // Float
                 if (tipo && strcmp(tipo, "float") == 0) {
@@ -1279,6 +1310,69 @@ const char* generarASM_rec(struct ast *n) {
 
                 return NULL;
             }
+
+case NODO_CONCAT: {
+    generarASM_rec(n->izq);   // genera el la $tX, strX y guarda nombre_literal
+    generarASM_rec(n->dcha);
+
+    const char* reg_izq = NULL;
+    const char* reg_dcha = NULL;
+
+    const char* nombre_izq = NULL;
+    const char* nombre_dcha = NULL;
+
+    // Obtener nombre de variable si es NODO_VARIABLE
+    if (n->izq->tipoNodo == NODO_VARIABLE) {
+        reg_izq = n->izq->nombre;
+    } else {
+        reg_izq = n->izq->nombre_literal;
+    }
+
+    if (n->dcha->tipoNodo == NODO_VARIABLE) {
+        reg_dcha = n->dcha->nombre;
+    } else {
+        reg_dcha = n->dcha->nombre_literal;
+    }
+
+
+    int id = temp_counter++;
+
+    fprintf(yyout, "    # Concatenación de strings: %s + %s\n", nombre_izq, nombre_dcha);
+    fprintf(yyout, "    la $t0, %s\n", reg_izq);
+    fprintf(yyout, "    la $t1, buffer_concat\n");
+
+    fprintf(yyout, "copy_str1_loop_%d:\n", id);
+    fprintf(yyout, "    lb $t2, 0($t0)\n");
+    fprintf(yyout, "    beqz $t2, copy_str2_start_%d\n", id);
+    fprintf(yyout, "    sb $t2, 0($t1)\n");
+    fprintf(yyout, "    addiu $t0, $t0, 1\n");
+    fprintf(yyout, "    addiu $t1, $t1, 1\n");
+    fprintf(yyout, "    j copy_str1_loop_%d\n", id);
+
+    fprintf(yyout, "copy_str2_start_%d:\n", id);
+    fprintf(yyout, "    la $t0, %s\n", reg_dcha);
+    fprintf(yyout, "copy_str2_loop_%d:\n", id);
+    fprintf(yyout, "    lb $t2, 0($t0)\n");
+    fprintf(yyout, "    beqz $t2, end_concat_%d\n", id);
+    fprintf(yyout, "    sb $t2, 0($t1)\n");
+    fprintf(yyout, "    addiu $t0, $t0, 1\n");
+    fprintf(yyout, "    addiu $t1, $t1, 1\n");
+    fprintf(yyout, "    j copy_str2_loop_%d\n", id);
+
+    fprintf(yyout, "end_concat_%d:\n", id);
+    fprintf(yyout, "    sb $zero, 0($t1)\n");
+
+    return "buffer_concat";
+}
+
+
+
+
+
+
+
+
+
         
 
             case NODO_LISTA: {
@@ -1346,90 +1440,84 @@ void generarASM(struct ast *n) {
 
     // 2. Sección .data 
     fprintf(yyout, ".data\n");
+    fprintf(yyout, "buffer_concat: .space 256\n");
+
+    char* ya_inicializadas[256];
+    int num_inicializadas = 0;
+
     for (int i = 0; i < indice; i++) {
+        const char* nombre = tabla[i].nombre;
+
+        // Comprobar si ya ha sido inicializada
+        int repetida = 0;
+        for (int j = 0; j < num_inicializadas; j++) {
+            if (strcmp(nombre, ya_inicializadas[j]) == 0) {
+                repetida = 1;
+                break;
+            }
+        }
+        if (repetida) continue; // Saltar esta entrada
+
         const char* tipo = tabla[i].tipo;
         const char* valor = tabla[i].valor;
         const char* tipoBase = tabla[i].tipoBase;
         const char* valores = tabla[i].Valores;
 
-        if (strcmp(tipo, "int") == 0 || strcmp(tipo, "bool") == 0) {
-            // Si contiene operación, no inicializar
-            int es_expresion = (tabla[i].valor && (
-                strchr(tabla[i].valor, '+') != NULL || 
-                strchr(tabla[i].valor, '-') != NULL ||
-                strchr(tabla[i].valor, '*') != NULL || 
-                strchr(tabla[i].valor, '/') != NULL || 
-                strstr(tabla[i].valor, "==") != NULL ||
-                strstr(tabla[i].valor, "!=") != NULL ||
-                strstr(tabla[i].valor, "<") != NULL ||
-                strstr(tabla[i].valor, "<=") != NULL ||
-                strstr(tabla[i].valor, ">") != NULL ||
-                strstr(tabla[i].valor, ">=") != NULL ));
+        int es_expresion = (valor && (
+            strchr(valor, '+') || strchr(valor, '-') || strchr(valor, '*') || strchr(valor, '/') ||
+            strstr(valor, "==") || strstr(valor, "!=") || strstr(valor, "<") || strstr(valor, "<=") ||
+            strstr(valor, ">") || strstr(valor, ">=") ));
 
+        if (strcmp(tipo, "int") == 0 || strcmp(tipo, "bool") == 0) {
             if (!es_expresion) {
-                int val = (valor != NULL) ? atoi(valor) : 0;
-                fprintf(yyout, "%s: .word %d\n", tabla[i].nombre, val);
-                if (tabla[i].valor != NULL) {
-                    inicializada[i] = tabla[i].nombre;
-                }
+                int val = valor ? atoi(valor) : 0;
+                fprintf(yyout, "%s: .word %d\n", nombre, val);
+                ya_inicializadas[num_inicializadas++] = strdup(nombre);
             } else {
-                // No inicializar, reservar espacio para la variable
-                fprintf(yyout, "%s: .word 0\n", tabla[i].nombre); // o usa solo `.space 4`
+                fprintf(yyout, "%s: .word 0\n", nombre);
             }
         }
 
         else if (strcmp(tipo, "float") == 0) {
-            int es_expresion = (tabla[i].valor && (
-                strchr(tabla[i].valor, '+') != NULL || 
-                strchr(tabla[i].valor, '-') != NULL ||
-                strchr(tabla[i].valor, '*') != NULL || 
-                strchr(tabla[i].valor, '/') != NULL || 
-                strstr(tabla[i].valor, "==") != NULL || 
-                strstr(tabla[i].valor, "!=") != NULL ||
-                strstr(tabla[i].valor, "<") != NULL ||
-                strstr(tabla[i].valor, "<=") != NULL ||
-                strstr(tabla[i].valor, ">") != NULL ||
-                strstr(tabla[i].valor, ">=") != NULL ));
-
-            if (!es_expresion) {    
-                float val = (valor != NULL) ? atof(valor) : 0.0;
-                fprintf(yyout, "%s: .float %f\n", tabla[i].nombre, val);
+            if (!es_expresion) {
+                float val = valor ? atof(valor) : 0.0;
+                fprintf(yyout, "%s: .float %f\n", nombre, val);
+                ya_inicializadas[num_inicializadas++] = strdup(nombre);
             } else {
-                // No inicializar, reservar espacio para la variable
-                fprintf(yyout, "%s: .float 0.0\n", tabla[i].nombre); // o usa solo `.space 4`
+                fprintf(yyout, "%s: .float 0.0\n", nombre);
             }
         }
+
         else if (strcmp(tipo, "string") == 0) {
-            fprintf(yyout, "%s: .asciiz %s\n", tabla[i].nombre, valor ? valor : "");
+            fprintf(yyout, "%s: .asciiz %s\n", nombre, valor ? valor : "");
+            ya_inicializadas[num_inicializadas++] = strdup(nombre);
         }
+
         else if (strcmp(tipo, "array") == 0 || strcmp(tipo, "matriz") == 0) {
             if (tipoBase && strcmp(tipoBase, "string") == 0) {
-                // 1. Declarar cada string como strX
                 char* valores_copia = strdup(valores ? valores : "");
                 char* token = strtok(valores_copia, " ");
                 int idx = 0;
-                char* nombres_aux[256]; // Máximo 256 strings por array
+                char* nombres_aux[256];
                 while (token) {
                     char nombre_aux[64];
-                    sprintf(nombre_aux, "%s_str%d", tabla[i].nombre, idx);
+                    sprintf(nombre_aux, "%s_str%d", nombre, idx);
                     nombres_aux[idx] = strdup(nombre_aux);
                     fprintf(yyout, "%s: .asciiz %s\n", nombre_aux, token);
                     idx++;
                     token = strtok(NULL, " ");
                 }
                 free(valores_copia);
-
-                // 2. Declarar el array de punteros
-                fprintf(yyout, "%s: .word", tabla[i].nombre);
+                fprintf(yyout, "%s: .word", nombre);
                 for (int j = 0; j < idx; j++) {
                     fprintf(yyout, " %s", nombres_aux[j]);
                     free(nombres_aux[j]);
                 }
                 fprintf(yyout, "\n");
-                continue;
-            } else if (tipoBase && strcmp(tipoBase, "float") == 0) {
-                // Array/matriz de float
-                fprintf(yyout, "%s: .float", tabla[i].nombre);
+                ya_inicializadas[num_inicializadas++] = strdup(nombre);
+            }
+            else if (tipoBase && strcmp(tipoBase, "float") == 0) {
+                fprintf(yyout, "%s: .float", nombre);
                 if (valores && strlen(valores) > 0) {
                     char* valores_copia = strdup(valores);
                     char* token = strtok(valores_copia, " ");
@@ -1440,9 +1528,10 @@ void generarASM(struct ast *n) {
                     free(valores_copia);
                 }
                 fprintf(yyout, "\n");
-            } else {
-                // Por defecto, array/matriz de int o bool
-                fprintf(yyout, "%s: .word", tabla[i].nombre);
+                ya_inicializadas[num_inicializadas++] = strdup(nombre);
+            }
+            else {
+                fprintf(yyout, "%s: .word", nombre);
                 if (valores && strlen(valores) > 0) {
                     char* valores_copia = strdup(valores);
                     char* token = strtok(valores_copia, " ");
@@ -1453,6 +1542,7 @@ void generarASM(struct ast *n) {
                     free(valores_copia);
                 }
                 fprintf(yyout, "\n");
+                ya_inicializadas[num_inicializadas++] = strdup(nombre);
             }
         }
     }
