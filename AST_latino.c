@@ -1155,7 +1155,7 @@ const char* generarASM_rec(struct ast *n) {
                 const char* label_else = nuevo_label();
                 const char* label_end = nuevo_label();
 
-                // 🔍 1. Determinar el tipo de la condición
+                // 1. Determinar el tipo de la condición
                 const char* tipo = NULL;
 
                 // Si la condición es una comparación (como ==, !=, <, etc.)
@@ -1193,7 +1193,7 @@ const char* generarASM_rec(struct ast *n) {
                         tipo = "int";
                 }
 
-                // 🧠 2. Generar el ASM de la condición
+                // 2. Generar el ASM de la condición
                 const char* reg_cond = generarASM_rec(n->izq);
 
                 if (!reg_cond) {
@@ -1201,7 +1201,7 @@ const char* generarASM_rec(struct ast *n) {
                     return NULL;
                 }
 
-                // 🎯 3. Generar salto condicional según tipo
+                // 3. Generar salto condicional según tipo
                 if (strcmp(tipo, "float") == 0) {
                     // Asumimos que el flag de comparación se puso ya en generarASM_rec
                     fprintf(yyout, "    bc1f %s\n", label_else);  // Salta si la condición es falsa
@@ -1213,19 +1213,19 @@ const char* generarASM_rec(struct ast *n) {
                     fprintf(yyout, "    beqz %s, %s\n", reg_cond, label_else);
                 }
 
-                // ✅ THEN
+                // THEN
                 if (n->dcha && n->dcha->izq)
                     generarASM_rec(n->dcha->izq);
 
                 if (n->dcha && n->dcha->dcha)
                     fprintf(yyout, "    j %s\n", label_end);
 
-                // ❌ ELSE
+                //ELSE
                 fprintf(yyout, "%s:\n", label_else);
                 if (n->dcha && n->dcha->dcha)
                     generarASM_rec(n->dcha->dcha);
 
-                // 🔚 END
+                //END
                 fprintf(yyout, "%s:\n", label_end);
 
                 return NULL;
