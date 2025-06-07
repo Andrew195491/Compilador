@@ -175,6 +175,39 @@ asignacion
                 }
         break;
     }
+    case NODO_RESTA: {
+                struct ast* izq = $3.n->izq;
+                struct ast* dcha = $3.n->dcha;
+
+                if ((izq && izq->tipoNodo == NODO_FLOAT) || (dcha && dcha->tipoNodo == NODO_FLOAT)) {
+                    $3.tipo = strdup("float");
+                } else {
+                    tipoNodo = "int";
+                }
+        break;
+    }
+    case NODO_MULT: {
+                struct ast* izq = $3.n->izq;
+                struct ast* dcha = $3.n->dcha;
+
+                if ((izq && izq->tipoNodo == NODO_FLOAT) || (dcha && dcha->tipoNodo == NODO_FLOAT)) {
+                    $3.tipo = strdup("float");
+                } else {
+                    tipoNodo = "int";
+                }
+        break;
+    }
+    case NODO_DIV: {
+                struct ast* izq = $3.n->izq;
+                struct ast* dcha = $3.n->dcha;
+
+                if ((izq && izq->tipoNodo == NODO_FLOAT) || (dcha && dcha->tipoNodo == NODO_FLOAT)) {
+                    $3.tipo = strdup("float");
+                } else {
+                    tipoNodo = "int";
+                }
+        break;
+    }
             default: tipoNodo = "otro"; break;
         }
 
@@ -466,7 +499,7 @@ expresion
                 fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", $1.tipo, $3.tipo, num_linea);
                 exit(1);
             }
-            if (strcmp($1.tipo, "string") == 0 || strcmp($3.tipo, "string") == 0 || strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
+            if (strcmp($1.tipo, "bool") == 0 || strcmp($3.tipo, "bool") == 0) {
                 fprintf(stderr, "[ERROR] Operacion aritmetica no permitida con tipo string/bool (linea %d)\n", num_linea);
                 exit(1);
             }

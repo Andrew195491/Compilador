@@ -1,8 +1,2 @@
-i = 1.0
-
-while i < 5.0
-  if i >= 3.0
-    puts i
-  end
-  i = i + 1.0
-end
+i = "Hola" + "siiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"
+puts i

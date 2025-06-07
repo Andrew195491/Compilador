@@ -1,29 +1,38 @@
 .data
 buffer_concat: .space 256
-i: .float 1.000000
-float_1: .float 5.000000
-float_2: .float 3.000000
+i: .asciiz "Hola""siiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"
+str1: .asciiz "Hola"
+str2: .asciiz "siiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"
 
 .text
 .globl main
 main:
-    l.s $f12, i
-    s.s $f12, i
-L0:
-    l.s $f13, i
-    l.s $f14, float_1
-    c.lt.s $f13, $f14
-    bc1f L1
-    l.s $f15, i
-    l.s $f16, float_2
-    c.lt.s $f15, $f16
-    # Error: condición no generó registro
-    l.s $f17, i
-    l.s $f18, i
-    add.s $f19, $f17, $f18
-    mov.s $f12, $f19
-    s.s $f12, i
-    j L0
-L1:
+    la $t0, str1
+    la $t1, str2
+    # Concatenación de strings: (null) + (null)
+    la $t0, str1
+    la $t1, buffer_concat
+copy_str1_loop_2:
+    lb $t2, 0($t0)
+    beqz $t2, copy_str2_start_2
+    sb $t2, 0($t1)
+    addiu $t0, $t0, 1
+    addiu $t1, $t1, 1
+    j copy_str1_loop_2
+copy_str2_start_2:
+    la $t0, str2
+copy_str2_loop_2:
+    lb $t2, 0($t0)
+    beqz $t2, end_concat_2
+    sb $t2, 0($t1)
+    addiu $t0, $t0, 1
+    addiu $t1, $t1, 1
+    j copy_str2_loop_2
+end_concat_2:
+    sb $zero, 0($t1)
+    la $t3, i
+    la $a0, buffer_concat
+    li $v0, 4
+    syscall
     li $v0, 10
     syscall

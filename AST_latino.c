@@ -836,8 +836,7 @@ const char* generarASM_rec(struct ast *n) {
                     const char* reg_izq = generarASM_rec(n->izq);
                     const char* reg_dcha = generarASM_rec(n->dcha);
                     const char* reg = nuevo_temp_float();
-                    fprintf(yyout, "    div.s %s, %s\n", reg_izq, reg_dcha);
-                    fprintf(yyout, "    mflo %s\n", reg);
+                    fprintf(yyout, "    div.s %s, %s, %s\n", reg, reg_izq, reg_dcha);
                     return reg;
                 } else {
                     const char* reg_izq = generarASM_rec(n->izq);
@@ -1493,12 +1492,12 @@ void generarASM(struct ast *n) {
         }
 
         else if (strcmp(tipo, "float") == 0) {
-            if (!es_expresion) {
-                float val = valor ? atof(valor) : 0.0;
+            float val = valor ? atof(valor) : 0.0;
+            if (!es_expresion) {              
                 fprintf(yyout, "%s: .float %f\n", nombre, val);
                 ya_inicializadas[num_inicializadas++] = strdup(nombre);
             } else {
-                fprintf(yyout, "%s: .float 0.0\n", nombre);
+                fprintf(yyout, "%s: .float %f\n", nombre, val);
             }
         }
 
