@@ -1,2 +1,3 @@
-ppp = "SIIIIIIIIII" + "NOOOOOOOOOOOOo"
-puts ppp
+x = 1.1
+y = x + 2.2
+puts y

@@ -1,61 +1,22 @@
 .data
 buffer_concat: .space 256
-ppp: .asciiz "SIIIIIIIIII""NOOOOOOOOOOOOo""dasgSDFGDRSFG"
-str1: .asciiz "SIIIIIIIIII"
-str2: .asciiz "NOOOOOOOOOOOOo"
-str3: .asciiz "dasgSDFGDRSFG"
+x: .float 1.100000
+y: .float 0.0
+float_1: .float 2.200000
 
 .text
 .globl main
 main:
-    la $t0, str1
-    la $t1, str2
-    # Concatenación de strings: (null) + (null)
-    la $t0, str1
-    la $t1, buffer_concat
-copy_str1_loop_2:
-    lb $t2, 0($t0)
-    beqz $t2, copy_str2_start_2
-    sb $t2, 0($t1)
-    addiu $t0, $t0, 1
-    addiu $t1, $t1, 1
-    j copy_str1_loop_2
-copy_str2_start_2:
-    la $t0, str2
-copy_str2_loop_2:
-    lb $t2, 0($t0)
-    beqz $t2, end_concat_2
-    sb $t2, 0($t1)
-    addiu $t0, $t0, 1
-    addiu $t1, $t1, 1
-    j copy_str2_loop_2
-end_concat_2:
-    sb $zero, 0($t1)
-    la $t3, str3
-    # Concatenación de strings: (null) + (null)
-    la $t0, (null)
-    la $t1, buffer_concat
-copy_str1_loop_4:
-    lb $t2, 0($t0)
-    beqz $t2, copy_str2_start_4
-    sb $t2, 0($t1)
-    addiu $t0, $t0, 1
-    addiu $t1, $t1, 1
-    j copy_str1_loop_4
-copy_str2_start_4:
-    la $t0, str3
-copy_str2_loop_4:
-    lb $t2, 0($t0)
-    beqz $t2, end_concat_4
-    sb $t2, 0($t1)
-    addiu $t0, $t0, 1
-    addiu $t1, $t1, 1
-    j copy_str2_loop_4
-end_concat_4:
-    sb $zero, 0($t1)
-    la $t5, ppp
-    la $a0, buffer_concat
-    li $v0, 4
+    l.s $f12, x
+    s.s $f12, x
+    l.s $f13, x
+    l.s $f14, float_1
+    add.s $f15, $f13, $f14
+    mov.s $f12, $f15
+    s.s $f12, y
+    l.s $f16, y
+    mov.s $f12, $f16
+    li $v0, 2
     syscall
     li $v0, 10
     syscall

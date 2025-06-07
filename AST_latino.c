@@ -697,11 +697,8 @@ const char* generarASM_rec(struct ast *n) {
             case NODO_FLOAT: {
                 const char* reg = nuevo_temp_float();
 
-                // Verifica si ya existe el literal en la tabla de símbolos
+                // Solo busca el literal que ya debe estar en la tabla
                 int pos = -1;
-                char buffer[32];
-                sprintf(buffer, "%.4f", n->valor_float);
-
                 for (int i = 0; i < indice; i++) {
                     if (tabla[i].tipo && strcmp(tabla[i].tipo, "float") == 0 && tabla[i].valor) {
                         if (fabs(atof(tabla[i].valor) - n->valor_float) < 0.0001f) {
@@ -711,20 +708,14 @@ const char* generarASM_rec(struct ast *n) {
                     }
                 }
 
-                if (pos == -1) {
-                    // No está, lo añadimos a la tabla
-                    tabla[indice].nombre = strdup(n->valor_str); // "float_0"
-                    tabla[indice].tipo = strdup("float");
-                    tabla[indice].valor = strdup(buffer);        // "2.0"
-                    n->es_inicializada = 1;
-                    pos = indice++;
-                    
-                    // Escribimos en .data (yyout o yyout_data según cómo lo tengas)
-                    fprintf(yyout, "%s: .float %s\n", n->valor_str, buffer);
+                if (pos != -1) {
+                    // Carga el literal desde .data (NO escribes aquí la declaración)
+                    fprintf(yyout, "    l.s %s, %s\n", reg, tabla[pos].nombre);
+                } else {
+                    // Error: debería haberse recolectado antes
+                    fprintf(stderr, "Error: Literal float no encontrado en tabla\n");
                 }
-
-                // Cargamos ese literal en un registro float
-                fprintf(yyout, "    l.s %s, %s\n", reg, tabla[pos].nombre);
+                
                 return reg;
             }
 
@@ -1311,69 +1302,59 @@ const char* generarASM_rec(struct ast *n) {
                 return NULL;
             }
 
-case NODO_CONCAT: {
-    generarASM_rec(n->izq);   // genera el la $tX, strX y guarda nombre_literal
-    generarASM_rec(n->dcha);
+            case NODO_CONCAT: {
+                generarASM_rec(n->izq);   // genera el la $tX, strX y guarda nombre_literal
+                generarASM_rec(n->dcha);
 
-    const char* reg_izq = NULL;
-    const char* reg_dcha = NULL;
+                const char* reg_izq = NULL;
+                const char* reg_dcha = NULL;
 
-    const char* nombre_izq = NULL;
-    const char* nombre_dcha = NULL;
+                const char* nombre_izq = NULL;
+                const char* nombre_dcha = NULL;
 
-    // Obtener nombre de variable si es NODO_VARIABLE
-    if (n->izq->tipoNodo == NODO_VARIABLE) {
-        reg_izq = n->izq->nombre;
-    } else {
-        reg_izq = n->izq->nombre_literal;
-    }
+                // Obtener nombre de variable si es NODO_VARIABLE
+                if (n->izq->tipoNodo == NODO_VARIABLE) {
+                    reg_izq = n->izq->nombre;
+                } else {
+                    reg_izq = n->izq->nombre_literal;
+                }
 
-    if (n->dcha->tipoNodo == NODO_VARIABLE) {
-        reg_dcha = n->dcha->nombre;
-    } else {
-        reg_dcha = n->dcha->nombre_literal;
-    }
-
-
-    int id = temp_counter++;
-
-    fprintf(yyout, "    # Concatenación de strings: %s + %s\n", nombre_izq, nombre_dcha);
-    fprintf(yyout, "    la $t0, %s\n", reg_izq);
-    fprintf(yyout, "    la $t1, buffer_concat\n");
-
-    fprintf(yyout, "copy_str1_loop_%d:\n", id);
-    fprintf(yyout, "    lb $t2, 0($t0)\n");
-    fprintf(yyout, "    beqz $t2, copy_str2_start_%d\n", id);
-    fprintf(yyout, "    sb $t2, 0($t1)\n");
-    fprintf(yyout, "    addiu $t0, $t0, 1\n");
-    fprintf(yyout, "    addiu $t1, $t1, 1\n");
-    fprintf(yyout, "    j copy_str1_loop_%d\n", id);
-
-    fprintf(yyout, "copy_str2_start_%d:\n", id);
-    fprintf(yyout, "    la $t0, %s\n", reg_dcha);
-    fprintf(yyout, "copy_str2_loop_%d:\n", id);
-    fprintf(yyout, "    lb $t2, 0($t0)\n");
-    fprintf(yyout, "    beqz $t2, end_concat_%d\n", id);
-    fprintf(yyout, "    sb $t2, 0($t1)\n");
-    fprintf(yyout, "    addiu $t0, $t0, 1\n");
-    fprintf(yyout, "    addiu $t1, $t1, 1\n");
-    fprintf(yyout, "    j copy_str2_loop_%d\n", id);
-
-    fprintf(yyout, "end_concat_%d:\n", id);
-    fprintf(yyout, "    sb $zero, 0($t1)\n");
-
-    return "buffer_concat";
-}
+                if (n->dcha->tipoNodo == NODO_VARIABLE) {
+                    reg_dcha = n->dcha->nombre;
+                } else {
+                    reg_dcha = n->dcha->nombre_literal;
+                }
 
 
+                int id = temp_counter++;
 
+                fprintf(yyout, "    # Concatenación de strings: %s + %s\n", nombre_izq, nombre_dcha);
+                fprintf(yyout, "    la $t0, %s\n", reg_izq);
+                fprintf(yyout, "    la $t1, buffer_concat\n");
 
+                fprintf(yyout, "copy_str1_loop_%d:\n", id);
+                fprintf(yyout, "    lb $t2, 0($t0)\n");
+                fprintf(yyout, "    beqz $t2, copy_str2_start_%d\n", id);
+                fprintf(yyout, "    sb $t2, 0($t1)\n");
+                fprintf(yyout, "    addiu $t0, $t0, 1\n");
+                fprintf(yyout, "    addiu $t1, $t1, 1\n");
+                fprintf(yyout, "    j copy_str1_loop_%d\n", id);
 
+                fprintf(yyout, "copy_str2_start_%d:\n", id);
+                fprintf(yyout, "    la $t0, %s\n", reg_dcha);
+                fprintf(yyout, "copy_str2_loop_%d:\n", id);
+                fprintf(yyout, "    lb $t2, 0($t0)\n");
+                fprintf(yyout, "    beqz $t2, end_concat_%d\n", id);
+                fprintf(yyout, "    sb $t2, 0($t1)\n");
+                fprintf(yyout, "    addiu $t0, $t0, 1\n");
+                fprintf(yyout, "    addiu $t1, $t1, 1\n");
+                fprintf(yyout, "    j copy_str2_loop_%d\n", id);
 
+                fprintf(yyout, "end_concat_%d:\n", id);
+                fprintf(yyout, "    sb $zero, 0($t1)\n");
 
-
-
-        
+                return "buffer_concat";
+            }
 
             case NODO_LISTA: {
                 generarASM_rec(n->izq);
@@ -1428,6 +1409,38 @@ void recolectar_strings_literal(struct ast *nodo) {
     recolectar_strings_literal(nodo->dcha);
 }
 
+void recolectar_floats_literal(struct ast *n) {
+    if (n == NULL) return;
+    
+    if (n->tipoNodo == NODO_FLOAT) {
+        // Verifica si ya existe el literal en la tabla de símbolos
+        int pos = -1;
+        char buffer[32];
+        sprintf(buffer, "%.4f", n->valor_float);
+
+        for (int i = 0; i < indice; i++) {
+            if (tabla[i].tipo && strcmp(tabla[i].tipo, "float") == 0 && tabla[i].valor) {
+                if (fabs(atof(tabla[i].valor) - n->valor_float) < 0.0001f) {
+                    pos = i;
+                    break;
+                }
+            }
+        }
+
+        if (pos == -1) {
+            // No está, lo añadimos a la tabla
+            tabla[indice].nombre = strdup(n->valor_str); // "float_0"
+            tabla[indice].tipo = strdup("float");
+            tabla[indice].valor = strdup(buffer);        // "2.0"
+            n->es_inicializada = 1;
+            indice++;
+        }
+    }
+    
+    // Recursión para recorrer todo el AST
+    recolectar_floats_literal(n->izq);
+    recolectar_floats_literal(n->dcha);
+}
 // ======== Función principal de generación de ensamblador ========
 
 void generarASM(struct ast *n) {
@@ -1437,6 +1450,7 @@ void generarASM(struct ast *n) {
     // 1. Recolectar variables y tipos del AST
     recolectar_vars_tipos(n);
     recolectar_strings_literal(n);
+    recolectar_floats_literal(n); 
 
     // 2. Sección .data 
     fprintf(yyout, ".data\n");
