@@ -12,7 +12,6 @@ extern FILE *yyout;
 #define MAX_VARS 100
 char *lista_vars[MAX_VARS];
 char* inicializada[MAX_VARS];
-int ya_asignado[MAX_VARS] = {0};
 int num_vars = 0;
 const char* nombres_nodo[] = {
     "NODO_LISTA",
@@ -384,7 +383,7 @@ void generar_puts(struct ast *expresion) {
     switch (expresion->tipoNodo) {
         case NODO_STRING:
             for (int i = 0; i < indice; i++) {
-                if (tabla[i].tipo && strcmp(tabla[i].tipo, "string") == 0 && tabla[i].valor && strcmp(tabla[i].valor, expresion->valor_str) == 0) {
+                if (tabla[i].valor && strcmp(tabla[i].valor, expresion->valor_str) == 0) {
                     pos = i;
                     break;
                 }

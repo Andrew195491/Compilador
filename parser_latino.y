@@ -145,23 +145,44 @@ sentencia
 
 asignacion
     : IDENTIFICADOR IGUAL expresion {
+        int pos = buscarTabla($1);
         $3.n->es_inicializada = 1;
+
         if ($3.tipo && strcmp($3.tipo, "matriz") == 0) {
-            // Si tienes forma de calcular filas/columnas, ponlo aquí. Si no, déjalo en 0.
             guardar_simbolo_matriz($1, $3.tipo, $3.tipoBase, $3.filas, $3.columnas, $3.valores ? $3.valores : "NULL");
         } else if ($3.tipo && strcmp($3.tipo, "array") == 0) {
             guardar_simbolo_array($1, $3.tipo, $3.tipoBase, $3.tam, $3.valores);
         } else {
             guardar_simbolo($1, $3.tipo, $3.valor);
         }
+
+        // Comprobación de tipos incompatibles
+        const char* tipoNodo = NULL;
+        switch ($3.n->tipoNodo) {
+            case NODO_NUMERO: tipoNodo = "int"; break;
+            case NODO_FLOAT:  tipoNodo = "float"; break;
+            case NODO_STRING: tipoNodo = "string"; break;
+            case NODO_BOOL:   tipoNodo = "bool"; break;
+            default: tipoNodo = "otro"; break;
+        }
+
+        if (tabla[pos].tipo && tipoNodo && strcmp(tabla[pos].tipo, tipoNodo) != 0) {
+            fprintf(stderr,
+                    "[ERROR] No puedes asignar un valor de tipo '%s' a la variable '%s' que es de tipo '%s' (linea %d)\n",
+                    tipoNodo, tabla[pos].nombre, tabla[pos].tipo, num_linea);
+            exit(1);
+        }
+
         $$.tipo = strdup("asignacion");
         $$.valor = NULL;
         $3.n->es_inicializada = 1;
         $$.n = crearNodoAsignacion($1, $3.n);
+
         mostrar_tabla();
         free($1); free($3.tipo); free($3.valor);
         free($3.tipoBase); free($3.valores);
     }
+
 
 if_else_end
     : IF expresion salto lista_sentencias END {

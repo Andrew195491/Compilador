@@ -27,12 +27,7 @@ int buscarTabla(const char* nombre) {
 /* Inserta un símbolo si no existe; si existe, actualiza su tipo */
 void guardar_simbolo(const char* nombre, const char* tipo, const char* valor) {
     int pos = buscarTabla(nombre); // Primero mira si el simbolo ya estaba en la tabla
-    if (pos >= 0) { // Si existe, limpia su tipo y lo modifica con el nuevo
-        /* Actualizar tipo si necesario */
-        free(tabla[pos].tipo);
-
-        tabla[pos].tipo = strdup(tipo);
-    } else {
+    if (pos < 0) {
         if (indice >= MAX_SIMBOLOS) { // Si no existe, comprueba que haya espacio en la tabla
             fprintf(stderr, "[ERROR] Tabla de simbolos llena.\n"); // Si no hay espacio, salta error
             exit(EXIT_FAILURE);
