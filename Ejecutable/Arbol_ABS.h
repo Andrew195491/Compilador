@@ -7,6 +7,7 @@ enum tipoNodoAST {
     NODO_LISTA, 
     NODO_ASIGNACION, 
     NODO_SUMA, 
+    NODO_CONCAT,
     NODO_RESTA, 
     NODO_MULT, 
     NODO_DIV,
@@ -20,6 +21,7 @@ enum tipoNodoAST {
     NODO_WHILE, 
     NODO_IF, 
     NODO_ELSE, 
+    NODO_NOT,
     NODO_IGUALIGUAL,
     NODO_DIFERENTE, 
     NODO_MENOR, 
@@ -28,8 +30,6 @@ enum tipoNodoAST {
     NODO_MAYORIGUAL,
     NODO_AND, 
     NODO_OR, 
-    NODO_NOT, 
-    NODO_CONCAT
 };
 
 struct ast {

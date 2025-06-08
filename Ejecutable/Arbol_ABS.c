@@ -29,7 +29,6 @@ const char* nombres_nodo[] = {
     "NODO_PUTS",
     "NODO_WHILE",
     "NODO_IF",
-    "NODO_ELSE",
     "NODO_IGUALIGUAL",
     "NODO_DIFERENTE",
     "NODO_MENOR",
@@ -161,11 +160,16 @@ struct ast *crearNodoPuts(struct ast *expresion) {
 }
 
 struct ast* crearNodoIf(struct ast* condicion, struct ast* cuerpo, struct ast* else_cuerpo) {
+
     struct ast* nodo = malloc(sizeof(struct ast));
     nodo->tipoNodo = NODO_IF;
     nodo->izq = condicion;
-
     nodo->dcha = crearNodoLista(cuerpo, else_cuerpo);
+    nodo->nombre = NULL;
+    nodo->valor_str = NULL;
+    nodo->valor_int = 0;
+    nodo->valor_float = 0.0f;
+     
     return nodo;
 }
 
@@ -180,7 +184,6 @@ struct ast* crearNodoWhile(struct ast* condicion, struct ast* cuerpo) {
     nodo->valor_float = 0.0f;
     return nodo;
 }
-
 
 struct ast* crearNodoConcat(struct ast* izq, struct ast* dcha) {
     struct ast* n = malloc(sizeof(struct ast));
@@ -969,11 +972,13 @@ const char* generarASM_rec(struct ast *n) {
 
 
             case NODO_IF: {
+                printf("[DEBUG] Entrando a NODO_IF\n");
+
                 const char* label_else = nuevo_label();
                 const char* label_end = nuevo_label();
 
+                // Determinar el tipo de la condición
                 const char* tipo = NULL;
-
                 if (n->izq->tipoNodo == NODO_IGUALIGUAL || n->izq->tipoNodo == NODO_DIFERENTE ||
                     n->izq->tipoNodo == NODO_MENOR || n->izq->tipoNodo == NODO_MENORIGUAL ||
                     n->izq->tipoNodo == NODO_MAYOR || n->izq->tipoNodo == NODO_MAYORIGUAL) {
@@ -1007,34 +1012,43 @@ const char* generarASM_rec(struct ast *n) {
                         tipo = "int";
                 }
 
-                const char* reg_cond = generarASM_rec(n->izq);
+                printf("[DEBUG] Tipo condición: %s\n", tipo);
 
+                const char* reg_cond = generarASM_rec(n->izq);
                 if (!reg_cond) {
+                    fprintf(stderr, "[ERROR] No se pudo generar ASM para la condición del if.\n");
                     return NULL;
                 }
 
+                printf("[DEBUG] Registro condición: %s\n", reg_cond);
+
+                // Evaluar la condición según tipo
                 if (strcmp(tipo, "float") == 0) {
-                    fprintf(yyout, "    bc1f %s\n", label_else);
+                    fprintf(yyout, "    bc1f %s\n", label_else);  // float falso
                 } else if (strcmp(tipo, "string") == 0) {
-                    fprintf(yyout, "    bnez %s, %s\n", reg_cond, label_else);
+                    fprintf(yyout, "    beq %s, $zero, %s\n", reg_cond, label_else);  // string vacío = false
                 } else {
-                    fprintf(yyout, "    beqz %s, %s\n", reg_cond, label_else);
+                    fprintf(yyout, "    beqz %s, %s\n", reg_cond, label_else);  // bool/int 0 = false
                 }
 
+                // Cuerpo del if
                 if (n->dcha && n->dcha->izq)
                     generarASM_rec(n->dcha->izq);
 
-                if (n->dcha && n->dcha->dcha)
-                    fprintf(yyout, "    j %s\n", label_end);
+                // Salto al final si hay else
+                fprintf(yyout, "    j %s\n", label_end);
 
+                // ELSE (si existe)
                 fprintf(yyout, "%s:\n", label_else);
                 if (n->dcha && n->dcha->dcha)
                     generarASM_rec(n->dcha->dcha);
 
+                // Fin del if
                 fprintf(yyout, "%s:\n", label_end);
 
                 return NULL;
             }
+
 
             case NODO_WHILE: {
                 const char* label_start = nuevo_label();

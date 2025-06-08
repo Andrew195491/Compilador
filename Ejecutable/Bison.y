@@ -220,45 +220,14 @@ if_else_end
     : IF expresion salto lista_sentencias END {
         $$.tipo = strdup("if");
         $$.valor = NULL;
-
-        struct ast* nodo = malloc(sizeof(struct ast));
-        nodo->tipoNodo = NODO_IF;
-        nodo->izq = $2.n;
-
-        struct ast* nodoLista = malloc(sizeof(struct ast));
-        nodoLista->tipoNodo = NODO_LISTA;
-        nodoLista->izq = $4.n;
-        nodoLista->dcha = NULL;
-
-        nodo->dcha = nodoLista;
-        nodo->nombre = NULL;
-
-        $$.n = nodo;
-
-        free($2.tipo); free($2.valor);
-        free($4.tipo); free($4.valor);
+        $$.n = crearNodoIf($2.n, $4.n, NULL);
+        free($2.tipo); free($2.valor); free($4.tipo); free($4.valor);
     }
     | IF expresion salto lista_sentencias ELSE salto lista_sentencias END {
         $$.tipo = strdup("if_else");
         $$.valor = NULL;
-
-        struct ast* nodo = malloc(sizeof(struct ast));
-        nodo->tipoNodo = NODO_IF;
-        nodo->izq = $2.n;
-
-        struct ast* nodoLista = malloc(sizeof(struct ast));
-        nodoLista->tipoNodo = NODO_LISTA;
-        nodoLista->izq = $4.n;
-        nodoLista->dcha = $7.n;
-
-        nodo->dcha = nodoLista;
-        nodo->nombre = NULL;
-
-        $$.n = nodo;
-
-        free($2.tipo); free($2.valor);
-        free($4.tipo); free($4.valor);
-        free($7.tipo); free($7.valor);
+        $$.n = crearNodoIf($2.n, $4.n, $7.n);
+        free($2.tipo); free($2.valor); free($4.tipo); free($4.valor); free($7.tipo); free($7.valor);
     }
 ;
 
