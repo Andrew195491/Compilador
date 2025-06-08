@@ -38,9 +38,9 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     AND = 258,
-     OR = 259,
-     NOT = 260,
+     NOT = 258,
+     AND = 259,
+     OR = 260,
      MENOR = 261,
      MAYOR = 262,
      MENORIGUAL = 263,

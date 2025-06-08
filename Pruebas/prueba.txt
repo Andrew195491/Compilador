@@ -1,1 +1,46 @@
-x = 2
+# Declaración de variables básicas
+x = 5
+y = 3.5
+activo = false
+
+# Operaciones
+z = x + 2
+w = y * 1.5
+puts z
+puts w
+
+resultado =  "Hola " + "compilador"
+puts resultado
+
+# Booleanos
+comparacion = x > 2
+puts comparacion
+
+# Arrays homogéneos
+numeros = [1, 2, 3]
+puts numeros
+
+# Matriz de enteros
+matriz = [[1, 2], [3, 4]]
+puts matriz
+
+# Matriz de strings
+mensajes = [["hola", "adiós"], ["sí", "no"]]
+puts mensajes
+
+# Comentario
+# Esto es un comentario de línea
+
+# If/else
+if !activo
+  puts "No está activo"
+else
+  puts "Está activo"
+end
+
+# While
+i = 0
+while i < 3
+  puts i
+  i = i + 1
+end

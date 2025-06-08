@@ -33,8 +33,7 @@ void yyerror(const char* s) {
     } simbolo;
 }
 
-%left OR AND
-%right NOT
+%left OR AND NOT
 %left IGUALIGUAL DIFERENTE MAYORIGUAL MENORIGUAL MAYOR MENOR
 %left SUMA RESTA
 %left MULTI DIVISION

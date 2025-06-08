@@ -15,29 +15,34 @@ static int label_counter = 0;
 int num_vars = 0;
 int primera_concat = 1;
 const char* nombres_nodo[] = {
-    "NODO_LISTA",
-    "NODO_ASIGNACION",
-    "NODO_SUMA",
-    "NODO_RESTA",
-    "NODO_MULT",
+    "NODO_LISTA", 
+    "NODO_ASIGNACION", 
+    "NODO_SUMA", 
+    "NODO_RESTA", 
+    "NODO_MULT", 
     "NODO_DIV",
-    "NODO_NUMERO",
-    "NODO_FLOAT",
-    "NODO_STRING",
-    "NODO_BOOL",
+    "NODO_NUMERO", 
+    "NODO_FLOAT", 
+    "NODO_STRING", 
+    "NODO_BOOL", 
     "NODO_VARIABLE",
-    "NODO_PUTS",
-    "NODO_WHILE",
+    "NODO_ARRAY", 
+    "NODO_PUTS", 
+    "NODO_WHILE", 
     "NODO_IF",
+    "NODO_FUNCION",
+    "NODO_LLAMADA_FUNCION",
     "NODO_IGUALIGUAL",
-    "NODO_DIFERENTE",
-    "NODO_MENOR",
-    "NODO_MENORIGUAL",
-    "NODO_MAYOR",
+    "NODO_DIFERENTE", 
+    "NODO_MENOR", 
+    "NODO_MAYOR", 
+    "NODO_MENORIGUAL", 
     "NODO_MAYORIGUAL",
-    "NODO_AND",
-    "NODO_OR",
-    "NODO_NOT"
+    "NODO_AND", 
+    "NODO_OR", 
+    "NODO_GRUPO", 
+    "NODO_NOT", 
+    "NODO_CONCAT"
 };
 
 int float_label_counter = 0;
@@ -498,6 +503,7 @@ const char* generarASM_rec(struct ast *n) {
                 const char* reg = nuevo_temp();
                 fprintf(yyout, "    li %s, %d\n", reg, n->valor_int);
                 return reg;
+                
             }
             case NODO_BOOL: {
                 const char* reg = nuevo_temp();
