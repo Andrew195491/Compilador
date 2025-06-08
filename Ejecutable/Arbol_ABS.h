@@ -20,8 +20,6 @@ enum tipoNodoAST {
     NODO_WHILE, 
     NODO_IF, 
     NODO_ELSE, 
-    NODO_FUNCION,
-    NODO_LLAMADA_FUNCION,
     NODO_IGUALIGUAL,
     NODO_DIFERENTE, 
     NODO_MENOR, 
@@ -31,7 +29,6 @@ enum tipoNodoAST {
     NODO_AND, 
     NODO_OR, 
     NODO_NOT, 
-    NODO_GRUPO, 
     NODO_CONCAT
 };
 
