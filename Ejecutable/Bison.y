@@ -682,9 +682,9 @@ int main(int argc, char** argv) {
             return 1;
         }
     }
-    yyout = fopen("output.asm", "w");
+    yyout = fopen("Pruebas/output.asm", "w");
     if (!yyout) {
-        perror("output.asm");
+        perror("Pruebas/output.asm");
         return 1;
     }
     printf("Analizando...\n");

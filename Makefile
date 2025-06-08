@@ -1,15 +1,19 @@
 # Compilador y opciones
 CC = gcc
 CFLAGS = -Wall -Wextra -Wno-unused-function
+
 LEX = flex
 BISON = bison
 
 # Nombres de archivos
-TARGET = Compilador
-SOURCES = Bison.tab.c lex.yy.c Tabla_Simbolos.c Arbol_ABS.c
-HEADERS = Bison.tab.h Tabla_Simbolos.h
-LEX_FILE = Flex.l
-YACC_FILE = Bison.y
+TARGET = $(SRC_DIR)/Compilador
+SRC_DIR = Ejecutable
+TEST_DIR = Pruebas
+
+SOURCES = $(SRC_DIR)/Bison.tab.c $(SRC_DIR)/lex.yy.c $(SRC_DIR)/Tabla_Simbolos.c $(SRC_DIR)/Arbol_ABS.c
+HEADERS = $(SRC_DIR)/Bison.tab.h $(SRC_DIR)/Tabla_Simbolos.h
+LEX_FILE = $(SRC_DIR)/Flex.l
+YACC_FILE = $(SRC_DIR)/Bison.y
 
 # Regla principal
 all: $(TARGET)
@@ -19,16 +23,15 @@ $(TARGET): $(SOURCES) $(HEADERS)
 	$(CC) $(CFLAGS) -o $@ $(SOURCES)
 
 # Generación del parser
-Bison.tab.c Bison.tab.h: $(YACC_FILE)
-	$(BISON) -d $(YACC_FILE)
+$(SRC_DIR)/Bison.tab.c $(SRC_DIR)/Bison.tab.h: $(YACC_FILE)
+	$(BISON) -d -o $(SRC_DIR)/Bison.tab.c $(YACC_FILE)
 
 # Generación del lexer
-lex.yy.c: $(LEX_FILE) Bison.tab.h
-	$(LEX) $(LEX_FILE)
+$(SRC_DIR)/lex.yy.c: $(LEX_FILE) $(SRC_DIR)/Bison.tab.h
+	$(LEX) -o $(SRC_DIR)/lex.yy.c $(LEX_FILE)
 
 # Limpieza
 clean:
-	rm -f $(TARGET) Bison.tab.c Bison.tab.h lex.yy.c output.asm *.o
+	rm -f $(TARGET) $(SRC_DIR)/Bison.tab.c $(SRC_DIR)/Bison.tab.h $(SRC_DIR)/lex.yy.c $(TEST_DIR)/output.asm *.o
 
-# Para evitar conflictos con archivos llamados 'clean'
 .PHONY: all clean

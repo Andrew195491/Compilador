@@ -1,5 +1,6 @@
+#line 2 "Ejecutable/lex.yy.c"
 
-#line 3 "lex.yy.c"
+#line 4 "Ejecutable/lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -522,15 +523,15 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "Flex.l"
-#line 4 "Flex.l"
+#line 1 "Ejecutable/Flex.l"
+#line 4 "Ejecutable/Flex.l"
 #include "Bison.tab.h"  // generado por Bison
 #include <string.h>
 #include <stdlib.h>
 
 int num_linea = 1;
 
-#line 534 "lex.yy.c"
+#line 535 "Ejecutable/lex.yy.c"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -718,10 +719,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 12 "Flex.l"
+#line 12 "Ejecutable/Flex.l"
 
 
-#line 725 "lex.yy.c"
+#line 726 "Ejecutable/lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -806,218 +807,218 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 14 "Flex.l"
+#line 14 "Ejecutable/Flex.l"
 ; // ignorar espacios
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 15 "Flex.l"
+#line 15 "Ejecutable/Flex.l"
 { num_linea++; return SALTO; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 18 "Flex.l"
+#line 18 "Ejecutable/Flex.l"
 { BEGIN(COMMENT); }
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 19 "Flex.l"
+#line 19 "Ejecutable/Flex.l"
 ;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 20 "Flex.l"
+#line 20 "Ejecutable/Flex.l"
 { BEGIN(INITIAL); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 22 "Flex.l"
+#line 22 "Ejecutable/Flex.l"
 { return DEF; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 23 "Flex.l"
+#line 23 "Ejecutable/Flex.l"
 { return END; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 24 "Flex.l"
+#line 24 "Ejecutable/Flex.l"
 { return IF; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 25 "Flex.l"
+#line 25 "Ejecutable/Flex.l"
 { return ELSE; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 26 "Flex.l"
+#line 26 "Ejecutable/Flex.l"
 { return FOR; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 27 "Flex.l"
+#line 27 "Ejecutable/Flex.l"
 { return WHILE; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 28 "Flex.l"
+#line 28 "Ejecutable/Flex.l"
 { return PUTS; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 29 "Flex.l"
+#line 29 "Ejecutable/Flex.l"
 { yylval.stringVal = strdup("true"); return BOOL; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 30 "Flex.l"
+#line 30 "Ejecutable/Flex.l"
 { yylval.stringVal = strdup("false"); return BOOL; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 32 "Flex.l"
+#line 32 "Ejecutable/Flex.l"
 { return IGUAL; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 33 "Flex.l"
+#line 33 "Ejecutable/Flex.l"
 { return CORCHETEABIERTO; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 34 "Flex.l"
+#line 34 "Ejecutable/Flex.l"
 { return CORCHETECERRADO; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 35 "Flex.l"
+#line 35 "Ejecutable/Flex.l"
 { return SEPARADOR; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 36 "Flex.l"
+#line 36 "Ejecutable/Flex.l"
 { return PARENIZQ; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 37 "Flex.l"
+#line 37 "Ejecutable/Flex.l"
 { return PARENDER; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 38 "Flex.l"
+#line 38 "Ejecutable/Flex.l"
 { return INTERP_INI; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 39 "Flex.l"
+#line 39 "Ejecutable/Flex.l"
 { return INTERP_FIN; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 40 "Flex.l"
+#line 40 "Ejecutable/Flex.l"
 { yylval.stringVal = strdup("+"); return SUMA; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 41 "Flex.l"
+#line 41 "Ejecutable/Flex.l"
 { yylval.stringVal = strdup("-"); return RESTA; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 42 "Flex.l"
+#line 42 "Ejecutable/Flex.l"
 { yylval.stringVal = strdup("*"); return MULTI; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 43 "Flex.l"
+#line 43 "Ejecutable/Flex.l"
 { yylval.stringVal = strdup("/"); return DIVISION; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 44 "Flex.l"
+#line 44 "Ejecutable/Flex.l"
 { return IGUALIGUAL; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 45 "Flex.l"
+#line 45 "Ejecutable/Flex.l"
 { return DIFERENTE; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 46 "Flex.l"
+#line 46 "Ejecutable/Flex.l"
 { return MAYORIGUAL; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 47 "Flex.l"
+#line 47 "Ejecutable/Flex.l"
 { return MENORIGUAL; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 48 "Flex.l"
+#line 48 "Ejecutable/Flex.l"
 { return MAYOR; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 49 "Flex.l"
+#line 49 "Ejecutable/Flex.l"
 { return MENOR; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 50 "Flex.l"
+#line 50 "Ejecutable/Flex.l"
 { return AND; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 51 "Flex.l"
+#line 51 "Ejecutable/Flex.l"
 { return OR; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 52 "Flex.l"
+#line 52 "Ejecutable/Flex.l"
 { return NOT; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 53 "Flex.l"
+#line 53 "Ejecutable/Flex.l"
 { return COMENTARIOLINEA; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 55 "Flex.l"
+#line 55 "Ejecutable/Flex.l"
 { yylval.realVal = atof(yytext); return NUMERICODECIMAL; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 56 "Flex.l"
+#line 56 "Ejecutable/Flex.l"
 { yylval.enteroVal = atoi(yytext); return NUMERICO; }
 	YY_BREAK
 case 39:
 /* rule 39 can match eol */
 YY_RULE_SETUP
-#line 57 "Flex.l"
+#line 57 "Ejecutable/Flex.l"
 { yylval.stringVal = strdup(yytext); return CADENA; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 59 "Flex.l"
+#line 59 "Ejecutable/Flex.l"
 { yylval.stringVal = strdup(yytext); return IDENTIFICADOR; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 61 "Flex.l"
+#line 61 "Ejecutable/Flex.l"
 { printf("[LEX] Caracter no reconocido: %s (linea %d)\n", yytext, num_linea); }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 63 "Flex.l"
+#line 63 "Ejecutable/Flex.l"
 ECHO;
 	YY_BREAK
-#line 1021 "lex.yy.c"
+#line 1022 "Ejecutable/lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 	yyterminate();
@@ -2016,7 +2017,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 63 "Flex.l"
+#line 63 "Ejecutable/Flex.l"
 
 
 

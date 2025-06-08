@@ -67,7 +67,7 @@
 /* Copy the first part of user declarations.  */
 
 /* Line 189 of yacc.c  */
-#line 1 "Bison.y"
+#line 1 "Ejecutable/Bison.y"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -87,7 +87,7 @@ void yyerror(const char* s) {
 
 
 /* Line 189 of yacc.c  */
-#line 91 "Bison.tab.c"
+#line 91 "Ejecutable/Bison.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -159,7 +159,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 19 "Bison.y"
+#line 19 "Ejecutable/Bison.y"
 
     int enteroVal;
     float realVal;
@@ -179,7 +179,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 183 "Bison.tab.c"
+#line 183 "Ejecutable/Bison.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -191,7 +191,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 195 "Bison.tab.c"
+#line 195 "Ejecutable/Bison.tab.c"
 
 #ifdef short
 # undef short
@@ -1494,7 +1494,7 @@ yyreduce:
         case 2:
 
 /* Line 1464 of yacc.c  */
-#line 70 "Bison.y"
+#line 70 "Ejecutable/Bison.y"
     {
         printf("Llamando a recorrerAST\n");
         generarASM((yyvsp[(1) - (1)].simbolo).n);
@@ -1505,7 +1505,7 @@ yyreduce:
   case 5:
 
 /* Line 1464 of yacc.c  */
-#line 82 "Bison.y"
+#line 82 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup((yyvsp[(1) - (2)].simbolo).tipo);
         if ((yyvsp[(1) - (2)].simbolo).valor != NULL) {
@@ -1521,7 +1521,7 @@ yyreduce:
   case 6:
 
 /* Line 1464 of yacc.c  */
-#line 92 "Bison.y"
+#line 92 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("lista");
         (yyval.simbolo).valor = NULL;
@@ -1533,7 +1533,7 @@ yyreduce:
   case 7:
 
 /* Line 1464 of yacc.c  */
-#line 102 "Bison.y"
+#line 102 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup((yyvsp[(1) - (1)].simbolo).tipo);
         (yyval.simbolo).valor = NULL;
@@ -1545,7 +1545,7 @@ yyreduce:
   case 8:
 
 /* Line 1464 of yacc.c  */
-#line 108 "Bison.y"
+#line 108 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("puts");
         (yyval.simbolo).valor = NULL;
@@ -1557,7 +1557,7 @@ yyreduce:
   case 9:
 
 /* Line 1464 of yacc.c  */
-#line 114 "Bison.y"
+#line 114 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("if_else");
         (yyval.simbolo).valor = NULL;
@@ -1569,7 +1569,7 @@ yyreduce:
   case 10:
 
 /* Line 1464 of yacc.c  */
-#line 120 "Bison.y"
+#line 120 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("while");
         (yyval.simbolo).valor = NULL;
@@ -1581,7 +1581,7 @@ yyreduce:
   case 11:
 
 /* Line 1464 of yacc.c  */
-#line 126 "Bison.y"
+#line 126 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("comentario_linea");
         (yyval.simbolo).valor = NULL;
@@ -1593,7 +1593,7 @@ yyreduce:
   case 12:
 
 /* Line 1464 of yacc.c  */
-#line 135 "Bison.y"
+#line 135 "Ejecutable/Bison.y"
     {
         int pos = buscarTabla((yyvsp[(1) - (3)].stringVal));
         (yyvsp[(3) - (3)].simbolo).n->es_inicializada = 1;
@@ -1681,7 +1681,7 @@ yyreduce:
   case 13:
 
 /* Line 1464 of yacc.c  */
-#line 220 "Bison.y"
+#line 220 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("if");
         (yyval.simbolo).valor = NULL;
@@ -1708,7 +1708,7 @@ yyreduce:
   case 14:
 
 /* Line 1464 of yacc.c  */
-#line 241 "Bison.y"
+#line 241 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("if_else");
         (yyval.simbolo).valor = NULL;
@@ -1736,7 +1736,7 @@ yyreduce:
   case 15:
 
 /* Line 1464 of yacc.c  */
-#line 268 "Bison.y"
+#line 268 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("while");
         (yyval.simbolo).valor = NULL;
@@ -1748,7 +1748,7 @@ yyreduce:
   case 16:
 
 /* Line 1464 of yacc.c  */
-#line 277 "Bison.y"
+#line 277 "Ejecutable/Bison.y"
     {
         if ((yyvsp[(2) - (3)].simbolo).tipoBase && strcmp((yyvsp[(2) - (3)].simbolo).tipoBase, "array") == 0) {
             (yyval.simbolo).tipo = strdup("matriz");
@@ -1774,7 +1774,7 @@ yyreduce:
   case 17:
 
 /* Line 1464 of yacc.c  */
-#line 297 "Bison.y"
+#line 297 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("array");
         (yyval.simbolo).valor = NULL;
@@ -1790,7 +1790,7 @@ yyreduce:
   case 18:
 
 /* Line 1464 of yacc.c  */
-#line 310 "Bison.y"
+#line 310 "Ejecutable/Bison.y"
     {
         if ((yyvsp[(1) - (3)].simbolo).tipo && strcmp((yyvsp[(1) - (3)].simbolo).tipo, "array") == 0) {
             
@@ -1826,7 +1826,7 @@ yyreduce:
   case 19:
 
 /* Line 1464 of yacc.c  */
-#line 340 "Bison.y"
+#line 340 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipoBase = strdup((yyvsp[(1) - (1)].simbolo).tipo);
         (yyval.simbolo).tam = 1;
@@ -1849,7 +1849,7 @@ yyreduce:
   case 21:
 
 /* Line 1464 of yacc.c  */
-#line 363 "Bison.y"
+#line 363 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("lista");
         (yyval.simbolo).valor = NULL;
@@ -1861,7 +1861,7 @@ yyreduce:
   case 22:
 
 /* Line 1464 of yacc.c  */
-#line 369 "Bison.y"
+#line 369 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("lista");
         (yyval.simbolo).valor = NULL;
@@ -1873,7 +1873,7 @@ yyreduce:
   case 23:
 
 /* Line 1464 of yacc.c  */
-#line 378 "Bison.y"
+#line 378 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup((yyvsp[(1) - (1)].simbolo).tipo);
         (yyval.simbolo).valor = strdup((yyvsp[(1) - (1)].simbolo).valor);
@@ -1885,7 +1885,7 @@ yyreduce:
   case 24:
 
 /* Line 1464 of yacc.c  */
-#line 384 "Bison.y"
+#line 384 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup((yyvsp[(1) - (1)].simbolo).tipo);
         (yyval.simbolo).valor = NULL;
@@ -1900,7 +1900,7 @@ yyreduce:
   case 25:
 
 /* Line 1464 of yacc.c  */
-#line 393 "Bison.y"
+#line 393 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("acceso_array");
         (yyval.simbolo).valor = NULL;
@@ -1912,7 +1912,7 @@ yyreduce:
   case 26:
 
 /* Line 1464 of yacc.c  */
-#line 399 "Bison.y"
+#line 399 "Ejecutable/Bison.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -1946,7 +1946,7 @@ yyreduce:
   case 27:
 
 /* Line 1464 of yacc.c  */
-#line 427 "Bison.y"
+#line 427 "Ejecutable/Bison.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -1967,7 +1967,7 @@ yyreduce:
   case 28:
 
 /* Line 1464 of yacc.c  */
-#line 442 "Bison.y"
+#line 442 "Ejecutable/Bison.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -1988,7 +1988,7 @@ yyreduce:
   case 29:
 
 /* Line 1464 of yacc.c  */
-#line 457 "Bison.y"
+#line 457 "Ejecutable/Bison.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2015,7 +2015,7 @@ yyreduce:
   case 30:
 
 /* Line 1464 of yacc.c  */
-#line 478 "Bison.y"
+#line 478 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup((yyvsp[(2) - (3)].simbolo).tipo);
         if ((yyvsp[(2) - (3)].simbolo).valor != NULL) {
@@ -2031,7 +2031,7 @@ yyreduce:
   case 31:
 
 /* Line 1464 of yacc.c  */
-#line 488 "Bison.y"
+#line 488 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("bool");
         (yyval.simbolo).valor = malloc(strlen((yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "") + strlen((yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "") + 4);
@@ -2044,7 +2044,7 @@ yyreduce:
   case 32:
 
 /* Line 1464 of yacc.c  */
-#line 495 "Bison.y"
+#line 495 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("bool");
         (yyval.simbolo).valor = malloc(strlen((yyvsp[(1) - (3)].simbolo).valor ? (yyvsp[(1) - (3)].simbolo).valor : "") + strlen((yyvsp[(3) - (3)].simbolo).valor ? (yyvsp[(3) - (3)].simbolo).valor : "") + 4);
@@ -2057,7 +2057,7 @@ yyreduce:
   case 33:
 
 /* Line 1464 of yacc.c  */
-#line 502 "Bison.y"
+#line 502 "Ejecutable/Bison.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2078,7 +2078,7 @@ yyreduce:
   case 34:
 
 /* Line 1464 of yacc.c  */
-#line 517 "Bison.y"
+#line 517 "Ejecutable/Bison.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2099,7 +2099,7 @@ yyreduce:
   case 35:
 
 /* Line 1464 of yacc.c  */
-#line 532 "Bison.y"
+#line 532 "Ejecutable/Bison.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2120,7 +2120,7 @@ yyreduce:
   case 36:
 
 /* Line 1464 of yacc.c  */
-#line 547 "Bison.y"
+#line 547 "Ejecutable/Bison.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo) != 0) {
             fprintf(stderr, "[ERROR] Tipos incompatibles: %s y %s (linea %d)\n", (yyvsp[(1) - (3)].simbolo).tipo, (yyvsp[(3) - (3)].simbolo).tipo, num_linea);
@@ -2141,7 +2141,7 @@ yyreduce:
   case 37:
 
 /* Line 1464 of yacc.c  */
-#line 562 "Bison.y"
+#line 562 "Ejecutable/Bison.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, "bool") != 0 || strcmp((yyvsp[(3) - (3)].simbolo).tipo, "bool") != 0) {
             fprintf(stderr, "[ERROR] Operacion logica AND requiere operandos bool (linea %d)\n", num_linea);
@@ -2164,7 +2164,7 @@ yyreduce:
   case 38:
 
 /* Line 1464 of yacc.c  */
-#line 579 "Bison.y"
+#line 579 "Ejecutable/Bison.y"
     {
         if (strcmp((yyvsp[(1) - (3)].simbolo).tipo, "bool") != 0 || strcmp((yyvsp[(3) - (3)].simbolo).tipo, "bool") != 0) {
             fprintf(stderr, "[ERROR] Operacion logica OR requiere operandos bool (linea %d)\n", num_linea);
@@ -2188,7 +2188,7 @@ yyreduce:
   case 39:
 
 /* Line 1464 of yacc.c  */
-#line 597 "Bison.y"
+#line 597 "Ejecutable/Bison.y"
     {
         if (strcmp((yyvsp[(2) - (2)].simbolo).tipo, "bool") != 0) {
             fprintf(stderr, "[ERROR] Operacion logica NOT requiere operandos bool (linea %d)\n", num_linea);
@@ -2213,7 +2213,7 @@ yyreduce:
   case 40:
 
 /* Line 1464 of yacc.c  */
-#line 620 "Bison.y"
+#line 620 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("int");
         (yyval.simbolo).valor = malloc(12);
@@ -2225,7 +2225,7 @@ yyreduce:
   case 41:
 
 /* Line 1464 of yacc.c  */
-#line 626 "Bison.y"
+#line 626 "Ejecutable/Bison.y"
     {
         (yyvsp[(2) - (2)].enteroVal) = -(yyvsp[(2) - (2)].enteroVal);
         (yyval.simbolo).tipo = strdup("int");
@@ -2238,7 +2238,7 @@ yyreduce:
   case 42:
 
 /* Line 1464 of yacc.c  */
-#line 633 "Bison.y"
+#line 633 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("float");
         (yyval.simbolo).valor = malloc(32);
@@ -2250,7 +2250,7 @@ yyreduce:
   case 43:
 
 /* Line 1464 of yacc.c  */
-#line 639 "Bison.y"
+#line 639 "Ejecutable/Bison.y"
     {
         (yyvsp[(2) - (2)].realVal) = -(yyvsp[(2) - (2)].realVal);
         (yyval.simbolo).tipo = strdup("float");
@@ -2263,7 +2263,7 @@ yyreduce:
   case 44:
 
 /* Line 1464 of yacc.c  */
-#line 646 "Bison.y"
+#line 646 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("string");
         (yyval.simbolo).valor = strdup((yyvsp[(1) - (1)].stringVal));
@@ -2275,7 +2275,7 @@ yyreduce:
   case 45:
 
 /* Line 1464 of yacc.c  */
-#line 652 "Bison.y"
+#line 652 "Ejecutable/Bison.y"
     {
         (yyval.simbolo).tipo = strdup("bool");
         (yyval.simbolo).valor = strdup((yyvsp[(1) - (1)].stringVal));
@@ -2287,7 +2287,7 @@ yyreduce:
   case 46:
 
 /* Line 1464 of yacc.c  */
-#line 658 "Bison.y"
+#line 658 "Ejecutable/Bison.y"
     {
         int pos = buscarTabla((yyvsp[(1) - (1)].stringVal));
         if (pos == -1){
@@ -2308,7 +2308,7 @@ yyreduce:
 
 
 /* Line 1464 of yacc.c  */
-#line 2312 "Bison.tab.c"
+#line 2312 "Ejecutable/Bison.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2520,7 +2520,7 @@ yyreturn:
 
 
 /* Line 1684 of yacc.c  */
-#line 675 "Bison.y"
+#line 675 "Ejecutable/Bison.y"
 
 
 int main(int argc, char** argv) {
@@ -2531,9 +2531,9 @@ int main(int argc, char** argv) {
             return 1;
         }
     }
-    yyout = fopen("output.asm", "w");
+    yyout = fopen("Pruebas/output.asm", "w");
     if (!yyout) {
-        perror("output.asm");
+        perror("Pruebas/output.asm");
         return 1;
     }
     printf("Analizando...\n");
