@@ -5,11 +5,11 @@ LEX = flex
 BISON = bison
 
 # Nombres de archivos
-TARGET = latino_compiler
-SOURCES = parser_latino.tab.c lex.yy.c tabla_simbolos.c AST_latino.c
-HEADERS = parser_latino.tab.h tabla_simbolos.h
-LEX_FILE = scanner_latino.l
-YACC_FILE = parser_latino.y
+TARGET = Compilador
+SOURCES = Bison.tab.c lex.yy.c Tabla_Simbolos.c Arbol_ABS.c
+HEADERS = Bison.tab.h Tabla_Simbolos.h
+LEX_FILE = Flex.l
+YACC_FILE = Bison.y
 
 # Regla principal
 all: $(TARGET)
@@ -19,16 +19,16 @@ $(TARGET): $(SOURCES) $(HEADERS)
 	$(CC) $(CFLAGS) -o $@ $(SOURCES)
 
 # Generación del parser
-parser_latino.tab.c parser_latino.tab.h: $(YACC_FILE)
+Bison.tab.c Bison.tab.h: $(YACC_FILE)
 	$(BISON) -d $(YACC_FILE)
 
 # Generación del lexer
-lex.yy.c: $(LEX_FILE) parser_latino.tab.h
+lex.yy.c: $(LEX_FILE) Bison.tab.h
 	$(LEX) $(LEX_FILE)
 
 # Limpieza
 clean:
-	rm -f $(TARGET) parser_latino.tab.c parser_latino.tab.h lex.yy.c output.asm *.o
+	rm -f $(TARGET) Bison.tab.c Bison.tab.h lex.yy.c output.asm *.o
 
 # Para evitar conflictos con archivos llamados 'clean'
 .PHONY: all clean

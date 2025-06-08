@@ -1,4 +1,4 @@
-#include "tabla_simbolos.h"
+#include "Tabla_Simbolos.h"
 #include <stdbool.h>
 #include <string.h>
 

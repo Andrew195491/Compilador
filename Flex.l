@@ -1,7 +1,7 @@
 %option noyywrap
 
 %{
-#include "parser_latino.tab.h"  // generado por Bison
+#include "Bison.tab.h"  // generado por Bison
 #include <string.h>
 #include <stdlib.h>
 

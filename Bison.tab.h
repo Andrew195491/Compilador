@@ -83,7 +83,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1685 of yacc.c  */
-#line 19 "parser_latino.y"
+#line 19 "Bison.y"
 
     int enteroVal;
     float realVal;
@@ -93,8 +93,8 @@ typedef union YYSTYPE
         char* valor;
         char* tipoBase;
         int tam;
-        int filas; // Para matrices
-        int columnas; // Para matrices
+        int filas;
+        int columnas;
         char* valores;
         char* tipoBaseReal;
         struct ast *n;
@@ -103,7 +103,7 @@ typedef union YYSTYPE
 
 
 /* Line 1685 of yacc.c  */
-#line 107 "parser_latino.tab.h"
+#line 107 "Bison.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

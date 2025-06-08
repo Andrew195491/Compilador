@@ -1,7 +1,7 @@
 #ifndef AST_LATINO_H
 #define AST_LATINO_H
 
-#include "tabla_simbolos.h"
+#include "Tabla_Simbolos.h"
 
 enum tipoNodoAST {
     NODO_LISTA, 
@@ -30,8 +30,8 @@ enum tipoNodoAST {
     NODO_MAYORIGUAL,
     NODO_AND, 
     NODO_OR, 
-    NODO_GRUPO, 
     NODO_NOT, 
+    NODO_GRUPO, 
     NODO_CONCAT
 };
 
@@ -57,7 +57,6 @@ struct ast *crearNodoString(const char* valor);
 struct ast *crearNodoBool(const char* valor);
 struct ast *crearNodoVariable(const char* nombre);
 struct ast* crearNodoArray(struct ast* elemento, struct ast* siguiente);
-struct ast* crearNodoNot(enum tipoNodoAST tipo, struct ast* izq);
 
 struct ast *crearNodoPuts(struct ast *expresion);
 
