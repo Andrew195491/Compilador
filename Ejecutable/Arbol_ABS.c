@@ -184,29 +184,6 @@ struct ast* crearNodoWhile(struct ast* condicion, struct ast* cuerpo) {
     return nodo;
 }
 
-struct ast* crearNodoFuncion(const char* nombre, struct ast* parametros, struct ast* cuerpo) {
-    struct ast* nodo = malloc(sizeof(struct ast));
-    nodo->tipoNodo = NODO_FUNCION;
-    nodo->izq = parametros;
-    nodo->dcha = cuerpo;
-    nodo->nombre = strdup_safe(nombre);
-    nodo->valor_str = NULL;
-    nodo->valor_int = 0;
-    nodo->valor_float = 0.0f;
-    return nodo;
-}
-
-struct ast* crearNodoParametro(const char* nombre, struct ast* siguiente) {
-    struct ast* nodo = malloc(sizeof(struct ast));
-    nodo->tipoNodo = NODO_VARIABLE;
-    nodo->izq = siguiente;
-    nodo->dcha = NULL;
-    nodo->nombre = strdup_safe(nombre);
-    nodo->valor_str = NULL;
-    nodo->valor_int = 0;
-    nodo->valor_float = 0.0f;
-    return nodo;
-}
 
 struct ast* crearNodoConcat(struct ast* izq, struct ast* dcha) {
     struct ast* n = malloc(sizeof(struct ast));
@@ -220,19 +197,6 @@ struct ast* crearNodoConcat(struct ast* izq, struct ast* dcha) {
 }
 
 
-
-struct ast* crearNodoLlamadaFuncion(const char* nombre, struct ast* argumentos) {
-    struct ast* nodo = malloc(sizeof(struct ast));
-    nodo->tipoNodo = NODO_LLAMADA_FUNCION;
-    nodo->izq = argumentos;
-    nodo->dcha = NULL;
-    nodo->nombre = strdup_safe(nombre);
-    nodo->valor_str = NULL;
-    nodo->valor_int = 0;
-    nodo->valor_float = 0.0f;
-    return nodo;
-}
-
 struct ast* crearNodoArray(struct ast* elemento, struct ast* siguiente) {
     struct ast* nodo = malloc(sizeof(struct ast));
     nodo->tipoNodo = NODO_ARRAY;
@@ -243,18 +207,6 @@ struct ast* crearNodoArray(struct ast* elemento, struct ast* siguiente) {
     nodo->valor_int = 0;
     nodo->valor_float = 0.0f;
     nodo->es_inicializada = 0;
-    return nodo;
-}
-
-struct ast* crearNodoArgumento(struct ast* valor, struct ast* siguiente) {
-    struct ast* nodo = malloc(sizeof(struct ast));
-    nodo->tipoNodo = NODO_VARIABLE;
-    nodo->izq = valor;
-    nodo->dcha = siguiente;
-    nodo->nombre = NULL;
-    nodo->valor_str = NULL;
-    nodo->valor_int = 0;
-    nodo->valor_float = 0.0f;
     return nodo;
 }
 

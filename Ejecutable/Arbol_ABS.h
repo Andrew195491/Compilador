@@ -65,10 +65,6 @@ struct ast* crearNodoWhile(struct ast* condicion, struct ast* cuerpo);
 struct ast* crearNodoIf(struct ast* condicion, struct ast* cuerpo, struct ast* else_cuerpo);
 struct ast* crearNodoElse(struct ast* cuerpo);
 
-struct ast* crearNodoFuncion(const char* nombre, struct ast* parametros, struct ast* cuerpo);
-struct ast* crearNodoParametro(const char* nombre, struct ast* siguiente);
-struct ast* crearNodoLlamadaFuncion(const char* nombre, struct ast* argumentos);
-struct ast* crearNodoArgumento(struct ast* valor, struct ast* siguiente);
 struct ast* crearNodoConcat(struct ast* izq, struct ast* dcha);
 
 void liberarAST(struct ast *n);
